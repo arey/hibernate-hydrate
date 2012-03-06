@@ -8,6 +8,12 @@
   <packaging>jar</packaging>
   <description></description>
 
+  <!-- Continous Integration build hosted by CloudBees -->  
+  <ciManagement>
+    <system>jenkins</system>
+    <url>https://elryk.ci.cloudbees.com/job/Hibernate Hydrate/</url>
+  </ciManagement>
+
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
