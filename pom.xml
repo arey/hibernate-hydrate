@@ -9,8 +9,17 @@
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy</description>
   <inceptionYear>2012</inceptionYear>
   <url>https://github.com/arey/hibernate-hydrate</url>
+  
+  <developers>
+    <developer>
+      <name>Antoine</name>
+      <email>antoine@javaetmoi.com</email>
+      <url>http://javaetmoi.com</url>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
 
-  <!-- Continous Integration build hosted by CloudBees -->  
+  <!-- Continous Integration build hosted by CloudBees -->
   <ciManagement>
     <system>jenkins</system>
     <url>https://javaetmoi.ci.cloudbees.com/job/Hibernate Hydrate/</url>
