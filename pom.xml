@@ -7,6 +7,7 @@
   <name>JavaEtMoi Core :: ${project.artifactId} - ${project.packaging}</name>
   <packaging>jar</packaging>
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy</description>
+  <inceptionYear>2012</inceptionYear>
 
   <!-- Continous Integration build hosted by CloudBees -->  
   <ciManagement>
