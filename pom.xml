@@ -8,6 +8,7 @@
   <packaging>jar</packaging>
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy</description>
   <inceptionYear>2012</inceptionYear>
+  <url>https://github.com/arey/hibernate-hydrate</url>
 
   <!-- Continous Integration build hosted by CloudBees -->  
   <ciManagement>
