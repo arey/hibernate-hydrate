@@ -24,6 +24,10 @@
     <system>jenkins</system>
     <url>https://javaetmoi.ci.cloudbees.com/job/Hibernate Hydrate/</url>
   </ciManagement>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/arey/hibernate-hydrate/issues</url>
+  </issueManagement>
 
   <properties>
     <!-- Version of third libraries -->
