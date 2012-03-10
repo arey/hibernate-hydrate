@@ -1,1 +1,0 @@
-Built on CloudBees with their Free and Open Source (FOSS) program : http://www.cloudbees.com/foss
