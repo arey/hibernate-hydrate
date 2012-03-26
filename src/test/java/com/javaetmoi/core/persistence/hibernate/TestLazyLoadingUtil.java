@@ -26,6 +26,8 @@ import org.hibernate.stat.Statistics;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -66,6 +68,8 @@ public class TestLazyLoadingUtil {
     private Address             paris, lyon, ladefense;
 
     private Country             france;
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(TestLazyLoadingUtil.class);
 
     /**
      * Populate entities graph and embbeded database
@@ -153,8 +157,16 @@ public class TestLazyLoadingUtil {
         assertNotNull("No LazyInitializationException should be thrown",
                 dbJames.getAddresses().get("home"));
         assertEquals(dbJames.getAddresses().size(), james.getAddresses().size());
+        LOGGER.debug("DB  James Paris Adress: {}",
+                dbJames.getAddresses().get(paris.getType()).getId());
+        LOGGER.debug("MEM James Paris Adress: {}",
+                james.getAddresses().get(paris.getType()).getId());
         assertEquals(dbJames.getAddresses().get(paris.getType()),
                 james.getAddresses().get(paris.getType()));
+        LOGGER.debug("DB  James La Défense Adress: {}",
+                dbJames.getAddresses().get(ladefense.getType()).getId());
+        LOGGER.debug("MEM James La Défense Adress: {}",
+                james.getAddresses().get(ladefense.getType()).getId());
         assertEquals(dbJames.getAddresses().get(ladefense.getType()),
                 james.getAddresses().get(ladefense.getType()));
         // FIXME Not working on the Jenkins Cloudbees platform
