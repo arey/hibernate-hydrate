@@ -155,10 +155,13 @@ public class TestLazyLoadingUtil {
         assertEquals(dbJames.getAddresses().size(), james.getAddresses().size());
         assertEquals(dbJames.getAddresses().get(paris.getType()),
                 james.getAddresses().get(paris.getType()));
-        // FIXME UNCOMMENT assertTrue(dbJames.getAddresses().equals(james.getAddresses()));
+        assertEquals(dbJames.getAddresses().get(ladefense.getType()),
+                james.getAddresses().get(ladefense.getType()));
+        // FIXME Not working on the Jenkins Cloudbees platform
+        assertTrue(dbJames.getAddresses().equals(james.getAddresses()));
         assertTrue(dbJames.getProjects().contains(android));
-        // FIXME UNCOMMEN assertEquals("Compare in-memory and database loaded employees", james,
-        // dbJames);
+        // FIXME Not working on the Jenkins Cloudbees platform
+        // assertEquals("Compare in-memory and database loaded employees", james, dbJames);
 
         Statistics statistics = hibernateTemplate.getSessionFactory().getStatistics();
         assertEquals(
