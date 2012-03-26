@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} | %5p | %-200m | %C.%M\(%F:%L\)%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.hibernate" level="INFO" />
+  <logger name="org.springframework" level="INFO" />
+<!--   <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" /> -->
+
+  <root level="INFO">
+    <appender-ref ref="Console" />
+  </root>
+</configuration>

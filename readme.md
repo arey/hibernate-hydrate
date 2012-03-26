@@ -16,6 +16,40 @@ The [wiki](https://github.com/arey/hibernate-hydrate/wiki) contains links to bas
 
 ## Quick Start ##
 
+Download the jar though Maven:
+```xml
+<dependency>
+  <groupId>com.javaetmoi.core</groupId>
+  <artifactId>javaetmoi-hibernate-hydrate</artifactId>
+  <version>1.0.0</version>
+</dependency> 
+       
+<repository>
+  <id>javaetmoi-maven-release</id>
+  <releases>
+    <enabled>true</enabled>
+  </releases>
+  <name>Java & Moi Maven RELEASE Repository</name>
+  <url>TO COMPLETE</url>
+</repository>
+```
+
+## Contributing to Hibernate Hydrate ##
+
+* Github is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
+
+### Development environment installation ###
+
+Download the code with git:
+> git clone git@github.com:areys/hibernate-hydrate.git
+
+Compile the code with maven:
+> mvn clean install
+
+If you're using an IDE that supports Maven-based projects (InteliJ Idea, Netbeans or m2Eclipse), you can import the project directly from its POM. 
+Otherwise, generate IDE metadata with the related IDE maven plugin:
+> mvn eclipse:clean eclipse:eclipse
+
 
 ## Credits ##
 

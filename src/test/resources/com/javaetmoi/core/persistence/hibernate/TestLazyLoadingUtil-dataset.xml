@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <COUNTRY ID="1000" NAME="France"/>
+  <ADDRESS ID="100" CITY="Paris" TYPE="home" EMPLOYEE_ID="1" COUNTRY_ID="1000"/>
+  <ADDRESS ID="200" CITY="Lyon" TYPE="work" EMPLOYEE_ID="2" COUNTRY_ID="1000"/>
+  <ADDRESS ID="300" CITY="La Défense" TYPE="work" EMPLOYEE_ID="1" COUNTRY_ID="1000"/>
+  <EMPLOYEE ID="1" JOB="Developer" NAME="James"/>
+  <EMPLOYEE ID="2" JOB="Project Manager" NAME="Tom"/>
+  <EMPLOYEE_PROJECT MEMBERS_ID="1" PROJECTS_ID="10"/>
+  <EMPLOYEE_PROJECT MEMBERS_ID="1" PROJECTS_ID="20"/>
+  <EMPLOYEE_PROJECT MEMBERS_ID="2" PROJECTS_ID="10"/>
+  <PROJECT ID="10" NAME="Android Project"/>
+  <PROJECT ID="20" NAME="iPhone Project"/>
+</dataset>

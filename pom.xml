@@ -9,13 +9,17 @@
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy</description>
   <inceptionYear>2012</inceptionYear>
   <url>https://github.com/arey/hibernate-hydrate</url>
-  
+
   <developers>
     <developer>
-      <name>Antoine</name>
+      <id>arey</id>
+      <name>Antoine Rey</name>
       <email>antoine@javaetmoi.com</email>
       <url>http://javaetmoi.com</url>
       <timezone>+1</timezone>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
     </developer>
   </developers>
 
@@ -42,6 +46,8 @@
     <version.spring>3.1.1.RELEASE</version.spring>
     <version.h2>1.3.164</version.h2>
     <version.dbunit>2.4.8</version.dbunit>
+    <version.commons-lang3>3.0.1</version.commons-lang3>
+    <version.ehcache>2.5.1</version.ehcache>
 
     <!-- Version of maven plugins -->
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
@@ -99,7 +105,8 @@
       <version>${version.spring}</version>
       <scope>test</scope>
     </dependency>
-    <!-- H2 embbeded database -->
+
+    <!-- * H2 embbeded database -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
@@ -111,8 +118,22 @@
       <groupId>org.dbunit</groupId>
       <artifactId>dbunit</artifactId>
       <version>${version.dbunit}</version>
+      <scope>test</scope>
     </dependency>
-
+    <!-- * Commons Lang for HashCode and Equals builders -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${version.commons-lang3}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- EhCache -->
+    <dependency>
+      <groupId>net.sf.ehcache</groupId>
+      <artifactId>ehcache-core</artifactId>
+      <version>${version.ehcache}</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 
@@ -120,7 +141,7 @@
     <profile>
       <id>eclipse</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <build>
         <pluginManagement>
