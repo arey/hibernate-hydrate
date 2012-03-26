@@ -148,7 +148,7 @@ public class DBUnitLoader {
             throw new IllegalArgumentException("No dataSet file located at " + dataSetLocation, e);
         }
         if (!new File(url.getPath()).exists()) {
-            throw new IllegalArgumentException("No dataSet file located at " + dataSetLocation);
+            throw new IllegalArgumentException("No dataSet file located at " + url.getPath());
         }
         return url;
     }
