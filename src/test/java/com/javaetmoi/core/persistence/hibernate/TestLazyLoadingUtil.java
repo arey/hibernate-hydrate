@@ -157,12 +157,19 @@ public class TestLazyLoadingUtil {
         assertNotNull("No LazyInitializationException should be thrown",
                 dbJames.getAddresses().get("home"));
         assertEquals(dbJames.getAddresses().size(), james.getAddresses().size());
-        LOGGER.debug("DB  James Paris Adress: {}",
-                dbJames.getAddresses().get(paris.getType()).getId());
-        LOGGER.debug("MEM James Paris Adress: {}",
-                james.getAddresses().get(paris.getType()).getId());
-        assertEquals(dbJames.getAddresses().get(paris.getType()),
-                james.getAddresses().get(paris.getType()));
+        Address dbJamesParis = dbJames.getAddresses().get(paris.getType());
+        Address memJamesAdress = james.getAddresses().get(paris.getType());
+        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getId(),
+                memJamesAdress.getId());
+        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getCity(),
+                memJamesAdress.getCity());
+        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getCountry(),
+                memJamesAdress.getCountry());
+        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getType(),
+                memJamesAdress.getType());
+        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getEmployee(),
+                memJamesAdress.getEmployee());
+        assertEquals(dbJamesParis, memJamesAdress);
         LOGGER.debug("DB  James La Défense Adress: {}",
                 dbJames.getAddresses().get(ladefense.getType()).getId());
         LOGGER.debug("MEM James La Défense Adress: {}",
