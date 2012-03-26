@@ -158,22 +158,30 @@ public class TestLazyLoadingUtil {
                 dbJames.getAddresses().get("home"));
         assertEquals(dbJames.getAddresses().size(), james.getAddresses().size());
         Address dbJamesParis = dbJames.getAddresses().get(paris.getType());
-        Address memJamesAdress = james.getAddresses().get(paris.getType());
+        Address memJamesParis = james.getAddresses().get(paris.getType());
         LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getId(),
-                memJamesAdress.getId());
+                memJamesParis.getId());
         LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getCity(),
-                memJamesAdress.getCity());
+                memJamesParis.getCity());
         LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getCountry(),
-                memJamesAdress.getCountry());
+                memJamesParis.getCountry());
         LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getType(),
-                memJamesAdress.getType());
+                memJamesParis.getType());
         LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getEmployee(),
-                memJamesAdress.getEmployee());
-        assertEquals(dbJamesParis, memJamesAdress);
-        LOGGER.debug("DB  James La Défense Adress: {}",
-                dbJames.getAddresses().get(ladefense.getType()).getId());
-        LOGGER.debug("MEM James La Défense Adress: {}",
-                james.getAddresses().get(ladefense.getType()).getId());
+                memJamesParis.getEmployee());
+        assertEquals(dbJamesParis, memJamesParis);
+        Address dbJamesLaDefense = dbJames.getAddresses().get(ladefense.getType());
+        Address memJamesLaDefense = james.getAddresses().get(ladefense.getType());
+        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getId(),
+                memJamesLaDefense.getId());
+        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getCity(),
+                memJamesLaDefense.getCity());
+        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getCountry(),
+                memJamesLaDefense.getCountry());
+        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getType(),
+                memJamesLaDefense.getType());
+        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getEmployee(),
+                memJamesLaDefense.getEmployee());
         assertEquals(dbJames.getAddresses().get(ladefense.getType()),
                 james.getAddresses().get(ladefense.getType()));
         // FIXME Not working on the Jenkins Cloudbees platform
