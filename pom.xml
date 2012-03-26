@@ -33,6 +33,14 @@
     <url>https://github.com/arey/hibernate-hydrate/issues</url>
   </issueManagement>
 
+  <!-- GitHub Software Configuration Management -->
+  <scm>
+    <url>https://github.com/arey/hibernate-hydrate</url>
+    <connection>scm:git:git://github.com/arey/hibernate-hydrate.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:arey/hibernate-hydrate.git</developerConnection>
+  </scm>
+
+
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
