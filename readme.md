@@ -30,7 +30,7 @@ Download the jar though Maven:
     <enabled>true</enabled>
   </releases>
   <name>Java & Moi Maven RELEASE Repository</name>
-  <url>TO COMPLETE</url>
+  <url>http://repository-javaetmoi.forge.cloudbees.com/release/</url>
 </repository>
 ```
 
@@ -41,8 +41,8 @@ Download the jar though Maven:
 ### Development environment installation ###
 
 Download the code with git:
-> git clone git@github.com:areys/hibernate-hydrate.git
-
+> git clone git://github.com/arey/hibernate-hydrate.git
+<
 Compile the code with maven:
 > mvn clean install
 
