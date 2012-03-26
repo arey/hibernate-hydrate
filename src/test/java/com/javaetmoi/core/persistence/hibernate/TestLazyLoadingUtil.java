@@ -153,7 +153,7 @@ public class TestLazyLoadingUtil {
 
         assertNotNull("No LazyInitializationException should be thrown",
                 dbJames.getAddresses().get("home"));
-        // FIXME UNCOMMENT assertTrue(dbJames.getAddresses().equals(james.getAddresses()));
+        assertTrue(dbJames.getAddresses().equals(james.getAddresses()));
         assertTrue(dbJames.getProjects().contains(android));
         assertEquals("Compare in-memory and database loaded employees", james, dbJames);
 
@@ -188,13 +188,5 @@ public class TestLazyLoadingUtil {
         assertEquals("Compare in-memory and database loaded addresses", lyon, dbLyon);
         assertEquals("Compare projetcs size", lyon.getEmployee().getProjects().size(),
                 dbLyon.getEmployee().getProjects().size());
-    }
-
-    // TODO : TEST A NE PAS COMMITER
-    public void test() {
-        Session session = hibernateTemplate.getSessionFactory().getCurrentSession();
-
-        Employee employee = (Employee) session.get(Employee.class, 1);
-        LazyLoadingUtil.deepHydrate(session, employee);
     }
 }
