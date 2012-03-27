@@ -22,6 +22,7 @@ import javax.persistence.ManyToMany;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 public class Project {
@@ -80,7 +81,7 @@ public class Project {
         if (obj == null) {
             return false;
         }
-        if (!getClass().isAssignableFrom(obj.getClass())) {
+        if (!Project.class.isAssignableFrom(obj.getClass())) {
             return false;
         }
 
@@ -89,6 +90,11 @@ public class Project {
         // Do not compare the members properties in order to avoid recursive equals stack call on
         // bi-directional relationship
         return new EqualsBuilder().append(id, other.id).append(this.name, other.name).isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append(id).append(name).build();
     }
 
 }

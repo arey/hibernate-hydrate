@@ -29,6 +29,7 @@ import javax.persistence.OneToMany;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 public class Employee {
@@ -111,7 +112,7 @@ public class Employee {
         if (obj == null) {
             return false;
         }
-        if (!getClass().isAssignableFrom(obj.getClass())) {
+        if (!Employee.class.isAssignableFrom(obj.getClass())) {
             return false;
         }
 
@@ -121,6 +122,12 @@ public class Employee {
         return new EqualsBuilder().append(id, other.id).append(this.job, other.job).append(
                 this.name, other.name).append(this.addresses, other.addresses).append(
                 this.projects.toArray(), other.projects.toArray()).isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append(id).append(job).append(name).append(addresses).append(
+                projects).build();
     }
 
 }

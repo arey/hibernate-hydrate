@@ -21,6 +21,7 @@ import javax.persistence.OneToOne;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 public class Address {
@@ -107,7 +108,7 @@ public class Address {
         if (obj == null) {
             return false;
         }
-        if (!getClass().isAssignableFrom(obj.getClass())) {
+        if (!Address.class.isAssignableFrom(obj.getClass())) {
             return false;
         }
 
@@ -117,5 +118,10 @@ public class Address {
         // bi-directional relationship
         return new EqualsBuilder().append(id, other.id).append(this.city, other.city).append(
                 this.country, other.country).append(this.type, other.type).isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append(id).append(city).append(country).append(type).build();
     }
 }

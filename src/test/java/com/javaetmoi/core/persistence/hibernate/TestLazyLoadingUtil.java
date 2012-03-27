@@ -36,6 +36,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.unitils.reflectionassert.ReflectionAssert;
+import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import com.javaetmoi.core.persistence.hibernate.domain.Address;
 import com.javaetmoi.core.persistence.hibernate.domain.Country;
@@ -89,7 +91,7 @@ public class TestLazyLoadingUtil {
         iphone = new Project(20, "iPhone Project");
         paris = new Address(100, "home", "Paris", james, france);
         lyon = new Address(200, "work", "Lyon", tom, france);
-        ladefense = new Address(300, "work", "La Défense", james, france);
+        ladefense = new Address(300, "work", "La Defense", james, france);
 
         james.getProjects().add(android);
         james.getProjects().add(iphone);
@@ -154,42 +156,44 @@ public class TestLazyLoadingUtil {
             }
         });
 
+        // Assertions
+
+        // - LazyInitializationException not thrown
         assertNotNull("No LazyInitializationException should be thrown",
                 dbJames.getAddresses().get("home"));
-        assertEquals(dbJames.getAddresses().size(), james.getAddresses().size());
-        Address dbJamesParis = dbJames.getAddresses().get(paris.getType());
-        Address memJamesParis = james.getAddresses().get(paris.getType());
-        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getId(),
-                memJamesParis.getId());
-        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getCity(),
-                memJamesParis.getCity());
-        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getCountry(),
-                memJamesParis.getCountry());
-        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getType(),
-                memJamesParis.getType());
-        LOGGER.debug("James Paris Adress DB: {} / MEM: {}", dbJamesParis.getEmployee(),
-                memJamesParis.getEmployee());
-        assertEquals(dbJamesParis, memJamesParis);
-        Address dbJamesLaDefense = dbJames.getAddresses().get(ladefense.getType());
-        Address memJamesLaDefense = james.getAddresses().get(ladefense.getType());
-        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getId(),
-                memJamesLaDefense.getId());
-        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getCity(),
-                memJamesLaDefense.getCity());
-        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getCountry(),
-                memJamesLaDefense.getCountry());
-        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getType(),
-                memJamesLaDefense.getType());
-        LOGGER.debug("James La Défense Adress DB: {} / MEM: {}", dbJamesLaDefense.getEmployee(),
-                memJamesLaDefense.getEmployee());
-        assertEquals(dbJames.getAddresses().get(ladefense.getType()),
-                james.getAddresses().get(ladefense.getType()));
-        // FIXME Not working on the Jenkins Cloudbees platform
-        assertTrue(dbJames.getAddresses().equals(james.getAddresses()));
-        assertTrue(dbJames.getProjects().contains(android));
-        // FIXME Not working on the Jenkins Cloudbees platform
-        // assertEquals("Compare in-memory and database loaded employees", james, dbJames);
 
+        // - Addresses
+        assertEquals("Same addresses size", james.getAddresses().size(),
+                dbJames.getAddresses().size());
+        Address dbJamesParis = dbJames.getAddresses().get(paris.getType());
+        LOGGER.debug("James Paris address toString(): {}", dbJamesParis.toString());
+        ReflectionAssert.assertReflectionEquals(
+                "Comparing James Paris address with ReflectionAssert", paris, dbJamesParis,
+                ReflectionComparatorMode.LENIENT_ORDER);
+        assertEquals("Compare James Paris address", paris, dbJamesParis);
+        Address dbJamesLaDefense = dbJames.getAddresses().get(ladefense.getType());
+        LOGGER.debug("James La Defense address toString(): {}", dbJamesLaDefense.toString());
+        ReflectionAssert.assertReflectionEquals(
+                "Comparing James La Defense address with ReflectionAssert", ladefense,
+                dbJamesLaDefense, ReflectionComparatorMode.LENIENT_ORDER);
+        assertEquals("Compare James La Defense address", dbJamesLaDefense, ladefense);
+
+        // - Projects
+        assertTrue(dbJames.getProjects().contains(android));
+        ReflectionAssert.assertReflectionEquals(
+                "Compare in-memory and database loaded projects with RelectionUtils",
+                james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
+        assertEquals(james.getProjects(), dbJames.getProjects());
+
+        // - Full employee
+        LOGGER.debug("James toString(): {}", dbJames.toString());
+        ReflectionAssert.assertReflectionEquals(
+                "Compare in-memory and database loaded employees with RelectionUtils", dbJames,
+                james, ReflectionComparatorMode.LENIENT_ORDER);
+        assertEquals("Compare in-memory and database loaded employees with the equals method",
+                james, dbJames);
+
+        // - Generated SQL statements number
         Statistics statistics = hibernateTemplate.getSessionFactory().getStatistics();
         assertEquals(
                 "All 8 entities are loaded: france, james, tom, android, iphone, paris, la défense and lyon",

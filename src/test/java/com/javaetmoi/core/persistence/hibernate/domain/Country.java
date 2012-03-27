@@ -18,6 +18,7 @@ import javax.persistence.Id;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 public class Country {
@@ -65,13 +66,18 @@ public class Country {
         if (obj == null) {
             return false;
         }
-        if (!getClass().isAssignableFrom(obj.getClass())) {
+        if (!Country.class.isAssignableFrom(obj.getClass())) {
             return false;
         }
 
         Country other = (Country) obj;
 
         return new EqualsBuilder().append(id, other.id).append(this.name, other.name).isEquals();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).append(id).append(name).build();
     }
 
 }
