@@ -49,19 +49,27 @@
     <version.hibernate-jpa-2.0-api>1.0.0.Final</version.hibernate-jpa-2.0-api>
     <version.logback>1.0.0</version.logback>
 
-    <!-- For testing purpose -->
+    <!-- * For testing purpose -->
     <version.junit>4.10</version.junit>
     <version.spring>3.1.1.RELEASE</version.spring>
     <version.h2>1.3.164</version.h2>
     <version.dbunit>2.4.8</version.dbunit>
     <version.commons-lang3>3.0.1</version.commons-lang3>
     <version.ehcache>2.5.1</version.ehcache>
+    <version.unitils>3.3</version.unitils>
 
     <!-- Version of maven plugins -->
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
+    <version.plugin.maven-compiler-plugin>2.3</version.plugin.maven-compiler-plugin>
+    <version.plugin.maven-resources-plugin>2.4.3</version.plugin.maven-resources-plugin>
+    
+    <!-- L'encoding des sources -->
+    <source.encoding>UTF-8</source.encoding>
   </properties>
 
   <dependencies>
+
+
     <!-- JPA -->
     <dependency>
       <groupId>org.hibernate.javax.persistence</groupId>
@@ -128,6 +136,13 @@
       <version>${version.dbunit}</version>
       <scope>test</scope>
     </dependency>
+    <!-- Unitils is useful for reflection assertion -->
+    <dependency>
+      <groupId>org.unitils</groupId>
+      <artifactId>unitils-core</artifactId>
+      <version>${version.unitils}</version>
+      <scope>test</scope>
+    </dependency>
     <!-- * Commons Lang for HashCode and Equals builders -->
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -144,6 +159,29 @@
     </dependency>
 
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${version.plugin.maven-compiler-plugin}</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+          <encoding>${source.encoding}</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${version.plugin.maven-resources-plugin}</version>
+        <configuration>
+          <encoding>${source.encoding}</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <profiles>
     <profile>
