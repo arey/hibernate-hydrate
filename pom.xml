@@ -62,7 +62,7 @@
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-compiler-plugin>2.3</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-resources-plugin>2.4.3</version.plugin.maven-resources-plugin>
-    <version.plugin.maven-resources-plugin>2.2.2</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-release-plugin>2.2.2</version.plugin.maven-release-plugin>
 
     <!-- Version of maven extensions -->
     <version.extension.wagon-webdav-jackrabbit>2.2</version.extension.wagon-webdav-jackrabbit>
