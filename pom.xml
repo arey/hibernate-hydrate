@@ -36,8 +36,8 @@
   <!-- GitHub Software Configuration Management -->
   <scm>
     <url>https://github.com/arey/hibernate-hydrate</url>
-    <connection>scm:git:git://github.com/arey/hibernate-hydrate.git</connection>
-    <developerConnection>scm:git:git@github.com:arey/hibernate-hydrate.git</developerConnection>
+    <connection>scm:git:ssh://git@github.com/arey/hibernate-hydrate.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/arey/hibernate-hydrate.git</developerConnection>
   </scm>
 
 
@@ -62,7 +62,11 @@
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-compiler-plugin>2.3</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-resources-plugin>2.4.3</version.plugin.maven-resources-plugin>
-    
+    <version.plugin.maven-resources-plugin>2.2.2</version.plugin.maven-resources-plugin>
+
+    <!-- Version of maven extensions -->
+    <version.extension.wagon-webdav-jackrabbit>2.2</version.extension.wagon-webdav-jackrabbit>
+
     <!-- L'encoding des sources -->
     <source.encoding>UTF-8</source.encoding>
   </properties>
@@ -161,6 +165,15 @@
   </dependencies>
 
   <build>
+    <extensions>
+      <!-- Publishing to the CloudBees maven repositories requires a webdav extension -->
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav-jackrabbit</artifactId>
+        <version>${version.extension.wagon-webdav-jackrabbit}</version>
+      </extension>
+    </extensions>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -180,8 +193,41 @@
           <encoding>${source.encoding}</encoding>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${version.plugin.maven-release-plugin}</version>
+      </plugin>
     </plugins>
   </build>
+
+  <!-- Deploy releases and snapshots to the CloudBees maven repositories -->
+  <distributionManagement>
+    <downloadUrl>https://github.com/arey/hibernate-hydrate</downloadUrl>
+    <repository>
+      <id>javaetmoi-cloudbees-release</id>
+      <name>javaetmoi-cloudbees-release</name>
+      <url>dav:https://repository-javaetmoi.forge.cloudbees.com/release/</url>
+    </repository>
+    <snapshotRepository>
+      <id>javaetmoi-cloudbees-snapshot</id>
+      <name>javaetmoi-cloudbees-snapshot</name>
+      <url>dav:https://repository-javaetmoi.forge.cloudbees.com/snapshot/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>javaetmoi-cloudbees-release</id>
+      <name>javaetmoi-cloudbees-release</name>
+      <url>https://repository-javaetmoi.forge.cloudbees.com/release/</url>
+    </repository>
+    <repository>
+      <id>javaetmoi-cloudbees-snapshot</id>
+      <name>javaetmoi-cloudbees-snapshot</name>
+      <url>https://repository-javaetmoi.forge.cloudbees.com/snapshot/</url>
+    </repository>
+  </repositories>
 
   <profiles>
     <profile>
