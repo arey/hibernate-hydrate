@@ -37,7 +37,7 @@
   <scm>
     <url>https://github.com/arey/hibernate-hydrate</url>
     <connection>scm:git:git://github.com/arey/hibernate-hydrate.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:arey/hibernate-hydrate.git</developerConnection>
+    <developerConnection>scm:git:git://github.com/arey/hibernate-hydrate.git</developerConnection>
   </scm>
 
 
