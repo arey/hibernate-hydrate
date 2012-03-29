@@ -62,6 +62,8 @@
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-compiler-plugin>2.3</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-resources-plugin>2.4.3</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-source-plugin>2.1.2</version.plugin.maven-source-plugin>
+    <version.plugin.maven-javadoc-plugin>2.7</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.2.2</version.plugin.maven-release-plugin>
 
     <!-- Version of maven extensions -->
@@ -167,9 +169,9 @@
   <build>
     <extensions>
       <extension>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-webdav</artifactId>
-      <version>${version.extension.wagon-webdav}</version>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav</artifactId>
+        <version>${version.extension.wagon-webdav}</version>
       </extension>
     </extensions>
 
@@ -192,11 +194,24 @@
           <encoding>${source.encoding}</encoding>
         </configuration>
       </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${version.plugin.maven-source-plugin}</version>
+        <configuration>
+          <encoding>${source.encoding}</encoding>
+        </configuration>          
+        </plugin>      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <version>${version.plugin.maven-release-plugin}</version>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${version.plugin.maven-javadoc-plugin}</version>
+      </plugin>      
     </plugins>
   </build>
 
@@ -267,8 +282,41 @@
         </pluginManagement>
       </build>
     </profile>
-  </profiles>
 
+    <profile>
+      <!-- Specific profile for release or artifact deployment -->
+      <!-- Sources et javadoc are packaged -->
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 
 </project>
