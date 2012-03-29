@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
   <version>1.1-SNAPSHOT</version>
@@ -64,7 +65,7 @@
     <version.plugin.maven-release-plugin>2.2.2</version.plugin.maven-release-plugin>
 
     <!-- Version of maven extensions -->
-    <version.extension.wagon-webdav-jackrabbit>2.2</version.extension.wagon-webdav-jackrabbit>
+    <version.extension.wagon-webdav>1.0-beta-2</version.extension.wagon-webdav>
 
     <!-- L'encoding des sources -->
     <source.encoding>UTF-8</source.encoding>
@@ -165,11 +166,10 @@
 
   <build>
     <extensions>
-      <!-- Publishing to the CloudBees maven repositories requires a webdav extension -->
       <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>${version.extension.wagon-webdav-jackrabbit}</version>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-webdav</artifactId>
+      <version>${version.extension.wagon-webdav}</version>
       </extension>
     </extensions>
 
@@ -220,11 +220,23 @@
       <id>javaetmoi-cloudbees-release</id>
       <name>javaetmoi-cloudbees-release</name>
       <url>https://repository-javaetmoi.forge.cloudbees.com/release/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
       <id>javaetmoi-cloudbees-snapshot</id>
       <name>javaetmoi-cloudbees-snapshot</name>
       <url>https://repository-javaetmoi.forge.cloudbees.com/snapshot/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
