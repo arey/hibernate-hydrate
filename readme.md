@@ -17,7 +17,7 @@ The [wiki](https://github.com/arey/hibernate-hydrate/wiki) contains links to bas
 ## Quick Start ##
 
 Download the jar though Maven:
-'''xml
+```xml
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate-hydrate</artifactId>
@@ -32,7 +32,14 @@ Download the jar though Maven:
   <name>Java & Moi Maven RELEASE Repository</name>
   <url>http://repository-javaetmoi.forge.cloudbees.com/release/</url>
 </repository>
-'''
+```
+
+```xml
+
+<repository>
+
+</repository>
+```
 
 ## Contributing to Hibernate Hydrate ##
 
