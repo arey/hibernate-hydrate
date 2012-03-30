@@ -26,7 +26,7 @@
   <!-- Continous Integration build hosted by CloudBees -->
   <ciManagement>
     <system>jenkins</system>
-    <url>https://javaetmoi.ci.cloudbees.com/job/Hibernate Hydrate/</url>
+    <url>https://javaetmoi.ci.cloudbees.com/job/Hibernate-Hydrate/</url>
   </ciManagement>
   <issueManagement>
     <system>github</system>
