@@ -44,14 +44,17 @@ Download the jar though Maven:
 ### Development environment installation ###
 
 Download the code with git:
-git clone git://github.com/arey/hibernate-hydrate.git
+
+``git clone git://github.com/arey/hibernate-hydrate.git``
 
 Compile the code with maven:
-mvn clean install
+
+``mvn clean install``
 
 If you're using an IDE that supports Maven-based projects (InteliJ Idea, Netbeans or m2Eclipse), you can import the project directly from its POM. 
 Otherwise, generate IDE metadata with the related IDE maven plugin:
-mvn eclipse:clean eclipse:eclipse
+
+``mvn eclipse:clean eclipse:eclipse``
 
 
 ## Credits ##
