@@ -14,9 +14,12 @@ There are also unit tests available to look at.
 
 The [wiki](https://github.com/arey/hibernate-hydrate/wiki) contains links to basic project information such as source code, jenkins build, javadocs, issue tracking, etc.
 
+A french article titled "Say goodbye to LazyInitializationException" : http://javaetmoi.com/2012/03/hibernate-dites-adieu-aux-lazy-initialization-exception/
+
 ## Quick Start ##
 
 Download the jar though Maven:
+
 ```xml
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
@@ -31,13 +34,6 @@ Download the jar though Maven:
   </releases>
   <name>Java & Moi Maven RELEASE Repository</name>
   <url>http://repository-javaetmoi.forge.cloudbees.com/release/</url>
-</repository>
-```
-
-```xml
-
-<repository>
-
 </repository>
 ```
 
