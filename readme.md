@@ -14,7 +14,7 @@ There are also unit tests available to look at.
 
 The [wiki](https://github.com/arey/hibernate-hydrate/wiki) contains links to basic project information such as source code, jenkins build, javadocs, issue tracking, etc.
 
-A french article titled "Say goodbye to LazyInitializationException" : http://javaetmoi.com/2012/03/hibernate-dites-adieu-aux-lazy-initialization-exception/
+A french article titled *Say goodbye to LazyInitializationException* : http://javaetmoi.com/2012/03/hibernate-dites-adieu-aux-lazy-initialization-exception/
 
 ## Quick Start ##
 
