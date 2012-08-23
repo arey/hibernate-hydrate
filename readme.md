@@ -14,9 +14,12 @@ There are also unit tests available to look at.
 
 The [wiki](https://github.com/arey/hibernate-hydrate/wiki) contains links to basic project information such as source code, jenkins build, javadocs, issue tracking, etc.
 
+A french article titled *Say goodbye to LazyInitializationException* : http://javaetmoi.com/2012/03/hibernate-dites-adieu-aux-lazy-initialization-exception/
+
 ## Quick Start ##
 
 Download the jar though Maven:
+
 ```xml
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
@@ -34,13 +37,6 @@ Download the jar though Maven:
 </repository>
 ```
 
-```xml
-
-<repository>
-
-</repository>
-```
-
 ## Contributing to Hibernate Hydrate ##
 
 * Github is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
@@ -48,14 +44,17 @@ Download the jar though Maven:
 ### Development environment installation ###
 
 Download the code with git:
-git clone git://github.com/arey/hibernate-hydrate.git
+
+``git clone git://github.com/arey/hibernate-hydrate.git``
 
 Compile the code with maven:
-mvn clean install
+
+``mvn clean install``
 
 If you're using an IDE that supports Maven-based projects (InteliJ Idea, Netbeans or m2Eclipse), you can import the project directly from its POM. 
 Otherwise, generate IDE metadata with the related IDE maven plugin:
-mvn eclipse:clean eclipse:eclipse
+
+``mvn eclipse:clean eclipse:eclipse``
 
 
 ## Credits ##
