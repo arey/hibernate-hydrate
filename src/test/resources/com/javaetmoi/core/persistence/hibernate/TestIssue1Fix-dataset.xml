@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <FOO ID="1"/>
+  <BIZ ID="10" NAME="Biz 10" FOO_ID="1"/>
+  <BIZ ID="11" NAME="Biz 11" FOO_ID="1"/>
+</dataset>

@@ -30,6 +30,7 @@ import org.hibernate.collection.PersistentMap;
 import org.hibernate.impl.AbstractSessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
 
 /**
@@ -133,21 +134,8 @@ public class LazyLoadingUtil {
 
         for (int i = 0, n = classMetadata.getPropertyNames().length; i < n; i++) {
             String propertyName = classMetadata.getPropertyNames()[i];
-            deepInflateProperty(entity, classMetadata, propertyName, currentSession, recursiveGuard);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes" })
-    private static void deepInflateProperty(Object entity, ClassMetadata classMetadata,
-            String propertyName, Session currentSession, Set<String> recursiveGuard) {
-        Type type = classMetadata.getPropertyType(propertyName);
-
-        if (type.isEntityType()) {
-            Object subEntity = classMetadata.getPropertyValue(entity, propertyName, EntityMode.POJO);
-            deepInflateEntity(currentSession, subEntity, recursiveGuard);
-
-        } else if (type.isCollectionType()) {
-            Object propertyValue;
+            Type propertyType = classMetadata.getPropertyType(propertyName);
+            Object propertyValue = null;
             if (entity instanceof javassist.util.proxy.ProxyObject) {
                 // For javassist proxy, the classMetadata.getPropertyValue(..) method return en
                 // emppty collection. So we have to call the property's getter in order to call the
@@ -158,6 +146,17 @@ public class LazyLoadingUtil {
                 propertyValue = classMetadata.getPropertyValue(entity, propertyName,
                         EntityMode.POJO);
             }
+            deepInflateProperty(propertyValue, propertyType, currentSession, recursiveGuard);
+        }
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    private static void deepInflateProperty(Object propertyValue, Type propertyType,
+            Session currentSession, Set<String> recursiveGuard) {
+
+        if (propertyType.isEntityType()) {
+            deepInflateEntity(currentSession, propertyValue, recursiveGuard);
+        } else if (propertyType.isCollectionType()) {
             // Handle PersistentBag, PersistentList and PersistentIndentifierBag
             if (propertyValue instanceof List) {
                 deepInflateCollection(currentSession, recursiveGuard, (List) propertyValue);
@@ -169,8 +168,27 @@ public class LazyLoadingUtil {
                 throw new UnsupportedOperationException("Unsupported collection type: "
                         + propertyValue.getClass().getSimpleName());
             }
-
+        } else if (propertyType.isComponentType()) {
+            // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
+            deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType,
+                    recursiveGuard);
         }
+    }
+
+    private static void deepInflateComponent(Session currentSession, Object componentValue,
+            ComponentType componentType, Set<String> recursiveGuard) {
+        // No public API to access to the component Hibernate metamodel => force to use
+        // introspection instead
+        String[] propertyNames = ReflectionUtil.getValue("propertyNames", componentType);
+        Type[] propertyTypes = ReflectionUtil.getValue("propertyTypes", componentType);
+
+        for (int i = 0; i < propertyNames.length; i++) {
+            String propertyName = propertyNames[i];
+            Type propertyType = propertyTypes[i];
+            Object propertyValue = ReflectionUtil.getValue(propertyName, componentValue);
+            deepInflateProperty(propertyValue, propertyType, currentSession, recursiveGuard);
+        }
+
     }
 
     private static void deepInflateMap(Session currentSession, Set<String> recursiveGuard,

@@ -148,7 +148,6 @@ public class TestLazyLoadingUtil {
         // Loading an entity and hydrating its graph is done in a single transaction
         Employee dbJames = transactionTemplate.execute(new TransactionCallback<Employee>() {
 
-            @Override
             public Employee doInTransaction(TransactionStatus status) {
                 Employee employee = hibernateTemplate.get(Employee.class, 1);
                 return LazyLoadingUtil.deepHydrate(
@@ -211,7 +210,6 @@ public class TestLazyLoadingUtil {
         // Loading an entity and hydrating its graph is done in a single transaction
         Address dbLyon = transactionTemplate.execute(new TransactionCallback<Address>() {
 
-            @Override
             public Address doInTransaction(TransactionStatus status) {
                 Address address = hibernateTemplate.get(Address.class, 200);
                 LazyLoadingUtil.deepHydrate(
@@ -226,4 +224,5 @@ public class TestLazyLoadingUtil {
         assertEquals("Compare projetcs size", lyon.getEmployee().getProjects().size(),
                 dbLyon.getEmployee().getProjects().size());
     }
+
 }
