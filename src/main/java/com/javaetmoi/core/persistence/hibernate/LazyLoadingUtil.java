@@ -169,9 +169,12 @@ public class LazyLoadingUtil {
                         + propertyValue.getClass().getSimpleName());
             }
         } else if (propertyType.isComponentType()) {
-            // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
-            deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType,
-                    recursiveGuard);
+            if (propertyType instanceof ComponentType) {
+                // i.e. @Embeddable annotation (see
+                // https://github.com/arey/hibernate-hydrate/issues/1)
+                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType,
+                        recursiveGuard);
+            }
         }
     }
 
