@@ -35,7 +35,7 @@ import com.javaetmoi.core.persistence.hibernate.domain.Foo;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("TestLazyLoadingUtil-context.xml")
-public class TestIssue1Fix {
+public class TestIssue1 {
 
     @Autowired
     private HibernateTemplate   hibernateTemplate;
