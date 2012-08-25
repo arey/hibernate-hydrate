@@ -19,25 +19,42 @@ abstract class ReflectionUtil {
 
     @SuppressWarnings("unchecked")
     static <T> T getValue(String fieldName, Object object) {
+        Class<? extends Object> clazz = object.getClass();
         T value = null;
         try {
-            Field field = object.getClass().getDeclaredField(fieldName);
+            Field field = getField(clazz, fieldName);
             field.setAccessible(true);
             value = (T) field.get(object);
         } catch (SecurityException ex) {
-            handleReflectionException(ex);
-        } catch (NoSuchFieldException ex) {
-            handleReflectionException(ex);
+            handleReflectionException(ex, clazz, fieldName);
         } catch (IllegalArgumentException ex) {
-            handleReflectionException(ex);
+            handleReflectionException(ex, clazz, fieldName);
         } catch (IllegalAccessException ex) {
-            handleReflectionException(ex);
+            handleReflectionException(ex, clazz, fieldName);
         }
         return value;
     }
 
-    private static void handleReflectionException(Exception ex) {
-        throw new IllegalStateException("Unexpected reflection exception: " + ex.getMessage(), ex);
+    public static Field getField(Class<?> clazz, String name) {
+        Class<?> currentClazz = clazz;
+        while (!Object.class.equals(currentClazz) && currentClazz != null) {
+            Field[] fields = currentClazz.getDeclaredFields();
+            for (Field field : fields) {
+                if ((name == null) || name.equals(field.getName())) {
+                    return field;
+                }
+            }
+            currentClazz = currentClazz.getSuperclass();
+        }
+        throw new IllegalStateException("The " + clazz.getSimpleName()
+                + " class does not have any " + name + " field");
+    }
+
+    private static void handleReflectionException(Exception ex, Class<? extends Object> clazz,
+            String fieldName) {
+        throw new IllegalStateException("Unexpected reflection exception while getting "
+                + fieldName + " field of class " + clazz.getSimpleName() + ": " + ex.getMessage(),
+                ex);
 
     }
 
