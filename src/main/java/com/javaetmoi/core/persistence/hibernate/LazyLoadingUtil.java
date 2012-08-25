@@ -153,6 +153,9 @@ public class LazyLoadingUtil {
     @SuppressWarnings({ "rawtypes" })
     private static void deepInflateProperty(Object propertyValue, Type propertyType,
             Session currentSession, Set<String> recursiveGuard) {
+        if (propertyValue == null) {
+            return; // null guard
+        }
 
         if (propertyType.isEntityType()) {
             deepInflateEntity(currentSession, propertyValue, recursiveGuard);
