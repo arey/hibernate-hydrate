@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <PARENT PARENTKEY="1" NAME="Parent 1" NUMBER="0001"/>
+  <CHILD ID="10" NAME="Child 10" NUMBER="0010" PARENTKEY_FK="1"/>
+  <CHILD ID="11" NAME="Child 11" NUMBER="0011" PARENTKEY_FK="1"/>
+</dataset>
