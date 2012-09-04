@@ -24,7 +24,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate-hydrate</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
 </dependency> 
        
 <repository>
