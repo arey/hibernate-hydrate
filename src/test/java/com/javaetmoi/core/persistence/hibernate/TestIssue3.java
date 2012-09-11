@@ -69,8 +69,8 @@ public class TestIssue3 {
 					}
 				});
 		assertEquals(new Integer(1), dbContainer.getId());
-		assertEquals(2, dbContainer.getTransfers().size());
-		assertEquals(2, dbContainer.getTransfers().get(1).getSubPlan().getEvents().size());
+		assertEquals(1, dbContainer.getTransfers().size());
+		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan().getEvents().size());
 	}
 
 }

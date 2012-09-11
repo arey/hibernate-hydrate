@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
 	<PLAN ID="1" />
-	<TRANSFER PLAN_ID="1" name="transfer1" ELEMENTORDER="1" SUBPLAN="1"/>
+	<TRANSFER PLAN_ID="1" name="transfer1" ELEMENTORDER="0" SUBPLAN="1"/>
 	<SUBPLAN ID="1" />
 	<EVENT ID="1" name="Event 1"/>
 	<EVENT ID="2" name="Event 2"/>
