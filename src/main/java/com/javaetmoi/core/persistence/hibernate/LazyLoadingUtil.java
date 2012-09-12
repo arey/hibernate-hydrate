@@ -26,6 +26,7 @@ import org.hibernate.EntityMode;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.collection.PersistentCollection;
 import org.hibernate.collection.PersistentMap;
 import org.hibernate.impl.AbstractSessionImpl;
 import org.hibernate.metadata.ClassMetadata;
@@ -228,8 +229,24 @@ public class LazyLoadingUtil {
     private static void deepInflateCollection(Session currentSession, Set<String> recursiveGuard,
             @SuppressWarnings("rawtypes") Collection collection) {
         if (collection != null && collection.size() > 0) {
+            ComponentType collectionType = null;
+            if (collection instanceof PersistentCollection) {
+                String role = ((PersistentCollection) collection).getRole();
+                Type type = currentSession.getSessionFactory().getCollectionMetadata(role).getElementType();
+                if (type instanceof ComponentType) {
+                    // ManyToMany relationship with @Embeddable annotation (see
+                    // https://github.com/arey/hibernate-hydrate/issues/3)
+                    collectionType = (ComponentType) type;
+                }
+            }
             for (Object item : collection) {
-                deepInflateEntity(currentSession, item, recursiveGuard);
+                if (item == null) {
+                    continue;
+                } else if (collectionType != null) {
+                    deepInflateComponent(currentSession, item, collectionType, recursiveGuard);
+                } else {
+                    deepInflateEntity(currentSession, item, recursiveGuard);
+                }
             }
         }
     }

@@ -36,41 +36,39 @@ import com.javaetmoi.core.persistence.hibernate.test3.Plan;
 @ContextConfiguration("TestLazyLoadingUtil-context.xml")
 public class TestIssue3 {
 
-	@Autowired
-	HibernateTemplate hibernateTemplate;
+    @Autowired
+    HibernateTemplate           hibernateTemplate;
 
-	@Autowired
-	private TransactionTemplate transactionTemplate;
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
-	@Autowired
-	private DBUnitLoader dbUnitLoader;
+    @Autowired
+    private DBUnitLoader        dbUnitLoader;
 
-	/**
-	 * Populate entities graph and embbeded database
-	 */
-	@Before
-	@Transactional
-	public void setUp() {
-		dbUnitLoader.loadDatabase(getClass());
-	}
+    /**
+     * Populate entities graph and embbeded database
+     */
+    @Before
+    @Transactional
+    public void setUp() {
+        dbUnitLoader.loadDatabase(getClass());
+    }
 
-	@Test
-	public void listWithEmbeddableClass() {
+    @Test
+    public void listWithEmbeddableClass() {
 
-		Plan dbContainer = transactionTemplate
-				.execute(new TransactionCallback<Plan>() {
+        Plan dbContainer = transactionTemplate.execute(new TransactionCallback<Plan>() {
 
-					public Plan doInTransaction(TransactionStatus status) {
-						Plan plan = hibernateTemplate.get(Plan.class, 1);
-						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession(),
-								plan);
-						return plan;
-					}
-				});
-		assertEquals(new Integer(1), dbContainer.getId());
-		assertEquals(2, dbContainer.getTransfers().size());
-		assertEquals(2, dbContainer.getTransfers().get(1).getSubPlan().getEvents().size());
-	}
+            public Plan doInTransaction(TransactionStatus status) {
+                Plan plan = hibernateTemplate.get(Plan.class, 1);
+                LazyLoadingUtil.deepHydrate(
+                        hibernateTemplate.getSessionFactory().getCurrentSession(), plan);
+                return plan;
+            }
+        });
+        assertEquals(new Integer(1), dbContainer.getId());
+        assertEquals(1, dbContainer.getTransfers().size());
+        assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan().getEvents().size());
+    }
 
 }
