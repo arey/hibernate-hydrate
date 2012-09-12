@@ -9,27 +9,27 @@ import org.hibernate.annotations.CascadeType;
 
 @Embeddable
 public class Transfer {
-private String name;
-		@ManyToOne
-		@JoinColumn(name = "SUBPLAN")
-		@Cascade(CascadeType.ALL)
-		private SubPlan subPlan;
 
-		public SubPlan getSubPlan() {
-			return subPlan;
-		}
+    private String  name;
+    @ManyToOne
+    @JoinColumn(name = "SUBPLAN")
+    @Cascade(CascadeType.ALL)
+    private SubPlan subPlan;
 
-		public void setSubPlan(SubPlan subPlan) {
-			this.subPlan = subPlan;
-		}
+    public SubPlan getSubPlan() {
+        return subPlan;
+    }
 
-		public String getName() {
-			return name;
-		}
+    public void setSubPlan(SubPlan subPlan) {
+        this.subPlan = subPlan;
+    }
 
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

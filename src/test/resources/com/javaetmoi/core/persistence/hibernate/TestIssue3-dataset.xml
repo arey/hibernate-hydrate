@@ -5,4 +5,6 @@
 	<SUBPLAN ID="1" />
 	<EVENT ID="1" name="Event 1"/>
 	<EVENT ID="2" name="Event 2"/>
+    <SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="1"/>
+    <SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="2"/>
 </dataset>
