@@ -13,9 +13,14 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
+
+import org.hibernate.EntityMode;
+import org.hibernate.criterion.Order;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +35,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
-
+import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
  */
@@ -93,7 +98,26 @@ public class TestIssue3 {
 		assertEquals(new Integer(1), dbContainer.getSystem().getId());
 		assertNotNull(dbContainer.getSystem().getSubSystems());
 		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
+	}
+	
+	@Test
+	public void listWithMappedEntityWithAdditionalSpecificCriteria() {
+		List<System> dbContainer = transactionTemplate
+				.execute(new TransactionCallback<List<System>>() {
+					public List<System> doInTransaction(TransactionStatus status) {
+						List<System> system =(List<System>)hibernateTemplate.getSessionFactory().getCurrentSession().createCriteria(System.class).addOrder(Order.asc("systemNumber")).list();
+						LazyLoadingUtil.deepHydrate(hibernateTemplate
+								.getSessionFactory().getCurrentSession().getSession(EntityMode.POJO),
+								system);
+						return system;
+					}
+				});
+		assertNotNull(dbContainer);
+		assertFalse(dbContainer.isEmpty());
+		assertEquals(2,dbContainer.size());
+		assertEquals(new Integer(1), dbContainer.get(0).getId());
+		assertNotNull(dbContainer.get(0).getSubSystems());
+		assertEquals(2, dbContainer.get(0).getSubSystems().size());
 
 	}
-
 }

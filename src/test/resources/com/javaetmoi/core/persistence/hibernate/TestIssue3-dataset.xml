@@ -10,10 +10,17 @@
 	<SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="2" />
 
 	<HOLDER ID="1" system="1" />
-	<SYSTEM systemNumber="1" name="system-1" id="1" />
-	<SUBSYSTEM parent="1" systemNumber="1-1" name="subsystem-1"
+	<SYSTEM systemNumber="1" name="system-1" SYSTEM_KEY_PK="1" />
+	<SUBSYSTEM SYSTEM_KEY_FK="1" systemNumber="1-1" name="subsystem-1"
 		id="1" />
-	<SUBSYSTEM parent="1" systemNumber="1-2" name="subsystem-2"
+	<SUBSYSTEM SYSTEM_KEY_FK="1" systemNumber="1-2" name="subsystem-2"
 		id="2" />
+
+	<SYSTEM systemNumber="2" name="system-2" SYSTEM_KEY_PK="2" />
+	<SUBSYSTEM SYSTEM_KEY_FK="2" systemNumber="2-1" name="subsystem-2"
+		id="3" />
+	<SUBSYSTEM SYSTEM_KEY_FK="2" systemNumber="2-2" name="subsystem-3"
+		id="4" />
+
 
 </dataset>
