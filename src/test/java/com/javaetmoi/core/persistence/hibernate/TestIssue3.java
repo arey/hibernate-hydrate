@@ -13,6 +13,7 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
@@ -27,7 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.javaetmoi.core.persistence.hibernate.test3.Plan;
+import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
+import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
@@ -36,40 +38,62 @@ import com.javaetmoi.core.persistence.hibernate.test3.Plan;
 @ContextConfiguration("TestLazyLoadingUtil-context.xml")
 public class TestIssue3 {
 
-    @Autowired
-    HibernateTemplate           hibernateTemplate;
+	@Autowired
+	HibernateTemplate hibernateTemplate;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+	@Autowired
+	private TransactionTemplate transactionTemplate;
 
-    @Autowired
-    private DBUnitLoader        dbUnitLoader;
+	@Autowired
+	private DBUnitLoader dbUnitLoader;
 
-    /**
-     * Populate entities graph and embbeded database
-     */
-    @Before
-    @Transactional
-    public void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-    }
+	/**
+	 * Populate entities graph and embbeded database
+	 */
+	@Before
+	@Transactional
+	public void setUp() {
+		dbUnitLoader.loadDatabase(getClass());
+	}
 
-    @Test
-    public void listWithEmbeddableClass() {
+	@Test
+	public void listWithEmbeddableClass() {
 
-        Plan dbContainer = transactionTemplate.execute(new TransactionCallback<Plan>() {
+		Plan dbContainer = transactionTemplate
+				.execute(new TransactionCallback<Plan>() {
 
 					public Plan doInTransaction(TransactionStatus status) {
 						Plan plan = hibernateTemplate.get(Plan.class, 1);
 						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession(),
-								plan);
+								.getSessionFactory().getCurrentSession(), plan);
 						return plan;
 					}
 				});
 		assertEquals(new Integer(1), dbContainer.getId());
 		assertEquals(1, dbContainer.getTransfers().size());
-		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan().getEvents().size());
+		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan()
+				.getEvents().size());
+	}
+
+	@Test
+	public void listWithMappedEntity() {
+		Holder dbContainer = transactionTemplate
+				.execute(new TransactionCallback<Holder>() {
+
+					public Holder doInTransaction(TransactionStatus status) {
+						Holder system = hibernateTemplate.get(Holder.class, 1);
+						LazyLoadingUtil.deepHydrate(hibernateTemplate
+								.getSessionFactory().getCurrentSession(),
+								system);
+						return system;
+					}
+				});
+		assertEquals(new Integer(1), dbContainer.getId());
+		assertNotNull(dbContainer.getSystem());
+		assertEquals(new Integer(1), dbContainer.getSystem().getId());
+		assertNotNull(dbContainer.getSystem().getSubSystems());
+		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
+
 	}
 
 }
