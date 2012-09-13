@@ -230,7 +230,10 @@ public class LazyLoadingUtil {
             @SuppressWarnings("rawtypes") Collection collection) {
         if (collection != null && collection.size() > 0) {
             ComponentType collectionType = null;
-            if (collection instanceof PersistentCollection) {
+            if (collection instanceof PersistentCollection
+                    && !((PersistentCollection) collection).isUnreferenced()) {
+                // The isUnreferenced() test is useful for some persistent bags that does not have
+                // any role
                 String role = ((PersistentCollection) collection).getRole();
                 Type type = currentSession.getSessionFactory().getCollectionMetadata(role).getElementType();
                 if (type instanceof ComponentType) {
