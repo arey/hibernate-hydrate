@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.EntityMode;
@@ -35,7 +36,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
+import com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
+
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
  */
@@ -99,25 +102,71 @@ public class TestIssue3 {
 		assertNotNull(dbContainer.getSystem().getSubSystems());
 		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
 	}
-	
+
 	@Test
 	public void listWithMappedEntityWithAdditionalSpecificCriteria() {
 		List<System> dbContainer = transactionTemplate
 				.execute(new TransactionCallback<List<System>>() {
 					public List<System> doInTransaction(TransactionStatus status) {
-						List<System> system =(List<System>)hibernateTemplate.getSessionFactory().getCurrentSession().createCriteria(System.class).addOrder(Order.asc("systemNumber")).list();
+						List<System> system = (List<System>) hibernateTemplate
+								.getSessionFactory().getCurrentSession()
+								.createCriteria(System.class)
+								.addOrder(Order.asc("systemNumber")).list();
 						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession().getSession(EntityMode.POJO),
-								system);
+								.getSessionFactory().getCurrentSession()
+								.getSession(EntityMode.POJO), system);
 						return system;
 					}
 				});
 		assertNotNull(dbContainer);
 		assertFalse(dbContainer.isEmpty());
-		assertEquals(2,dbContainer.size());
+		assertEquals(2, dbContainer.size());
 		assertEquals(new Integer(1), dbContainer.get(0).getId());
 		assertNotNull(dbContainer.get(0).getSubSystems());
 		assertEquals(2, dbContainer.get(0).getSubSystems().size());
 
+	}
+
+	@Test
+	public void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
+		List<System> dbContainer = transactionTemplate
+				.execute(new TransactionCallback<List<System>>() {
+					public List<System> doInTransaction(TransactionStatus status) {
+						Holder holder = new Holder();
+						System system = new System();
+						system.setName("system1");
+						system.setSystemNumber("1");
+						SubSystem subSystem1 = new SubSystem();
+						subSystem1.setName("subsystem1");
+						subSystem1.setParent(system);
+						subSystem1.setSystemNumber("1-1");
+						SubSystem subSystem2 = new SubSystem();
+						subSystem2.setName("subsystem2");
+						subSystem2.setParent(system);
+						subSystem2.setSystemNumber("1-2");
+						holder.setSystem(system);
+						List<SubSystem> subSystems = new ArrayList<SubSystem>();
+						subSystems.add(subSystem1);
+						subSystems.add(subSystem2);
+						system.setSubSystems(subSystems);
+						hibernateTemplate.getSessionFactory()
+								.getCurrentSession().save(subSystem1);
+						hibernateTemplate.getSessionFactory()
+								.getCurrentSession().save(subSystem2);
+						hibernateTemplate.getSessionFactory()
+								.getCurrentSession().save(system);
+						hibernateTemplate.getSessionFactory()
+								.getCurrentSession().save(holder);
+
+						List<System> retrievedSystems = (List<System>) hibernateTemplate
+								.getSessionFactory().getCurrentSession()
+								.createCriteria(System.class)
+								.addOrder(Order.asc("systemNumber")).list();
+						LazyLoadingUtil.deepHydrate(hibernateTemplate
+								.getSessionFactory().getCurrentSession()
+								.getSession(EntityMode.POJO), system);
+						return retrievedSystems;
+					}
+				});
 	}
 }
