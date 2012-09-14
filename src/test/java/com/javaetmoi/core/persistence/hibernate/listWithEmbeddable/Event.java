@@ -1,4 +1,4 @@
-package com.javaetmoi.core.persistence.hibernate.test3;
+package com.javaetmoi.core.persistence.hibernate.listWithEmbeddable;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

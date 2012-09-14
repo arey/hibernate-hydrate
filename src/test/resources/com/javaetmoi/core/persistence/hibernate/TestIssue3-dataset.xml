@@ -1,10 +1,26 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
 	<PLAN ID="1" />
-	<TRANSFER PLAN_ID="1" name="transfer1" ELEMENTORDER="0" SUBPLAN="1"/>
+	<TRANSFER PLAN_ID="1" name="transfer1" ELEMENTORDER="0"
+		SUBPLAN="1" />
 	<SUBPLAN ID="1" />
-	<EVENT ID="1" name="Event 1"/>
-	<EVENT ID="2" name="Event 2"/>
-    <SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="1"/>
-    <SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="2"/>
+	<EVENT ID="1" name="Event 1" />
+	<EVENT ID="2" name="Event 2" />
+	<SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="1" />
+	<SUBPLAN_EVENT SUBPLAN_ID="1" EVENTS_ID="2" />
+
+	<HOLDER ID="1" system="1" />
+	<SYSTEM systemNumber="1" name="system-1" SYSTEM_KEY_PK="1" />
+	<SUBSYSTEM SYSTEM_KEY_FK="1" systemNumber="1-1" name="subsystem-1"
+		id="1" />
+	<SUBSYSTEM SYSTEM_KEY_FK="1" systemNumber="1-2" name="subsystem-2"
+		id="2" />
+
+	<SYSTEM systemNumber="2" name="system-2" SYSTEM_KEY_PK="2" />
+	<SUBSYSTEM SYSTEM_KEY_FK="2" systemNumber="2-1" name="subsystem-2"
+		id="3" />
+	<SUBSYSTEM SYSTEM_KEY_FK="2" systemNumber="2-2" name="subsystem-3"
+		id="4" />
+
+
 </dataset>
