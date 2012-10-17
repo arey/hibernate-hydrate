@@ -20,13 +20,12 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.EntityMode;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionStatus;
@@ -47,7 +46,7 @@ import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 public class TestIssue3 {
 
 	@Autowired
-	HibernateTemplate hibernateTemplate;
+    private SessionFactory   sessionFactory;
 
 	@Autowired
 	private TransactionTemplate transactionTemplate;
@@ -71,9 +70,8 @@ public class TestIssue3 {
 				.execute(new TransactionCallback<Plan>() {
 
 					public Plan doInTransaction(TransactionStatus status) {
-						Plan plan = hibernateTemplate.get(Plan.class, 1);
-						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession(), plan);
+						Plan plan = (Plan) sessionFactory.getCurrentSession().get(Plan.class, 1);
+						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), plan);
 						return plan;
 					}
 				});
@@ -89,9 +87,8 @@ public class TestIssue3 {
 				.execute(new TransactionCallback<Holder>() {
 
 					public Holder doInTransaction(TransactionStatus status) {
-						Holder system = hibernateTemplate.get(Holder.class, 1);
-						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession(),
+						Holder system = (Holder) sessionFactory.getCurrentSession().get(Holder.class, 1);
+						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
 								system);
 						return system;
 					}
@@ -108,13 +105,10 @@ public class TestIssue3 {
 		List<System> dbContainer = transactionTemplate
 				.execute(new TransactionCallback<List<System>>() {
 					public List<System> doInTransaction(TransactionStatus status) {
-						List<System> system = (List<System>) hibernateTemplate
-								.getSessionFactory().getCurrentSession()
+						List<System> system = (List<System>) sessionFactory.getCurrentSession()
 								.createCriteria(System.class)
 								.addOrder(Order.asc("systemNumber")).list();
-						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession()
-								.getSession(EntityMode.POJO), system);
+						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
 						return system;
 					}
 				});
@@ -149,22 +143,15 @@ public class TestIssue3 {
 						subSystems.add(subSystem1);
 						subSystems.add(subSystem2);
 						system.setSubSystems(subSystems);
-						hibernateTemplate.getSessionFactory()
-								.getCurrentSession().save(subSystem1);
-						hibernateTemplate.getSessionFactory()
-								.getCurrentSession().save(subSystem2);
-						hibernateTemplate.getSessionFactory()
-								.getCurrentSession().save(system);
-						hibernateTemplate.getSessionFactory()
-								.getCurrentSession().save(holder);
+						sessionFactory.getCurrentSession().save(subSystem1);
+						sessionFactory.getCurrentSession().save(subSystem2);
+						sessionFactory.getCurrentSession().save(system);
+						sessionFactory.getCurrentSession().save(holder);
 
-						List<System> retrievedSystems = (List<System>) hibernateTemplate
-								.getSessionFactory().getCurrentSession()
+						List<System> retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
 								.createCriteria(System.class)
 								.addOrder(Order.asc("systemNumber")).list();
-						LazyLoadingUtil.deepHydrate(hibernateTemplate
-								.getSessionFactory().getCurrentSession()
-								.getSession(EntityMode.POJO), system);
+						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
 						return retrievedSystems;
 					}
 				});

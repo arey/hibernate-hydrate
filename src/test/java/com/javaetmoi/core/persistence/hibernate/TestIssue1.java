@@ -16,11 +16,11 @@ package com.javaetmoi.core.persistence.hibernate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionStatus;
@@ -38,7 +38,7 @@ import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 public class TestIssue1 {
 
     @Autowired
-    private HibernateTemplate   hibernateTemplate;
+    private SessionFactory   sessionFactory;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -61,9 +61,8 @@ public class TestIssue1 {
         Foo dbFoo = transactionTemplate.execute(new TransactionCallback<Foo>() {
 
             public Foo doInTransaction(TransactionStatus status) {
-                Foo foo = hibernateTemplate.get(Foo.class, 1);
-                LazyLoadingUtil.deepHydrate(
-                        hibernateTemplate.getSessionFactory().getCurrentSession(), foo);
+                Foo foo = (Foo) sessionFactory.getCurrentSession().get(Foo.class, 1);
+                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), foo);
                 return foo;
             }
         });

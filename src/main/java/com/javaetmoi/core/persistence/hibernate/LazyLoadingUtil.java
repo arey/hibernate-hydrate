@@ -26,9 +26,9 @@ import org.hibernate.EntityMode;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.collection.PersistentMap;
-import org.hibernate.impl.AbstractSessionImpl;
+import org.hibernate.collection.internal.PersistentMap;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.internal.AbstractSessionImpl;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.ComponentType;
@@ -144,8 +144,7 @@ public class LazyLoadingUtil {
                 // loading it from the database.
                 propertyValue = callCollectionGetter(entity, propertyName);
             } else {
-                propertyValue = classMetadata.getPropertyValue(entity, propertyName,
-                        EntityMode.POJO);
+                propertyValue = classMetadata.getPropertyValue(entity, propertyName);
             }
             deepInflateProperty(propertyValue, propertyType, currentSession, recursiveGuard);
         }
@@ -230,10 +229,7 @@ public class LazyLoadingUtil {
             @SuppressWarnings("rawtypes") Collection collection) {
         if (collection != null && collection.size() > 0) {
             ComponentType collectionType = null;
-            if (collection instanceof PersistentCollection
-                    && !((PersistentCollection) collection).isUnreferenced()) {
-                // The isUnreferenced() test is useful for some persistent bags that does not have
-                // any role
+            if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
                 String role = ((PersistentCollection) collection).getRole();
                 Type type = currentSession.getSessionFactory().getCollectionMetadata(role).getElementType();
                 if (type instanceof ComponentType) {

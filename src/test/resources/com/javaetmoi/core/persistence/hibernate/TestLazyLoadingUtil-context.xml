@@ -18,7 +18,7 @@
   <jdbc:embedded-database id="dataSource" type="H2" />
 
   <!-- A Hibernate SessionFactory for mapping Accounts and Restaurants from object to relation tables -->
-  <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+  <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
     <property name="dataSource" ref="dataSource" />
     <!-- Detect entities used by the test -->
     <property name="packagesToScan" value="com.javaetmoi.core.persistence.hibernate.*" />
@@ -33,7 +33,7 @@
   </bean>
 
   <!-- A transaction manager for working with Hibernate SessionFactories -->
-  <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+  <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
     p:sessionFactory-ref="sessionFactory" />
 
   <!-- Spring template class that simplifies programmatic transaction management -->
@@ -42,7 +42,6 @@
   </bean>
 
   <!-- Spring helper class that simplifies Hibernate data access code -->
-  <bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate" p:sessionFactory-ref="sessionFactory" />
 
   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" c:dataSource-ref="dataSource" />
 
