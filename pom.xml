@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
   <version>1.3-SNAPSHOT</version>
-  <artifactId>javaetmoi-hibernate-hydrate</artifactId>
+  <artifactId>javaetmoi-hibernate3-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId} - ${project.packaging}</name>
   <packaging>jar</packaging>
-  <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy</description>
+  <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (supports Hibernate 3.x)</description>
   <inceptionYear>2012</inceptionYear>
   <url>https://github.com/arey/hibernate-hydrate</url>
 
@@ -16,6 +16,14 @@
       <email>antoine@javaetmoi.com</email>
       <url>http://javaetmoi.com</url>
       <timezone>+1</timezone>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>karlhungus</id>
+      <name>Izaak Alpert</name>
+      <email>ialpert+github@gmail.com</email>
       <roles>
         <role>Java Developer</role>
       </roles>
