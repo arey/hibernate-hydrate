@@ -6,6 +6,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 
 * Utility class to populate a lazy-initialized object graph by recursivity
 * Supports JPA with Hibernate as provider
+* Supports both Hibernate 3.x and Hibernate 4.x
 
 ## Getting Help ##
 
@@ -21,6 +22,14 @@ A french article titled *Say goodbye to LazyInitializationException* : http://ja
 Download the jar though Maven:
 
 ```xml
+<!-- Either Hibernate 4 support -->
+<dependency>
+  <groupId>com.javaetmoi.core</groupId>
+  <artifactId>javaetmoi-hibernate4-hydrate</artifactId>
+  <version>2.0</version>
+</dependency> 
+
+<!-- Or Hibernate 3 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate-hydrate</artifactId>
@@ -61,3 +70,4 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 * Uses [Maven](http://maven.apache.org/) as a build tool
 * Uses [Cloudbees](http://www.cloudbees.com/foss) for continuous integration builds whenever code is pushed into GitHub
+* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) for their pull requests
