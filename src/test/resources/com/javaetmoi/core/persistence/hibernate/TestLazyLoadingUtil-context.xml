@@ -41,8 +41,6 @@
     <property name="transactionManager" ref="transactionManager" />
   </bean>
 
-  <!-- Spring helper class that simplifies Hibernate data access code -->
-  <bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate" p:sessionFactory-ref="sessionFactory" />
 
   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" c:dataSource-ref="dataSource" />
 

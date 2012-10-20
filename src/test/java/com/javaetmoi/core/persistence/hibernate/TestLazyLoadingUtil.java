@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.LazyInitializationException;
+import org.hibernate.SessionFactory;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.collection.PersistentMap;
 import org.hibernate.stat.Statistics;
@@ -29,7 +30,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionStatus;
@@ -55,7 +55,7 @@ import com.javaetmoi.core.persistence.hibernate.domain.Project;
 public class TestLazyLoadingUtil {
 
     @Autowired
-    HibernateTemplate           hibernateTemplate;
+    private SessionFactory      sessionFactory;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -82,7 +82,7 @@ public class TestLazyLoadingUtil {
         dbUnitLoader.loadDatabase(getClass());
 
         // Reset Hibernate Statistics
-        hibernateTemplate.getSessionFactory().getStatistics().clear();
+        sessionFactory.getStatistics().clear();
 
         france = new Country(1000, "France");
         james = new Employee(1, "James", "Developer");
@@ -111,7 +111,14 @@ public class TestLazyLoadingUtil {
     @Test(expected = LazyInitializationException.class)
     public void lazyInitializationExceptionOnPersistentMap() {
         // Load each entity in a transaction
-        Employee dbJames = hibernateTemplate.get(Employee.class, 1);
+        Employee dbJames = transactionTemplate.execute(new TransactionCallback<Employee>() {
+
+            public Employee doInTransaction(TransactionStatus status) {
+                Employee employee = (Employee) sessionFactory.getCurrentSession().get(
+                        Employee.class, 1);
+                return employee;
+            }
+        });
         // At this step, transaction and session are closed
         dbJames.getAddresses().get(0);
     }
@@ -123,7 +130,14 @@ public class TestLazyLoadingUtil {
     @Test(expected = LazyInitializationException.class)
     public void lazyInitializationExceptionOnPersistentCollection() {
         // Load each entity in a transaction
-        Employee dbJames = hibernateTemplate.get(Employee.class, 1);
+        Employee dbJames = transactionTemplate.execute(new TransactionCallback<Employee>() {
+
+            public Employee doInTransaction(TransactionStatus status) {
+                Employee employee = (Employee) sessionFactory.getCurrentSession().get(
+                        Employee.class, 1);
+                return employee;
+            }
+        });
         // At this step, transaction and session are closed
         dbJames.getProjects().contains(android);
     }
@@ -135,7 +149,14 @@ public class TestLazyLoadingUtil {
     @Test(expected = LazyInitializationException.class)
     public void lazyInitializationExceptionWithManyToOne() {
         // Load each entity in a transaction
-        Address dbLyon = hibernateTemplate.get(Address.class, 200);
+        Address dbLyon = transactionTemplate.execute(new TransactionCallback<Address>() {
+
+            public Address doInTransaction(TransactionStatus status) {
+                Address address = (Address) sessionFactory.getCurrentSession().get(Address.class,
+                        200);
+                return address;
+            }
+        });
         // At this step, transaction and session are closed
         dbLyon.getEmployee().getName();
     }
@@ -149,9 +170,9 @@ public class TestLazyLoadingUtil {
         Employee dbJames = transactionTemplate.execute(new TransactionCallback<Employee>() {
 
             public Employee doInTransaction(TransactionStatus status) {
-                Employee employee = hibernateTemplate.get(Employee.class, 1);
-                return LazyLoadingUtil.deepHydrate(
-                        hibernateTemplate.getSessionFactory().getCurrentSession(), employee);
+                Employee employee = (Employee) sessionFactory.getCurrentSession().get(
+                        Employee.class, 1);
+                return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), employee);
             }
         });
 
@@ -193,9 +214,9 @@ public class TestLazyLoadingUtil {
                 james, dbJames);
 
         // - Generated SQL statements number
-        Statistics statistics = hibernateTemplate.getSessionFactory().getStatistics();
+        Statistics statistics = sessionFactory.getStatistics();
         assertEquals(
-                "All 8 entities are loaded: france, james, tom, android, iphone, paris, la défense and lyon",
+                "All 8 entities are loaded: france, james, tom, android, iphone, paris, la dï¿½fense and lyon",
                 8, statistics.getEntityLoadCount());
         assertEquals(
                 "6 collections should be fetched: james' adresses, james' projects, iPhone members, tom's adresses, tom's projects, android members",
@@ -211,9 +232,9 @@ public class TestLazyLoadingUtil {
         Address dbLyon = transactionTemplate.execute(new TransactionCallback<Address>() {
 
             public Address doInTransaction(TransactionStatus status) {
-                Address address = hibernateTemplate.get(Address.class, 200);
-                LazyLoadingUtil.deepHydrate(
-                        hibernateTemplate.getSessionFactory().getCurrentSession(), address);
+                Address address = (Address) sessionFactory.getCurrentSession().get(Address.class,
+                        200);
+                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), address);
                 return address;
             }
         });
