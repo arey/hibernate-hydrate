@@ -46,7 +46,7 @@
   <issueManagement>
     <system>github</system>
     <url>https://github.com/arey/hibernate-hydrate/issues</url>
-    <!-- BuildHive ready: https://buildhive.cloudbees.com/user/arey/builds -->
+    <!-- BuildHive ready: https://buildhive.cloudbees.com/job/arey/job/hibernate-hydrate/ -->
   </issueManagement>
 
   <!-- Apache 2 license -->
