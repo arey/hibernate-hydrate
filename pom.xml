@@ -69,8 +69,8 @@
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>4.1.7.Final</version.hibernate>
-    <version.hibernate-javassist>3.12.0.GA</version.hibernate-javassist>
+    <version.hibernate>4.1.9.Final</version.hibernate>
+    <version.hibernate-javassist>3.17.1-GA</version.hibernate-javassist>
     <version.hibernate-jpa-2.0-api>1.0.1.Final</version.hibernate-jpa-2.0-api>
     <version.logback>1.0.0</version.logback>
 
@@ -120,7 +120,7 @@
     </dependency>
     <!-- Javassist -->
     <dependency>
-      <groupId>javassist</groupId>
+      <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
       <version>${version.hibernate-javassist}</version>
     </dependency>
