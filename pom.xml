@@ -69,7 +69,7 @@
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>4.1.9.Final</version.hibernate>
+    <version.hibernate>4.2.3.Final</version.hibernate>
     <version.hibernate-javassist>3.17.1-GA</version.hibernate-javassist>
     <version.hibernate-jpa-2.0-api>1.0.1.Final</version.hibernate-jpa-2.0-api>
     <version.logback>1.0.9</version.logback>
@@ -223,9 +223,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <version>${version.plugin.maven-source-plugin}</version>
-        <configuration>
-          <encoding>${source.encoding}</encoding>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
