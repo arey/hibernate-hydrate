@@ -72,7 +72,7 @@
     <version.hibernate>4.2.3.Final</version.hibernate>
     <version.hibernate-javassist>3.17.1-GA</version.hibernate-javassist>
     <version.hibernate-jpa-2.0-api>1.0.1.Final</version.hibernate-jpa-2.0-api>
-    <version.logback>1.0.9</version.logback>
+    <version.logback>1.0.13</version.logback>
 
     <!-- * For testing purpose -->
     <version.junit>4.11</version.junit>
