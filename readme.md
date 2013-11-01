@@ -71,3 +71,12 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 * Uses [Maven](http://maven.apache.org/) as a build tool
 * Uses [Cloudbees](http://www.cloudbees.com/foss) for continuous integration builds whenever code is pushed into GitHub
 * [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) for their pull requests
+ 
+
+## Build Status ##
+
+Travis : [![Build
+Status](https://travis-ci.org/arey/hibernate-hydrate.png?branch=master)](https://travis-ci.org/arey/hibernate-hydrate)
+
+Cloudbees Jenkins : [![Build
+Status](https://javaetmoi.ci.cloudbees.com/job/hibernate-hydrate/badge/icon)](https://javaetmoi.ci.cloudbees.com/job/hibernate-hydrate/)
