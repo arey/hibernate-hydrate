@@ -69,7 +69,7 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 ## Credits ##
 
 * Uses [Maven](http://maven.apache.org/) as a build tool
-* Uses [Cloudbees](http://www.cloudbees.com/foss) for continuous integration builds whenever code is pushed into GitHub
+* Uses [Cloudbees](http://www.cloudbees.com/foss) and [Travis CI](http://www.travis-ci.org) for continuous integration builds whenever code is pushed into GitHub
 * [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) for their pull requests
  
 
