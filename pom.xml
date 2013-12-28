@@ -69,9 +69,9 @@
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>4.2.7.SP1</version.hibernate>
+    <version.hibernate>4.3.0.Final</version.hibernate>
     <version.hibernate-javassist>3.18.1-GA</version.hibernate-javassist>
-    <version.hibernate-jpa-2.0-api>1.0.1.Final</version.hibernate-jpa-2.0-api>
+    <version.hibernate-jpa-2.1-api>1.0.0.Final</version.hibernate-jpa-2.1-api>
     <version.logback>1.0.13</version.logback>
 
     <!-- * For testing purpose -->
@@ -104,8 +104,8 @@
     <!-- JPA -->
     <dependency>
       <groupId>org.hibernate.javax.persistence</groupId>
-      <artifactId>hibernate-jpa-2.0-api</artifactId>
-      <version>${version.hibernate-jpa-2.0-api}</version>
+      <artifactId>hibernate-jpa-2.1-api</artifactId>
+      <version>${version.hibernate-jpa-2.1-api}</version>
     </dependency>
     <!-- Hibernate -->
     <dependency>
