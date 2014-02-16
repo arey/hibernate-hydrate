@@ -63,7 +63,11 @@ public class JpaLazyLoadingUtil {
         if (currentEntityManager instanceof HibernateEntityManager) {
             HibernateEntityManager entityManager = (HibernateEntityManager) currentEntityManager;
             return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entities);
-        }
+        } else
+            if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
+                org.hibernate.jpa.HibernateEntityManager entityManager = (HibernateEntityManager) currentEntityManager;
+                return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entities);
+            }            
         throw new RuntimeException(
                 "Only the Hibername implementation of JPA is currently supported");
     }
@@ -91,6 +95,10 @@ public class JpaLazyLoadingUtil {
     public static <E> E deepHydrate(final EntityManager currentEntityManager, E entity) {
         if (currentEntityManager instanceof HibernateEntityManager) {
             HibernateEntityManager entityManager = (HibernateEntityManager) currentEntityManager;
+            return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entity);
+        } else
+        if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
+            org.hibernate.jpa.HibernateEntityManager entityManager = (org.hibernate.jpa.HibernateEntityManager) currentEntityManager;
             return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entity);
         }
         throw new RuntimeException(
