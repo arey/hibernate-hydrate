@@ -75,8 +75,10 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 ## Build Status ##
 
-Travis : [![Build
+Travis: [![Build
 Status](https://travis-ci.org/arey/hibernate-hydrate.png?branch=master)](https://travis-ci.org/arey/hibernate-hydrate)
 
-Cloudbees Jenkins : [![Build
+Cloudbees Jenkins: [![Build
 Status](https://javaetmoi.ci.cloudbees.com/job/hibernate-hydrate/badge/icon)](https://javaetmoi.ci.cloudbees.com/job/hibernate-hydrate/)
+
+Bitdeli: [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/arey/hibernate-hydrate/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
