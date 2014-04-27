@@ -69,7 +69,7 @@
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>4.3.1.Final</version.hibernate>
+    <version.hibernate>4.3.5.Final</version.hibernate>
     <version.hibernate-javassist>3.18.1-GA</version.hibernate-javassist>
     <version.hibernate-jpa-2.1-api>1.0.0.Final</version.hibernate-jpa-2.1-api>
     <version.logback>1.0.13</version.logback>
