@@ -81,7 +81,7 @@
     <version.dbunit>2.4.9</version.dbunit>
     <version.commons-lang3>3.3.2</version.commons-lang3>
     <version.ehcache>2.6.9</version.ehcache>
-    <version.unitils>3.3</version.unitils>
+    <version.unitils>3.4.1</version.unitils>
 
     <!-- Version of maven plugins -->
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
