@@ -30,7 +30,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionStatus;
@@ -200,15 +199,15 @@ public class TestLazyLoadingUtil {
         ReflectionAssert.assertReflectionEquals(
                 "Compare in-memory and database loaded projects with RelectionUtils",
                 james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
-        assertEquals(james.getProjects(), dbJames.getProjects());
+        ReflectionAssert.assertReflectionEquals(james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Full employee
         LOGGER.debug("James toString(): {}", dbJames.toString());
         ReflectionAssert.assertReflectionEquals(
                 "Compare in-memory and database loaded employees with RelectionUtils", dbJames,
                 james, ReflectionComparatorMode.LENIENT_ORDER);
-        assertEquals("Compare in-memory and database loaded employees with the equals method",
-                james, dbJames);
+        ReflectionAssert.assertReflectionEquals("Compare in-memory and database loaded employees with the equals method",
+                james, dbJames, ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Generated SQL statements number
         Statistics statistics = sessionFactory.getStatistics();
