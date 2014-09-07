@@ -35,16 +35,9 @@ Download the jar though Maven:
   <artifactId>javaetmoi-hibernate-hydrate</artifactId>
   <version>1.2</version>
 </dependency> 
-       
-<repository>
-  <id>javaetmoi-maven-release</id>
-  <releases>
-    <enabled>true</enabled>
-  </releases>
-  <name>Java & Moi Maven RELEASE Repository</name>
-  <url>http://repository-javaetmoi.forge.cloudbees.com/release/</url>
-</repository>
 ```
+
+Hybernate Hydrate artefacts are available from [Maven Central](http://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate4-hydrate/)
 
 ## Contributing to Hibernate Hydrate ##
 
