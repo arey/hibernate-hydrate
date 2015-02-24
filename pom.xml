@@ -323,6 +323,9 @@
                 </goals>
               </execution>
             </executions>
+              <configuration>
+                  <additionalparam>-Xdoclint:none</additionalparam>
+              </configuration>
           </plugin>
           <!--GPG Signed Artefacts required by Maven Central -->
           <plugin>
