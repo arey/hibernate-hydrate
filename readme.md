@@ -26,7 +26,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate4-hydrate</artifactId>
-  <version>2.0</version>
+  <version>2.1</version>
 </dependency> 
 
 <!-- Or Hibernate 3 support -->
