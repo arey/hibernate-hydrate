@@ -13,27 +13,22 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.hibernate.EntityMode;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
+import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.internal.AbstractSessionImpl;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
-import org.hibernate.LazyInitializationException;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -122,7 +117,7 @@ public class LazyLoadingUtil {
             return;
         }
         Serializable identifier = classMetadata.getIdentifier(entity,
-                (AbstractSessionImpl) currentSession);
+                (SessionImplementor) currentSession);
         String key = persistentClass.getName() + "|" + identifier;
 
         if (recursiveGuard.contains(key)) {
