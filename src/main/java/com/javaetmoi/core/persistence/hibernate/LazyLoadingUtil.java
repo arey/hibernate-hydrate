@@ -33,6 +33,7 @@ import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
+import org.hibernate.LazyInitializationException;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -58,7 +59,7 @@ public class LazyLoadingUtil {
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized
      * Hibernate proxies.<br>
-     * The goal is to avoid any {@link lazyinitializationexception} once entities are detached from
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from
      * the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate
      * session.
@@ -85,7 +86,7 @@ public class LazyLoadingUtil {
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized
      * Hibernate proxies.<br>
-     * The goal is to avoid any {@link lazyinitializationexception} once entities are detached from
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from
      * the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate
      * session.
@@ -139,7 +140,7 @@ public class LazyLoadingUtil {
             Object propertyValue = null;
             if (entity instanceof javassist.util.proxy.ProxyObject) {
                 // For javassist proxy, the classMetadata.getPropertyValue(..) method return en
-                // emppty collection. So we have to call the property's getter in order to call the
+                // empty collection. So we have to call the property's getter in order to call the
                 // JavassistLazyInitializer.invoke(..) method that will initialize the collection by
                 // loading it from the database.
                 propertyValue = callCollectionGetter(entity, propertyName);
@@ -218,13 +219,6 @@ public class LazyLoadingUtil {
         }
     }
 
-    /**
-     * 
-     * 
-     * @param sessionFactory
-     * @param recursiveGuard
-     * @param collection
-     */
     private static void deepInflateCollection(Session currentSession, Set<String> recursiveGuard,
             @SuppressWarnings("rawtypes") Collection collection) {
         if (collection != null && collection.size() > 0) {
