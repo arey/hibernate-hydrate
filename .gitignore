@@ -5,3 +5,9 @@
 
 # Compiled classes
 target
+
+
+# Idea IntelliJ
+.idea
+*.iml
+
