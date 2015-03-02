@@ -32,7 +32,7 @@ Download the jar though Maven:
 <!-- Or Hibernate 3 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
-  <artifactId>javaetmoi-hibernate-hydrate</artifactId>
+  <artifactId>javaetmoi-hibernate3-hydrate</artifactId>
   <version>1.3</version>
 </dependency> 
 ```
