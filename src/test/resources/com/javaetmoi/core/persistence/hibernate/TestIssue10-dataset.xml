@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <CUSTOMER ID="1" PASSPORT_FK="1"/>
+    <PASSPORT ID="1"/>
+</dataset>
