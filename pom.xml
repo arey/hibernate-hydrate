@@ -124,11 +124,6 @@
       <artifactId>javassist</artifactId>
       <version>${version.hibernate-javassist}</version>
     </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${version.logback}</version>
-    </dependency>
 
 
     <!-- Tests -->
@@ -158,8 +153,16 @@
       <version>${version.spring}</version>
       <scope>test</scope>
     </dependency>
+    <!-- * Logger -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${version.logback}</version>
+      <scope>test</scope>
+    </dependency>
 
-    <!-- * H2 embbeded database -->
+
+      <!-- * H2 embbeded database -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
