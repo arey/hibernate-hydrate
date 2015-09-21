@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
   <version>2.2-SNAPSHOT</version>
-  <artifactId>javaetmoi-hibernate4-hydrate</artifactId>
+  <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId} - ${project.packaging}</name>
   <packaging>jar</packaging>
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 4.x)</description>
@@ -70,19 +70,20 @@
   <properties>
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>4.3.5.Final</version.hibernate>
+    <version.hibernate>5.0.1.Final</version.hibernate>
     <version.hibernate-javassist>3.18.1-GA</version.hibernate-javassist>
     <version.hibernate-jpa-2.1-api>1.0.0.Final</version.hibernate-jpa-2.1-api>
     <version.logback>1.1.2</version.logback>
 
     <!-- * For testing purpose -->
     <version.junit>4.11</version.junit>
-    <version.spring>4.0.3.RELEASE</version.spring>
+    <version.spring>4.2.1.RELEASE</version.spring>
     <version.h2>1.4.177</version.h2>
     <version.dbunit>2.4.9</version.dbunit>
     <version.commons-lang3>3.3.2</version.commons-lang3>
     <version.ehcache>2.6.9</version.ehcache>
     <version.unitils>3.4.1</version.unitils>
+    <version.mockito>1.9.5</version.mockito>
 
     <!-- Version of maven plugins -->
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
@@ -160,8 +161,13 @@
       <version>${version.logback}</version>
       <scope>test</scope>
     </dependency>
-
-
+    <!-- * Mockito -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${version.mockito}</version>
+      <scope>test</scope>
+    </dependency>
       <!-- * H2 embbeded database -->
     <dependency>
       <groupId>com.h2database</groupId>

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.IdentifierLoadAccess;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.junit.Before;
@@ -126,23 +127,17 @@ public class TestIssue3 {
 		List<System> dbContainer = transactionTemplate
 				.execute(new TransactionCallback<List<System>>() {
 					public List<System> doInTransaction(TransactionStatus status) {
-						Holder holder = new Holder();
-						System system = new System();
-						system.setName("system1");
-						system.setSystemNumber("1");
-						SubSystem subSystem1 = new SubSystem();
-						subSystem1.setName("subsystem1");
-						subSystem1.setParent(system);
-						subSystem1.setSystemNumber("1-1");
-						SubSystem subSystem2 = new SubSystem();
-						subSystem2.setName("subsystem2");
-						subSystem2.setParent(system);
-						subSystem2.setSystemNumber("1-2");
-						holder.setSystem(system);
-						List<SubSystem> subSystems = new ArrayList<SubSystem>();
-						subSystems.add(subSystem1);
-						subSystems.add(subSystem2);
-						system.setSubSystems(subSystems);
+						IdentifierLoadAccess<Holder> loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
+						Holder holder = loadAccess.getReference(1);
+						System system = holder.getSystem();
+						system.setName("system1A");
+						system.setSystemNumber("1A");
+						SubSystem subSystem1 = system.getSubSystems().get(0);
+						subSystem1.setName("subsystem1A");
+						subSystem1.setSystemNumber("1-1A");
+						SubSystem subSystem2 = system.getSubSystems().get(1);
+						subSystem2.setName("subsystem21");
+						subSystem2.setSystemNumber("1-21");
 						sessionFactory.getCurrentSession().save(subSystem1);
 						sessionFactory.getCurrentSession().save(subSystem2);
 						sessionFactory.getCurrentSession().save(system);

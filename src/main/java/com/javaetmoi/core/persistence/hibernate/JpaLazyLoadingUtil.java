@@ -44,7 +44,7 @@ public class JpaLazyLoadingUtil {
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized
      * Hibernate proxies.<br>
-     * The goal is to avoid any {@link lazyinitializationexception} once entities are detached from
+     * The goal is to avoid any {@link org.hibernate.LazyInitializationException} once entities are detached from
      * the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate
      * session.
@@ -78,7 +78,7 @@ public class JpaLazyLoadingUtil {
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized
      * Hibernate proxies.<br>
-     * The goal is to avoid any {@link lazyinitializationexception} once entities are detached from
+     * The goal is to avoid any {@link org.hibernate.LazyInitializationException} once entities are detached from
      * the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate
      * session.
