@@ -44,7 +44,10 @@ Download the jar though Maven:
 </dependency> 
 ```
 
-Hybernate Hydrate artefacts are available from [Maven Central](http://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate4-hydrate/)
+Hybernate Hydrate artefacts are available from [Maven Central](http://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate5-hydrate/)
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate)
+
 
 ## Contributing to Hibernate Hydrate ##
 
