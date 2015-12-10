@@ -131,10 +131,12 @@ public class LazyLoadingUtil {
             Hibernate.initialize(entity);
         }
 
-        for (int i = 0, n = classMetadata.getPropertyNames().length; i < n; i++) {
-            String propertyName = classMetadata.getPropertyNames()[i];
-            Type propertyType = classMetadata.getPropertyType(propertyName);
-            Object propertyValue = null;
+        String[] propertyNames = classMetadata.getPropertyNames();
+        Type[] propertyTypes = classMetadata.getPropertyTypes();
+        for (int i = 0, n = propertyNames.length; i < n; i++) {
+            String propertyName = propertyNames[i];
+            Type propertyType = propertyTypes[i];
+            Object propertyValue;
             if (entity instanceof javassist.util.proxy.ProxyObject) {
                 // For javassist proxy, the classMetadata.getPropertyValue(..) method return en
                 // emppty collection. So we have to call the property's getter in order to call the
