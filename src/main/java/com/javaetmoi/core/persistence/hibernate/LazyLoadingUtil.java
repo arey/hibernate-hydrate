@@ -13,22 +13,24 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
-
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -65,11 +67,11 @@ public class LazyLoadingUtil {
      * @param entities
      *            a {@link Collection} of Hibernate entities to load
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
-     *         input parameter. Usefull when calling this method in a return statement.
+     *         input parameter. Useful when calling this method in a return statement.
      * 
      */
     public static <E> Collection<E> deepHydrate(final Session currentSession, Collection<E> entities) {
-        Set<String> recursiveGuard = new HashSet<String>();
+        IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
             deepInflateEntity(currentSession, entity, recursiveGuard);
         }
@@ -97,33 +99,23 @@ public class LazyLoadingUtil {
      * 
      */
     public static <E> E deepHydrate(final Session currentSession, E entity) {
-        Set<String> recursiveGuard = new HashSet<String>();
+        IdentitySet recursiveGuard = new IdentitySet();
         deepInflateEntity(currentSession, entity, recursiveGuard);
         return entity;
     }
 
     @SuppressWarnings("unchecked")
     private static void deepInflateEntity(final Session currentSession, Object entity,
-            Set<String> recursiveGuard) throws HibernateException {
-        if (entity == null) {
+            IdentitySet recursiveGuard) throws HibernateException {
+        if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
 
-        Class<?> persistentClass = entity.getClass();
-        if (entity instanceof HibernateProxy) {
-            persistentClass = ((HibernateProxy) entity).getHibernateLazyInitializer().getPersistentClass();
-        }
-        ClassMetadata classMetadata = currentSession.getSessionFactory().getClassMetadata(
-                persistentClass);
+        Class<?> persistentClass = entity instanceof HibernateProxy?
+              ((HibernateProxy) entity).getHibernateLazyInitializer().getPersistentClass() :
+              entity.getClass();
+        ClassMetadata classMetadata = currentSession.getSessionFactory().getClassMetadata(persistentClass);
         if (classMetadata == null) {
-            return;
-        }
-        Serializable identifier = classMetadata.getIdentifier(entity,
-                (SessionImplementor) currentSession);
-        String key = persistentClass.getName() + "|" + identifier;
-
-        if (!recursiveGuard.add(key)) {
-            // entity already has been processed
             return;
         }
 
@@ -152,7 +144,7 @@ public class LazyLoadingUtil {
 
     @SuppressWarnings({ "rawtypes" })
     private static void deepInflateProperty(Object propertyValue, Type propertyType,
-            Session currentSession, Set<String> recursiveGuard) {
+            Session currentSession, IdentitySet recursiveGuard) {
         if (propertyValue == null) {
             return; // null guard
         }
@@ -182,7 +174,10 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateComponent(Session currentSession, Object componentValue,
-            ComponentType componentType, Set<String> recursiveGuard) {
+            ComponentType componentType, IdentitySet recursiveGuard) {
+        if (componentValue == null || !recursiveGuard.add(componentValue)) {
+            return;
+        }
         // No public API to access to the component Hibernate metamodel => force to use
         // introspection instead
         String[] propertyNames = ReflectionUtil.getValue("propertyNames", componentType);
@@ -197,8 +192,11 @@ public class LazyLoadingUtil {
 
     }
 
-    private static void deepInflateMap(Session currentSession, Set<String> recursiveGuard,
+    private static void deepInflateMap(Session currentSession, IdentitySet recursiveGuard,
             @SuppressWarnings("rawtypes") Map map) {
+        if (map == null || !recursiveGuard.add(map)) {
+            return;
+        }
 
         if (map instanceof PersistentMap) {
             if (!((PersistentMap) map).wasInitialized()) {
@@ -218,9 +216,13 @@ public class LazyLoadingUtil {
         }
     }
 
-    private static void deepInflateCollection(Session currentSession, Set<String> recursiveGuard,
+    private static void deepInflateCollection(Session currentSession, IdentitySet recursiveGuard,
             @SuppressWarnings("rawtypes") Collection collection) {
-        if (collection != null && collection.size() > 0) {
+        if (collection == null || !recursiveGuard.add(collection)) {
+            return;
+        }
+
+        if (collection.size() > 0) {
             ComponentType collectionType = null;
             if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
                 // The isUnreferenced() test is useful for some persistent bags that does not have any role
@@ -277,7 +279,6 @@ public class LazyLoadingUtil {
      * @return name of the corresponding getter (ie. getClients)
      */
     protected static String getterFromCollection(String propertyName) {
-        return new StringBuilder(propertyName.length() + 3).append("get").append(
-                Character.toTitleCase(propertyName.charAt(0))).append(propertyName.substring(1)).toString();
+        return "get" + Character.toTitleCase(propertyName.charAt(0)) + propertyName.substring(1);
     }
 }
