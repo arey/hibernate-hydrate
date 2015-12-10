@@ -69,8 +69,9 @@ public class LazyLoadingUtil {
      * 
      */
     public static <E> Collection<E> deepHydrate(final Session currentSession, Collection<E> entities) {
+        Set<String> recursiveGuard = new HashSet<String>();
         for (Object entity : entities) {
-            deepInflateEntity(currentSession, entity, new HashSet<String>());
+            deepInflateEntity(currentSession, entity, recursiveGuard);
         }
         return entities;
     }
@@ -96,7 +97,8 @@ public class LazyLoadingUtil {
      * 
      */
     public static <E> E deepHydrate(final Session currentSession, E entity) {
-        deepInflateEntity(currentSession, entity, new HashSet<String>());
+        Set<String> recursiveGuard = new HashSet<String>();
+        deepInflateEntity(currentSession, entity, recursiveGuard);
         return entity;
     }
 
@@ -107,7 +109,7 @@ public class LazyLoadingUtil {
             return;
         }
 
-        Class<? extends Object> persistentClass = entity.getClass();
+        Class<?> persistentClass = entity.getClass();
         if (entity instanceof HibernateProxy) {
             persistentClass = ((HibernateProxy) entity).getHibernateLazyInitializer().getPersistentClass();
         }
@@ -120,10 +122,10 @@ public class LazyLoadingUtil {
                 (SessionImplementor) currentSession);
         String key = persistentClass.getName() + "|" + identifier;
 
-        if (recursiveGuard.contains(key)) {
+        if (!recursiveGuard.add(key)) {
+            // entity already has been processed
             return;
         }
-        recursiveGuard.add(key);
 
         if (!Hibernate.isInitialized(entity)) {
             Hibernate.initialize(entity);
