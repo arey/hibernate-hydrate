@@ -36,6 +36,14 @@
         <role>Java Developer</role>
       </roles>
     </developer>
+    <developer>
+      <id>markus-s24</id>
+      <name>Markus Heiden</name>
+      <email>markus.heiden@s24.com</email>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+    </developer>
   </developers>
 
   <!-- Continous Integration build hosted by CloudBees -->
