@@ -3,7 +3,7 @@
   <groupId>com.javaetmoi.core</groupId>
   <version>2.3-SNAPSHOT</version>
   <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
-  <name>JavaEtMoi Core :: ${project.artifactId} - ${project.packaging}</name>
+  <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 4.x)</description>
   <inceptionYear>2012</inceptionYear>
