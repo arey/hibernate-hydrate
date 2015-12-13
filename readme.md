@@ -52,6 +52,7 @@ Hybernate Hydrate artefacts are available from [Maven Central](http://repo1.mave
 ## Contributing to Hibernate Hydrate ##
 
 * Github is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
+* Each major version of Hibernate owns a hit branch: Hibernate 5 on the master, Hibernate 4 on the hibernate4 branch and Hibernate 3 on the hibernate3 branch
 
 ### Development environment installation ###
 
@@ -73,7 +74,7 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 * Uses [Maven](http://maven.apache.org/) as a build tool
 * Uses [Cloudbees](http://www.cloudbees.com/foss) and [Travis CI](http://www.travis-ci.org) for continuous integration builds whenever code is pushed into GitHub
-* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) for their pull requests
+* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) and [Markus Heiden](https://github.com/markus-s24) for their pull requests
  
 
 ## Build Status ##
