@@ -6,7 +6,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 
 * Utility class to populate a lazy-initialized object graph by recursivity
 * Supports JPA with Hibernate as provider
-* Supports both Hibernate 3.x and Hibernate 4.x
+* Supports third Hibernate 3.x, Hibernate 4.x and Hibernate 5.x
 
 ## Getting Help ##
 
@@ -26,21 +26,21 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
-  <version>2.1</version>
+  <version>2.2</version>
 </dependency> 
 
 <!-- or Hibernate 4 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate4-hydrate</artifactId>
-  <version>2.1</version>
+  <version>2.2</version>
 </dependency> 
 
 <!-- Or Hibernate 3 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate3-hydrate</artifactId>
-  <version>1.3</version>
+  <version>2.2</version>
 </dependency> 
 ```
 
