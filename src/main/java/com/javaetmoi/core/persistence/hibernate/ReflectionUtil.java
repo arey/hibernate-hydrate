@@ -14,26 +14,10 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 abstract class ReflectionUtil {
-
-    @SuppressWarnings("unchecked")
-    static <T> T getValue(String fieldName, Object object) {
-        Class<? extends Object> clazz = object.getClass();
-        T value = null;
-        try {
-            Field field = getField(clazz, fieldName);
-            field.setAccessible(true);
-            value = (T) field.get(object);
-        } catch (SecurityException ex) {
-            handleReflectionException(ex, clazz, fieldName);
-        } catch (IllegalArgumentException ex) {
-            handleReflectionException(ex, clazz, fieldName);
-        } catch (IllegalAccessException ex) {
-            handleReflectionException(ex, clazz, fieldName);
-        }
-        return value;
-    }
 
     public static Field getField(Class<?> clazz, String name) {
         Class<?> currentClazz = clazz;
@@ -47,15 +31,60 @@ abstract class ReflectionUtil {
             currentClazz = currentClazz.getSuperclass();
         }
         throw new IllegalStateException("The " + clazz.getSimpleName()
-                + " class does not have any " + name + " field");
+              + " class does not have any " + name + " field");
     }
 
-    private static void handleReflectionException(Exception ex, Class<? extends Object> clazz,
-            String fieldName) {
-        throw new IllegalStateException("Unexpected reflection exception while getting "
-                + fieldName + " field of class " + clazz.getSimpleName() + ": " + ex.getMessage(),
-                ex);
+    @SuppressWarnings("unchecked")
+    static <T> T getValue(String fieldName, Object object) {
+        Class<?> clazz = object.getClass();
+        try {
+            Field field = getField(clazz, fieldName);
+            field.setAccessible(true);
+            return (T) field.get(object);
+        } catch (SecurityException ex) {
+            throw fieldReflectionException(ex, clazz, fieldName);
+        } catch (IllegalArgumentException ex) {
+            throw fieldReflectionException(ex, clazz, fieldName);
+        } catch (IllegalAccessException ex) {
+            throw fieldReflectionException(ex, clazz, fieldName);
+        }
+    }
+
+    private static IllegalStateException fieldReflectionException(Exception ex, Class<?> clazz, String fieldName) {
+        throw new IllegalStateException(
+              "Unexpected reflection exception while getting field " + fieldName +
+                    " of class " + clazz.getSimpleName() + ": " + ex.getMessage(), ex);
 
     }
 
+    /**
+     * Call getter method.
+     *
+     * @param object
+     *            target object
+     * @param propertyName
+     *            name of property
+     */
+    protected static Object getProperty(Object object, String propertyName) {
+        Class<?> clazz = object.getClass();
+        try {
+            String methodName = "get" + Character.toTitleCase(propertyName.charAt(0)) + propertyName.substring(1);
+            Method getter = clazz.getMethod(methodName);
+            getter.setAccessible(true);
+            return getter.invoke(object);
+        } catch (NoSuchMethodException ex) {
+            throw getterReflectionException(ex, clazz, propertyName);
+        } catch (IllegalAccessException ex) {
+            throw getterReflectionException(ex, clazz, propertyName);
+        } catch (InvocationTargetException ex) {
+            throw getterReflectionException(ex, clazz, propertyName);
+        }
+    }
+
+    private static IllegalStateException getterReflectionException(Exception ex, Class<?> clazz, String propertyName) {
+        return new IllegalStateException(
+              "Unexpected reflection exception while getting property " + propertyName +
+                    " of class " + clazz.getSimpleName() + ": " + ex.getMessage(), ex);
+
+    }
 }
