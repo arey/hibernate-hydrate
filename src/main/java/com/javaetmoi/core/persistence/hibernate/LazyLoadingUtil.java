@@ -178,10 +178,9 @@ public class LazyLoadingUtil {
         if (componentValue == null || !recursiveGuard.add(componentValue)) {
             return;
         }
-        // No public API to access to the component Hibernate metamodel => force to use
-        // introspection instead
-        String[] propertyNames = ReflectionUtil.getValue("propertyNames", componentType);
-        Type[] propertyTypes = ReflectionUtil.getValue("propertyTypes", componentType);
+
+        String[] propertyNames = componentType.getPropertyNames();
+        Type[] propertyTypes = componentType.getSubtypes();
 
         for (int i = 0; i < propertyNames.length; i++) {
             String propertyName = propertyNames[i];
