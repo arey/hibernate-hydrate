@@ -69,7 +69,7 @@ public class JpaLazyLoadingUtil {
                 return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entities);
             }            
         throw new RuntimeException(
-                "Only the Hibername implementation of JPA is currently supported");
+                "Only the Hibernate implementation of JPA is currently supported");
     }
 
     /**
@@ -102,7 +102,7 @@ public class JpaLazyLoadingUtil {
             return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entity);
         }
         throw new RuntimeException(
-                "Only the Hibername implementation of JPA is currently supported");
+                "Only the Hibernate implementation of JPA is currently supported");
     }
 
 }

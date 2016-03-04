@@ -13,8 +13,6 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +132,7 @@ public class LazyLoadingUtil {
                 // empty collection. So we have to call the property's getter in order to call the
                 // JavassistLazyInitializer.invoke(..) method that will initialize the collection by
                 // loading it from the database.
-                propertyValue = callCollectionGetter(entity, propertyName);
+                propertyValue = ReflectionUtil.getProperty(entity, propertyName);
             } else {
                 propertyValue = classMetadata.getPropertyValue(entity, propertyName);
             }
@@ -178,10 +176,9 @@ public class LazyLoadingUtil {
         if (componentValue == null || !recursiveGuard.add(componentValue)) {
             return;
         }
-        // No public API to access to the component Hibernate metamodel => force to use
-        // introspection instead
-        String[] propertyNames = ReflectionUtil.getValue("propertyNames", componentType);
-        Type[] propertyTypes = ReflectionUtil.getValue("propertyTypes", componentType);
+
+        String[] propertyNames = componentType.getPropertyNames();
+        Type[] propertyTypes = componentType.getSubtypes();
 
         for (int i = 0; i < propertyNames.length; i++) {
             String propertyName = propertyNames[i];
@@ -244,41 +241,5 @@ public class LazyLoadingUtil {
                 }
             }
         }
-    }
-
-    /**
-     * Calls the getter of a collection property in order to resolve the javassist lazy proxy
-     * object.
-     * 
-     * @param entity
-     *            target object
-     * @param propertyName
-     *            name of the collection property (ie. clients)
-     * @return the collection
-     */
-    protected static Object callCollectionGetter(Object entity, String propertyName) {
-        try {
-            Method getter = entity.getClass().getMethod(getterFromCollection(propertyName));
-            getter.setAccessible(true);
-            return getter.invoke(entity);
-        } catch (NoSuchMethodException e) {
-            // Wrap checked exception to the runtime unchecked exception
-            return new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            return new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            return new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Generate the getter name of a collection property.
-     * 
-     * @param propertyName
-     *            name of the collection property (ie. clients)
-     * @return name of the corresponding getter (ie. getClients)
-     */
-    protected static String getterFromCollection(String propertyName) {
-        return "get" + Character.toTitleCase(propertyName.charAt(0)) + propertyName.substring(1);
     }
 }
