@@ -28,6 +28,7 @@ import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
+import org.hibernate.tuple.component.ComponentTuplizer;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
 
@@ -172,14 +173,11 @@ public class LazyLoadingUtil {
             return;
         }
 
-        String[] propertyNames = componentType.getPropertyNames();
+        ComponentTuplizer tuplizer = componentType.getComponentTuplizer();
         Type[] propertyTypes = componentType.getSubtypes();
-
-        for (int i = 0; i < propertyNames.length; i++) {
-            String propertyName = propertyNames[i];
-            Type propertyType = propertyTypes[i];
-            Object propertyValue = ReflectionUtil.getValue(propertyName, componentValue);
-            deepInflateProperty(propertyValue, propertyType, currentSession, recursiveGuard);
+        for (int i = 0; i < propertyTypes.length; i++) {
+            Object propertyValue = tuplizer.getPropertyValue(componentValue, i);
+            deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
         }
 
     }
