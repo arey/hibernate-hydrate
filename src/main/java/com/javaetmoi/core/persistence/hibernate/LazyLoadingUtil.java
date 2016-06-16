@@ -119,10 +119,17 @@ public class LazyLoadingUtil {
             target = initializer.getImplementation();
         }
 
-        ClassMetadata classMetadata = currentSession.getSessionFactory().getClassMetadata(clazz);
-        if (classMetadata == null) {
+        // TODO Use metamodel instead for future releases...
+        ClassMetadata classMetadata;
+        try {
+            classMetadata = currentSession.getSessionFactory().getClassMetadata(clazz);
+            if (classMetadata == null) {
+                return;
+            }
+        } catch (Exception e) {
             return;
         }
+
 
         if (!Hibernate.isInitialized(entity)) {
             Hibernate.initialize(entity);
