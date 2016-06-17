@@ -13,24 +13,22 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.hibernate.Hibernate;
-import org.hibernate.HibernateException;
-import org.hibernate.LazyInitializationException;
-import org.hibernate.Session;
+import org.hibernate.*;
 import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.internal.MetamodelImpl;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
 import org.hibernate.tuple.component.ComponentTuplizer;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -119,26 +117,21 @@ public class LazyLoadingUtil {
             target = initializer.getImplementation();
         }
 
-        // TODO Use metamodel instead for future releases...
-        ClassMetadata classMetadata;
+        EntityPersister persister;
         try {
-            classMetadata = currentSession.getSessionFactory().getClassMetadata(clazz);
-            if (classMetadata == null) {
-                return;
-            }
-        } catch (Exception e) {
+            persister = ((MetamodelImpl) currentSession.getMetamodel()).entityPersister(clazz);
+        } catch (MappingException e) {
             return;
         }
-
 
         if (!Hibernate.isInitialized(entity)) {
             Hibernate.initialize(entity);
         }
 
-        String[] propertyNames = classMetadata.getPropertyNames();
-        Type[] propertyTypes = classMetadata.getPropertyTypes();
+        String[] propertyNames = persister.getPropertyNames();
+        Type[] propertyTypes = persister.getPropertyTypes();
         for (int i = 0, n = propertyNames.length; i < n; i++) {
-            Object propertyValue = classMetadata.getPropertyValue(target, propertyNames[i]);
+            Object propertyValue = persister.getPropertyValue(target, propertyNames[i]);
             deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
         }
     }
