@@ -14,7 +14,6 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import org.hibernate.Hibernate;
-import org.hibernate.HibernateException;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.collection.internal.PersistentMap;
@@ -106,7 +105,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateEntity(
-            final Session currentSession, Object entity, IdentitySet recursiveGuard) throws HibernateException {
+            final Session currentSession, Object entity, IdentitySet recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
