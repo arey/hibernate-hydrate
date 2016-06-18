@@ -20,7 +20,8 @@ import org.hibernate.Session;
 import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.internal.MetamodelImpl;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
@@ -118,7 +119,7 @@ public class LazyLoadingUtil {
             target = initializer.getImplementation();
         }
 
-        EntityPersister persister = ((MetamodelImpl) currentSession.getMetamodel()).entityPersisters().get(name);
+        EntityPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).entityPersisters().get(name);
         if (persister == null) {
             return;
         }
@@ -159,8 +160,7 @@ public class LazyLoadingUtil {
             if (propertyType instanceof ComponentType) {
                 // i.e. @Embeddable annotation (see
                 // https://github.com/arey/hibernate-hydrate/issues/1)
-                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType,
-                        recursiveGuard);
+                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
             }
         }
     }
@@ -215,22 +215,23 @@ public class LazyLoadingUtil {
         }
 
         if (!collection.isEmpty()) {
-            ComponentType collectionType = null;
+            ComponentType componentType = null;
             if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
                 // The isUnreferenced() test is useful for some persistent bags that does not have any role
                 String role = ((PersistentCollection) collection).getRole();
-                Type type = currentSession.getSessionFactory().getCollectionMetadata(role).getElementType();
+                CollectionPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).collectionPersister(role);
+                Type type = persister.getElementType();
                 if (type instanceof ComponentType) {
                     // ManyToMany relationship with @Embeddable annotation (see
                     // https://github.com/arey/hibernate-hydrate/issues/3)
-                    collectionType = (ComponentType) type;
+                    componentType = (ComponentType) type;
                 }
             }
             for (Object item : collection) {
                 if (item == null) {
                     continue;
-                } else if (collectionType != null) {
-                    deepInflateComponent(currentSession, item, collectionType, recursiveGuard);
+                } else if (componentType != null) {
+                    deepInflateComponent(currentSession, item, componentType, recursiveGuard);
                 } else {
                     deepInflateEntity(currentSession, item, recursiveGuard);
                 }
