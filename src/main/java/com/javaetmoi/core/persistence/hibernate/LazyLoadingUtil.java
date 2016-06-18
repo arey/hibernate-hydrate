@@ -28,7 +28,6 @@ import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -144,16 +143,14 @@ public class LazyLoadingUtil {
         if (propertyType.isEntityType()) {
             deepInflateEntity(currentSession, propertyValue, recursiveGuard);
         } else if (propertyType.isCollectionType()) {
-            // Handle PersistentBag, PersistentList and PersistentIdentifierBag
-            if (propertyValue instanceof List) {
-                deepInflateCollection(currentSession, recursiveGuard, (List) propertyValue);
-            } else if (propertyValue instanceof Map) {
-                deepInflateMap(currentSession, recursiveGuard, (Map) propertyValue);
-            } else if (propertyValue instanceof Set) {
-                deepInflateCollection(currentSession, recursiveGuard, (Set) propertyValue);
+            if (propertyValue instanceof Map) {
+                deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
+            } else if (propertyValue instanceof Collection) {
+                // Handle PersistentBag, PersistentList and PersistentIdentifierBag
+                deepInflateCollection(currentSession, (Collection<?>) propertyValue, recursiveGuard);
             } else {
-                throw new UnsupportedOperationException("Unsupported collection type: "
-                        + propertyValue.getClass().getSimpleName());
+                throw new UnsupportedOperationException(
+                        "Unsupported collection type: " + propertyValue.getClass().getSimpleName());
             }
         } else if (propertyType.isComponentType()) {
             if (propertyType instanceof ComponentType) {
@@ -179,7 +176,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateMap(
-            Session currentSession, IdentitySet recursiveGuard, Map<?, ?> map) {
+            Session currentSession, Map<?, ?> map, IdentitySet recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
@@ -197,12 +194,12 @@ public class LazyLoadingUtil {
                 deepInflateEntity(currentSession, key, recursiveGuard);
             }
             // Then map values
-            deepInflateCollection(currentSession, recursiveGuard, map.values());
+            deepInflateCollection(currentSession, map.values(), recursiveGuard);
         }
     }
 
     private static void deepInflateCollection(
-            Session currentSession, IdentitySet recursiveGuard, Collection<?> collection) {
+            Session currentSession, Collection<?> collection, IdentitySet recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
