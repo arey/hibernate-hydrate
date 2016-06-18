@@ -94,7 +94,7 @@ public class LazyLoadingUtil {
      *            Hibernate session still open
      * @param entity
      *            a single Hibernate entity or a simple java class referencing entities
-     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Usefull
+     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
      *         when calling this method in a return statement.
      * 
      */
@@ -104,9 +104,8 @@ public class LazyLoadingUtil {
         return entity;
     }
 
-    @SuppressWarnings("unchecked")
-    private static void deepInflateEntity(final Session currentSession, Object entity,
-            IdentitySet recursiveGuard) throws HibernateException {
+    private static void deepInflateEntity(
+            final Session currentSession, Object entity, IdentitySet recursiveGuard) throws HibernateException {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
@@ -136,9 +135,8 @@ public class LazyLoadingUtil {
         }
     }
 
-    @SuppressWarnings({ "rawtypes" })
-    private static void deepInflateProperty(Object propertyValue, Type propertyType,
-            Session currentSession, IdentitySet recursiveGuard) {
+    private static void deepInflateProperty(
+            Object propertyValue, Type propertyType, Session currentSession, IdentitySet recursiveGuard) {
         if (propertyValue == null) {
             return; // null guard
         }
@@ -146,7 +144,7 @@ public class LazyLoadingUtil {
         if (propertyType.isEntityType()) {
             deepInflateEntity(currentSession, propertyValue, recursiveGuard);
         } else if (propertyType.isCollectionType()) {
-            // Handle PersistentBag, PersistentList and PersistentIndentifierBag
+            // Handle PersistentBag, PersistentList and PersistentIdentifierBag
             if (propertyValue instanceof List) {
                 deepInflateCollection(currentSession, recursiveGuard, (List) propertyValue);
             } else if (propertyValue instanceof Map) {
@@ -167,8 +165,8 @@ public class LazyLoadingUtil {
         }
     }
 
-    private static void deepInflateComponent(Session currentSession, Object componentValue,
-            ComponentType componentType, IdentitySet recursiveGuard) {
+    private static void deepInflateComponent(
+            Session currentSession, Object componentValue, ComponentType componentType, IdentitySet recursiveGuard) {
         if (componentValue == null || !recursiveGuard.add(componentValue)) {
             return;
         }
@@ -181,8 +179,8 @@ public class LazyLoadingUtil {
 
     }
 
-    private static void deepInflateMap(Session currentSession, IdentitySet recursiveGuard,
-            @SuppressWarnings("rawtypes") Map map) {
+    private static void deepInflateMap(
+            Session currentSession, IdentitySet recursiveGuard, Map<?, ?> map) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
@@ -195,8 +193,7 @@ public class LazyLoadingUtil {
 
         if (!map.isEmpty()) {
             // First map keys
-            @SuppressWarnings("rawtypes")
-            Set keySet = map.keySet();
+            Set<?> keySet = map.keySet();
             for (Object key : keySet) {
                 deepInflateEntity(currentSession, key, recursiveGuard);
             }
@@ -205,8 +202,8 @@ public class LazyLoadingUtil {
         }
     }
 
-    private static void deepInflateCollection(Session currentSession, IdentitySet recursiveGuard,
-            @SuppressWarnings("rawtypes") Collection collection) {
+    private static void deepInflateCollection(
+            Session currentSession, IdentitySet recursiveGuard, Collection<?> collection) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
