@@ -181,10 +181,8 @@ public class LazyLoadingUtil {
             return;
         }
 
-        if (map instanceof PersistentMap) {
-            if (!((PersistentMap) map).wasInitialized()) {
-                Hibernate.initialize(map);
-            }
+        if (map instanceof PersistentMap && !((PersistentMap) map).wasInitialized()) {
+            Hibernate.initialize(map);
         }
 
         if (!map.isEmpty()) {
@@ -204,10 +202,8 @@ public class LazyLoadingUtil {
             return;
         }
 
-        if (collection instanceof PersistentCollection) {
-            if (!((PersistentCollection) collection).wasInitialized()) {
-                Hibernate.initialize(collection);
-            }
+        if (collection instanceof PersistentCollection && !((PersistentCollection) collection).wasInitialized()) {
+            Hibernate.initialize(collection);
         }
 
         if (!collection.isEmpty()) {
