@@ -130,12 +130,12 @@ public class LazyLoadingUtil {
         Type[] propertyTypes = persister.getPropertyTypes();
         for (int i = 0, n = propertyNames.length; i < n; i++) {
             Object propertyValue = persister.getPropertyValue(target, propertyNames[i]);
-            deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
+            deepInflateProperty(currentSession, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
 
     private static void deepInflateProperty(
-            Object propertyValue, Type propertyType, Session currentSession, IdentitySet recursiveGuard) {
+            Session currentSession, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
         if (propertyValue == null) {
             return; // null guard
         }
@@ -170,7 +170,7 @@ public class LazyLoadingUtil {
         Type[] propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
             Object propertyValue = componentType.getPropertyValue(componentValue, i);
-            deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
+            deepInflateProperty(currentSession, propertyValue, propertyTypes[i], recursiveGuard);
         }
 
     }
