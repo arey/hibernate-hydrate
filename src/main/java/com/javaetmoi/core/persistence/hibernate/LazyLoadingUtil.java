@@ -13,7 +13,10 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import org.hibernate.*;
+import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.internal.util.collections.IdentitySet;
@@ -21,7 +24,6 @@ import org.hibernate.metamodel.internal.MetamodelImpl;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
-import org.hibernate.tuple.component.ComponentTuplizer;
 import org.hibernate.type.ComponentType;
 import org.hibernate.type.Type;
 
@@ -109,18 +111,16 @@ public class LazyLoadingUtil {
             return;
         }
 
-        Class<?> clazz = entity.getClass();
+        String name = entity.getClass().getName();
         Object target = entity;
         if (entity instanceof HibernateProxy) {
             LazyInitializer initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
-            clazz = initializer.getPersistentClass();
+            name = initializer.getEntityName();
             target = initializer.getImplementation();
         }
 
-        EntityPersister persister;
-        try {
-            persister = ((MetamodelImpl) currentSession.getMetamodel()).entityPersister(clazz);
-        } catch (MappingException e) {
+        EntityPersister persister = ((MetamodelImpl) currentSession.getMetamodel()).entityPersisters().get(name);
+        if (persister == null) {
             return;
         }
 
@@ -173,10 +173,9 @@ public class LazyLoadingUtil {
             return;
         }
 
-        ComponentTuplizer tuplizer = componentType.getComponentTuplizer();
         Type[] propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
-            Object propertyValue = tuplizer.getPropertyValue(componentValue, i);
+            Object propertyValue = componentType.getPropertyValue(componentValue, i);
             deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
         }
 
