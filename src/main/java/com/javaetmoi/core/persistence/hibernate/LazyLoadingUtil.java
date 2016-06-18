@@ -208,6 +208,12 @@ public class LazyLoadingUtil {
             return;
         }
 
+        if (collection instanceof PersistentCollection) {
+            if (!((PersistentCollection) collection).wasInitialized()) {
+                Hibernate.initialize(collection);
+            }
+        }
+
         if (!collection.isEmpty()) {
             ComponentType collectionType = null;
             if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
