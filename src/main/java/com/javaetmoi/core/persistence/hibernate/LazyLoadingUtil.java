@@ -193,7 +193,7 @@ public class LazyLoadingUtil {
             }
         }
 
-        if (map.size() > 0) {
+        if (!map.isEmpty()) {
             // First map keys
             @SuppressWarnings("rawtypes")
             Set keySet = map.keySet();
@@ -211,7 +211,7 @@ public class LazyLoadingUtil {
             return;
         }
 
-        if (collection.size() > 0) {
+        if (!collection.isEmpty()) {
             ComponentType collectionType = null;
             if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
                 // The isUnreferenced() test is useful for some persistent bags that does not have any role
