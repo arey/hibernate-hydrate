@@ -110,10 +110,8 @@ public class LazyLoadingUtil {
         if (propertyType.isEntityType()) {
             deepInflateEntity(currentSession, propertyValue, recursiveGuard);
         } else if (propertyType.isComponentType()) {
-            if (propertyType instanceof ComponentType) {
-                // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
-                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
-            }
+            // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
+            deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
         } else if (propertyType.isCollectionType()) {
             if (propertyValue instanceof Map) {
                 deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
@@ -214,9 +212,7 @@ public class LazyLoadingUtil {
         }
 
         for (Object item : collection) {
-            if (item == null) {
-                continue;
-            } else if (componentType != null) {
+            if (componentType != null) {
                 deepInflateComponent(currentSession, item, componentType, recursiveGuard);
             } else {
                 deepInflateEntity(currentSession, item, recursiveGuard);
