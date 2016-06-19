@@ -16,10 +16,8 @@ package com.javaetmoi.core.persistence.hibernate;
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
-import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.spi.MetamodelImplementor;
-import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
@@ -27,7 +25,6 @@ import org.hibernate.type.*;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -67,9 +64,10 @@ public class LazyLoadingUtil {
      * 
      */
     public static <E> Collection<E> deepHydrate(Session currentSession, Collection<E> entities) {
+        SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) currentSession.getSessionFactory();
         IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
-            deepInflateEntity(currentSession, entity, recursiveGuard);
+            deepInflateEntity(sessionFactory, entity, recursiveGuard);
         }
         return entities;
     }
@@ -95,27 +93,28 @@ public class LazyLoadingUtil {
      * 
      */
     public static <E> E deepHydrate(Session currentSession, E entity) {
+        SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) currentSession.getSessionFactory();
         IdentitySet recursiveGuard = new IdentitySet();
-        deepInflateEntity(currentSession, entity, recursiveGuard);
+        deepInflateEntity(sessionFactory, entity, recursiveGuard);
         return entity;
     }
 
     private static void deepInflateProperty(
-            Session currentSession, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
         if (propertyValue == null) {
             return; // null guard
         }
 
         if (propertyType instanceof EntityType) {
-            deepInflateEntity(currentSession, propertyValue, recursiveGuard);
+            deepInflateEntity(sessionFactory, propertyValue, recursiveGuard);
         } else if (propertyType instanceof ComponentType) {
             // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
-            deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
+            deepInflateComponent(sessionFactory, propertyValue, (ComponentType) propertyType, recursiveGuard);
         } else if (propertyType instanceof MapType) {
-            deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
+            deepInflateMap(sessionFactory, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
         } else if (propertyType instanceof CollectionType) {
-            // Handle PersistentBag, PersistentList and PersistentIdentifierBag
-            deepInflateCollection(currentSession, (Collection<?>) propertyValue, recursiveGuard);
+            // Handle PersistentBag, PersistentList, PersistentIdentifierBag etc.
+            deepInflateCollection(sessionFactory, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
         } else if (propertyType.isCollectionType()) {
             throw new UnsupportedOperationException(
                     "Unsupported type " + propertyType.getClass().getSimpleName() +
@@ -124,7 +123,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateEntity(
-            Session currentSession, Object entity, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Object entity, IdentitySet recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
@@ -138,7 +137,7 @@ public class LazyLoadingUtil {
             target = initializer.getImplementation();
         }
 
-        EntityPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).entityPersisters().get(name);
+        EntityPersister persister = sessionFactory.getMetamodel().entityPersisters().get(name);
         if (persister == null) {
             return;
         }
@@ -147,12 +146,12 @@ public class LazyLoadingUtil {
         Type[] propertyTypes = persister.getPropertyTypes();
         for (int i = 0, n = propertyNames.length; i < n; i++) {
             Object propertyValue = persister.getPropertyValue(target, propertyNames[i]);
-            deepInflateProperty(currentSession, propertyValue, propertyTypes[i], recursiveGuard);
+            deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
 
     private static void deepInflateComponent(
-            Session currentSession, Object componentValue, ComponentType componentType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Object componentValue, ComponentType componentType, IdentitySet recursiveGuard) {
         if (componentValue == null || !recursiveGuard.add(componentValue)) {
             return;
         }
@@ -160,13 +159,12 @@ public class LazyLoadingUtil {
         Type[] propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
             Object propertyValue = componentType.getPropertyValue(componentValue, i);
-            deepInflateProperty(currentSession, propertyValue, propertyTypes[i], recursiveGuard);
+            deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
-
     }
 
     private static void deepInflateMap(
-            Session currentSession, Map<?, ?> map, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Map<?, ?> map, MapType mapType, IdentitySet recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
@@ -177,16 +175,19 @@ public class LazyLoadingUtil {
         }
 
         // First map keys
-        Set<?> keySet = map.keySet();
-        for (Object key : keySet) {
-            deepInflateEntity(currentSession, key, recursiveGuard);
+        // TODO markus 2016-06-19: How to determine key type?
+        for (Object key : map.keySet()) {
+            deepInflateEntity(sessionFactory, key, recursiveGuard);
         }
         // Then map values
-        deepInflateCollection(currentSession, map.values(), recursiveGuard);
+        Type elementType = mapType.getElementType(sessionFactory);
+        for (Object element : map.values()) {
+            deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
+        }
     }
 
     private static void deepInflateCollection(
-            Session currentSession, Collection<?> collection, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Collection<?> collection, CollectionType collectionType, IdentitySet recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
@@ -196,25 +197,9 @@ public class LazyLoadingUtil {
             return;
         }
 
-        ComponentType componentType = null;
-        if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
-            // The isUnreferenced() test is useful for some persistent bags that does not have any role
-            String role = ((PersistentCollection) collection).getRole();
-            CollectionPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).collectionPersister(role);
-            Type type = persister.getElementType();
-            if (type instanceof ComponentType) {
-                // ManyToMany relationship with @Embeddable annotation (see
-                // https://github.com/arey/hibernate-hydrate/issues/3)
-                componentType = (ComponentType) type;
-            }
-        }
-
-        for (Object item : collection) {
-            if (componentType != null) {
-                deepInflateComponent(currentSession, item, componentType, recursiveGuard);
-            } else {
-                deepInflateEntity(currentSession, item, recursiveGuard);
-            }
+        Type elementType = collectionType.getElementType(sessionFactory);
+        for (Object element : collection) {
+            deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
         }
     }
 }
