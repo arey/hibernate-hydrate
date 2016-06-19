@@ -102,6 +102,33 @@ public class LazyLoadingUtil {
         return entity;
     }
 
+    private static void deepInflateProperty(
+            Session currentSession, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
+        if (propertyValue == null) {
+            return; // null guard
+        }
+
+        if (propertyType.isEntityType()) {
+            deepInflateEntity(currentSession, propertyValue, recursiveGuard);
+        } else if (propertyType.isCollectionType()) {
+            if (propertyValue instanceof Map) {
+                deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
+            } else if (propertyValue instanceof Collection) {
+                // Handle PersistentBag, PersistentList and PersistentIdentifierBag
+                deepInflateCollection(currentSession, (Collection<?>) propertyValue, recursiveGuard);
+            } else {
+                throw new UnsupportedOperationException(
+                        "Unsupported collection type: " + propertyValue.getClass().getSimpleName());
+            }
+        } else if (propertyType.isComponentType()) {
+            if (propertyType instanceof ComponentType) {
+                // i.e. @Embeddable annotation (see
+                // https://github.com/arey/hibernate-hydrate/issues/1)
+                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
+            }
+        }
+    }
+
     private static void deepInflateEntity(
             final Session currentSession, Object entity, IdentitySet recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
@@ -127,33 +154,6 @@ public class LazyLoadingUtil {
         for (int i = 0, n = propertyNames.length; i < n; i++) {
             Object propertyValue = persister.getPropertyValue(target, propertyNames[i]);
             deepInflateProperty(currentSession, propertyValue, propertyTypes[i], recursiveGuard);
-        }
-    }
-
-    private static void deepInflateProperty(
-            Session currentSession, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
-        if (propertyValue == null) {
-            return; // null guard
-        }
-
-        if (propertyType.isEntityType()) {
-            deepInflateEntity(currentSession, propertyValue, recursiveGuard);
-        } else if (propertyType.isCollectionType()) {
-            if (propertyValue instanceof Map) {
-                deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
-            } else if (propertyValue instanceof Collection) {
-                // Handle PersistentBag, PersistentList and PersistentIdentifierBag
-                deepInflateCollection(currentSession, (Collection<?>) propertyValue, recursiveGuard);
-            } else {
-                throw new UnsupportedOperationException(
-                        "Unsupported collection type: " + propertyValue.getClass().getSimpleName());
-            }
-        } else if (propertyType.isComponentType()) {
-            if (propertyType instanceof ComponentType) {
-                // i.e. @Embeddable annotation (see
-                // https://github.com/arey/hibernate-hydrate/issues/1)
-                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
-            }
         }
     }
 
