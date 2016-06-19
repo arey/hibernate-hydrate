@@ -40,12 +40,11 @@ import java.util.Set;
  * @author Antoine Rey
  */
 public class LazyLoadingUtil {
-
     /**
      * No-arg constructor
      */
     private LazyLoadingUtil() {
-        // Private visibility because utility class
+        // Private visibility because utility class.
     }
 
     /**
@@ -68,7 +67,7 @@ public class LazyLoadingUtil {
      *         input parameter. Useful when calling this method in a return statement.
      * 
      */
-    public static <E> Collection<E> deepHydrate(final Session currentSession, Collection<E> entities) {
+    public static <E> Collection<E> deepHydrate(Session currentSession, Collection<E> entities) {
         IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
             deepInflateEntity(currentSession, entity, recursiveGuard);
@@ -96,7 +95,7 @@ public class LazyLoadingUtil {
      *         when calling this method in a return statement.
      * 
      */
-    public static <E> E deepHydrate(final Session currentSession, E entity) {
+    public static <E> E deepHydrate(Session currentSession, E entity) {
         IdentitySet recursiveGuard = new IdentitySet();
         deepInflateEntity(currentSession, entity, recursiveGuard);
         return entity;
@@ -110,6 +109,11 @@ public class LazyLoadingUtil {
 
         if (propertyType.isEntityType()) {
             deepInflateEntity(currentSession, propertyValue, recursiveGuard);
+        } else if (propertyType.isComponentType()) {
+            if (propertyType instanceof ComponentType) {
+                // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
+                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
+            }
         } else if (propertyType.isCollectionType()) {
             if (propertyValue instanceof Map) {
                 deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
@@ -120,17 +124,11 @@ public class LazyLoadingUtil {
                 throw new UnsupportedOperationException(
                         "Unsupported collection type: " + propertyValue.getClass().getSimpleName());
             }
-        } else if (propertyType.isComponentType()) {
-            if (propertyType instanceof ComponentType) {
-                // i.e. @Embeddable annotation (see
-                // https://github.com/arey/hibernate-hydrate/issues/1)
-                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
-            }
         }
     }
 
     private static void deepInflateEntity(
-            final Session currentSession, Object entity, IdentitySet recursiveGuard) {
+            Session currentSession, Object entity, IdentitySet recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
@@ -178,15 +176,17 @@ public class LazyLoadingUtil {
         }
         Hibernate.initialize(map);
 
-        if (!map.isEmpty()) {
-            // First map keys
-            Set<?> keySet = map.keySet();
-            for (Object key : keySet) {
-                deepInflateEntity(currentSession, key, recursiveGuard);
-            }
-            // Then map values
-            deepInflateCollection(currentSession, map.values(), recursiveGuard);
+        if (map.isEmpty()) {
+            return;
         }
+
+        // First map keys
+        Set<?> keySet = map.keySet();
+        for (Object key : keySet) {
+            deepInflateEntity(currentSession, key, recursiveGuard);
+        }
+        // Then map values
+        deepInflateCollection(currentSession, map.values(), recursiveGuard);
     }
 
     private static void deepInflateCollection(
@@ -196,27 +196,30 @@ public class LazyLoadingUtil {
         }
         Hibernate.initialize(collection);
 
-        if (!collection.isEmpty()) {
-            ComponentType componentType = null;
-            if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
-                // The isUnreferenced() test is useful for some persistent bags that does not have any role
-                String role = ((PersistentCollection) collection).getRole();
-                CollectionPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).collectionPersister(role);
-                Type type = persister.getElementType();
-                if (type instanceof ComponentType) {
-                    // ManyToMany relationship with @Embeddable annotation (see
-                    // https://github.com/arey/hibernate-hydrate/issues/3)
-                    componentType = (ComponentType) type;
-                }
+        if (collection.isEmpty()) {
+            return;
+        }
+
+        ComponentType componentType = null;
+        if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
+            // The isUnreferenced() test is useful for some persistent bags that does not have any role
+            String role = ((PersistentCollection) collection).getRole();
+            CollectionPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).collectionPersister(role);
+            Type type = persister.getElementType();
+            if (type instanceof ComponentType) {
+                // ManyToMany relationship with @Embeddable annotation (see
+                // https://github.com/arey/hibernate-hydrate/issues/3)
+                componentType = (ComponentType) type;
             }
-            for (Object item : collection) {
-                if (item == null) {
-                    continue;
-                } else if (componentType != null) {
-                    deepInflateComponent(currentSession, item, componentType, recursiveGuard);
-                } else {
-                    deepInflateEntity(currentSession, item, recursiveGuard);
-                }
+        }
+
+        for (Object item : collection) {
+            if (item == null) {
+                continue;
+            } else if (componentType != null) {
+                deepInflateComponent(currentSession, item, componentType, recursiveGuard);
+            } else {
+                deepInflateEntity(currentSession, item, recursiveGuard);
             }
         }
     }
