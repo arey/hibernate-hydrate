@@ -181,8 +181,8 @@ public class LazyLoadingUtil {
 
         // First map keys
         Type indexType = persister.getIndexType();
-        for (Object key : map.keySet()) {
-            deepInflateProperty(sessionFactory, key, indexType, recursiveGuard);
+        for (Object index : map.keySet()) {
+            deepInflateProperty(sessionFactory, index, indexType, recursiveGuard);
         }
         // Then map values
         Type elementType = mapType.getElementType(sessionFactory);
