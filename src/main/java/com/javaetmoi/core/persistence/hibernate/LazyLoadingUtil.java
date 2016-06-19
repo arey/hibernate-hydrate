@@ -16,7 +16,6 @@ package com.javaetmoi.core.persistence.hibernate;
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
-import org.hibernate.collection.internal.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metamodel.spi.MetamodelImplementor;
@@ -108,6 +107,7 @@ public class LazyLoadingUtil {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
+        Hibernate.initialize(entity);
 
         String name = entity.getClass().getName();
         Object target = entity;
@@ -120,10 +120,6 @@ public class LazyLoadingUtil {
         EntityPersister persister = ((MetamodelImplementor) currentSession.getMetamodel()).entityPersisters().get(name);
         if (persister == null) {
             return;
-        }
-
-        if (!Hibernate.isInitialized(entity)) {
-            Hibernate.initialize(entity);
         }
 
         String[] propertyNames = persister.getPropertyNames();
@@ -180,10 +176,7 @@ public class LazyLoadingUtil {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
-
-        if (map instanceof PersistentMap && !((PersistentMap) map).wasInitialized()) {
-            Hibernate.initialize(map);
-        }
+        Hibernate.initialize(map);
 
         if (!map.isEmpty()) {
             // First map keys
@@ -201,10 +194,7 @@ public class LazyLoadingUtil {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
-
-        if (collection instanceof PersistentCollection && !((PersistentCollection) collection).wasInitialized()) {
-            Hibernate.initialize(collection);
-        }
+        Hibernate.initialize(collection);
 
         if (!collection.isEmpty()) {
             ComponentType componentType = null;
