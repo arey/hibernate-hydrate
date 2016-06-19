@@ -153,14 +153,14 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateComponent(
-            SessionFactoryImplementor sessionFactory, Object componentValue, ComponentType componentType, IdentitySet recursiveGuard) {
-        if (componentValue == null || !recursiveGuard.add(componentValue)) {
+            SessionFactoryImplementor sessionFactory, Object component, ComponentType componentType, IdentitySet recursiveGuard) {
+        if (component == null || !recursiveGuard.add(component)) {
             return;
         }
 
         Type[] propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
-            Object propertyValue = componentType.getPropertyValue(componentValue, i);
+            Object propertyValue = componentType.getPropertyValue(component, i);
             deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
