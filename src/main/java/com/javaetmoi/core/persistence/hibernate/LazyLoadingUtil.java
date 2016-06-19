@@ -67,7 +67,8 @@ public class LazyLoadingUtil {
         SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) currentSession.getSessionFactory();
         IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
-            deepInflateEntity(sessionFactory, entity, recursiveGuard);
+            // TODO markus 2016-06-19: How to determine entity type?
+            deepInflateEntity(sessionFactory, entity, null, recursiveGuard);
         }
         return entities;
     }
@@ -95,7 +96,8 @@ public class LazyLoadingUtil {
     public static <E> E deepHydrate(Session currentSession, E entity) {
         SessionFactoryImplementor sessionFactory = (SessionFactoryImplementor) currentSession.getSessionFactory();
         IdentitySet recursiveGuard = new IdentitySet();
-        deepInflateEntity(sessionFactory, entity, recursiveGuard);
+        // TODO markus 2016-06-19: How to determine entity type?
+        deepInflateEntity(sessionFactory, entity, null, recursiveGuard);
         return entity;
     }
 
@@ -106,7 +108,7 @@ public class LazyLoadingUtil {
         }
 
         if (propertyType instanceof EntityType) {
-            deepInflateEntity(sessionFactory, propertyValue, recursiveGuard);
+            deepInflateEntity(sessionFactory, propertyValue, (EntityType) propertyType, recursiveGuard);
         } else if (propertyType instanceof ComponentType) {
             // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
             deepInflateComponent(sessionFactory, propertyValue, (ComponentType) propertyType, recursiveGuard);
@@ -123,13 +125,13 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateEntity(
-            SessionFactoryImplementor sessionFactory, Object entity, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Object entity, EntityType entityType, IdentitySet recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
         Hibernate.initialize(entity);
 
-        String name = entity.getClass().getName();
+        String name = entityType != null? entityType.getName() : entity.getClass().getName();
         Object target = entity;
         if (entity instanceof HibernateProxy) {
             LazyInitializer initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
@@ -177,7 +179,7 @@ public class LazyLoadingUtil {
         // First map keys
         // TODO markus 2016-06-19: How to determine key type?
         for (Object key : map.keySet()) {
-            deepInflateEntity(sessionFactory, key, recursiveGuard);
+            deepInflateEntity(sessionFactory, key, null, recursiveGuard);
         }
         // Then map values
         Type elementType = mapType.getElementType(sessionFactory);
