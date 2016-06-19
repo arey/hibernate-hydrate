@@ -23,8 +23,7 @@ import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
-import org.hibernate.type.ComponentType;
-import org.hibernate.type.Type;
+import org.hibernate.type.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -107,21 +106,20 @@ public class LazyLoadingUtil {
             return; // null guard
         }
 
-        if (propertyType.isEntityType()) {
+        if (propertyType instanceof EntityType) {
             deepInflateEntity(currentSession, propertyValue, recursiveGuard);
-        } else if (propertyType.isComponentType()) {
+        } else if (propertyType instanceof ComponentType) {
             // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
             deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType, recursiveGuard);
+        } else if (propertyType instanceof MapType) {
+            deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
+        } else if (propertyType instanceof CollectionType) {
+            // Handle PersistentBag, PersistentList and PersistentIdentifierBag
+            deepInflateCollection(currentSession, (Collection<?>) propertyValue, recursiveGuard);
         } else if (propertyType.isCollectionType()) {
-            if (propertyValue instanceof Map) {
-                deepInflateMap(currentSession, (Map<?, ?>) propertyValue, recursiveGuard);
-            } else if (propertyValue instanceof Collection) {
-                // Handle PersistentBag, PersistentList and PersistentIdentifierBag
-                deepInflateCollection(currentSession, (Collection<?>) propertyValue, recursiveGuard);
-            } else {
-                throw new UnsupportedOperationException(
-                        "Unsupported collection type: " + propertyValue.getClass().getSimpleName());
-            }
+            throw new UnsupportedOperationException(
+                    "Unsupported type " + propertyType.getClass().getSimpleName() +
+                    " for " + propertyValue.getClass().getSimpleName());
         }
     }
 
