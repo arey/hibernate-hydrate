@@ -18,6 +18,7 @@ import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
+import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
@@ -176,10 +177,12 @@ public class LazyLoadingUtil {
             return;
         }
 
+        CollectionPersister persister = sessionFactory.getMetamodel().collectionPersister(mapType.getRole());
+
         // First map keys
-        // TODO markus 2016-06-19: How to determine key type?
+        Type indexType = persister.getIndexType();
         for (Object key : map.keySet()) {
-            deepInflateEntity(sessionFactory, key, null, recursiveGuard);
+            deepInflateProperty(sessionFactory, key, indexType, recursiveGuard);
         }
         // Then map values
         Type elementType = mapType.getElementType(sessionFactory);
