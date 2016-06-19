@@ -120,7 +120,7 @@ public class LazyLoadingUtil {
             deepInflateCollection(sessionFactory, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
         } else if (propertyType.isCollectionType()) {
             throw new UnsupportedOperationException(
-                    "Unsupported type " + propertyType.getClass().getSimpleName() +
+                    "Unsupported collection type " + propertyType.getClass().getSimpleName() +
                     " for " + propertyValue.getClass().getSimpleName());
         }
     }
