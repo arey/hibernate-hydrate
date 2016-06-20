@@ -13,6 +13,9 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -22,10 +25,11 @@ import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
-import org.hibernate.type.*;
-
-import java.util.Collection;
-import java.util.Map;
+import org.hibernate.type.CollectionType;
+import org.hibernate.type.ComponentType;
+import org.hibernate.type.EntityType;
+import org.hibernate.type.MapType;
+import org.hibernate.type.Type;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -116,12 +120,12 @@ public class LazyLoadingUtil {
         } else if (propertyType instanceof MapType) {
             deepInflateMap(sessionFactory, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
         } else if (propertyType instanceof CollectionType) {
-            // Handle PersistentBag, PersistentList, PersistentIdentifierBag etc.
-            deepInflateCollection(sessionFactory, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
-        } else if (propertyType.isCollectionType()) {
-            throw new UnsupportedOperationException(
-                    "Unsupported collection type " + propertyType.getClass().getSimpleName() +
-                    " for " + propertyValue.getClass().getSimpleName());
+            if (propertyValue instanceof Collection) {
+                deepInflateCollection(sessionFactory, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
+            } else {
+                throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
+                      propertyType.getClass().getSimpleName(), propertyValue.getClass().getSimpleName()));
+            }
         }
     }
 
