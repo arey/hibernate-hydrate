@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -13,11 +13,11 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.Collection;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 
 import javax.persistence.EntityManager;
-
-import org.hibernate.Session;
+import java.util.Collection;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -41,21 +41,17 @@ public class JpaLazyLoadingUtil {
      * Populate a lazy-initialized object graph by recursivity.
      * 
      * <p>
-     * This method deeply navigates into a graph of entities in order to resolve uninitialized
-     * Hibernate proxies.<br>
-     * The goal is to avoid any {@link org.hibernate.LazyInitializationException} once entities are detached from
-     * the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate
-     * session.
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
      * 
      * @param currentEntityManager
-     *            current JPA entity manager still open
+     *            Current JPA entity manager still open
      * @param entities
-     *            a {@link Collection} of Hibernate entities to load
+     *            A {@link Collection} of attached Hibernate entities to load
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
-     *         input parameter. Usefull when calling this method in a return statement.
-     * 
+     *         input parameter. Useful when calling this method in a return statement.
      */
     public static <E> Collection<E> deepHydrate(EntityManager currentEntityManager, Collection<E> entities) {
         return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entities);
@@ -65,21 +61,17 @@ public class JpaLazyLoadingUtil {
      * Populate a lazy-initialized object graph by recursivity.
      * 
      * <p>
-     * This method deeply navigates into a graph of entities in order to resolve uninitialized
-     * Hibernate proxies.<br>
-     * The goal is to avoid any {@link org.hibernate.LazyInitializationException} once entities are detached from
-     * the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate
-     * session.
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
      * 
      * @param currentEntityManager
-     *            current JPA entity manager still open
+     *            Current JPA entity manager still open
      * @param entity
-     *            a single Hibernate entity or a simple java class referencing entities
-     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Usefull
+     *            A single attached Hibernate entity or a simple java class referencing entities
+     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
      *         when calling this method in a return statement.
-     * 
      */
     public static <E> E deepHydrate(EntityManager currentEntityManager, E entity) {
         return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entity);
