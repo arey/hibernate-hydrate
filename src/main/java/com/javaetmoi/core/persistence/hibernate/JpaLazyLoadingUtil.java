@@ -13,11 +13,12 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import org.hibernate.LazyInitializationException;
-import org.hibernate.Session;
+import java.util.Collection;
 
 import javax.persistence.EntityManager;
-import java.util.Collection;
+
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -86,10 +87,6 @@ public class JpaLazyLoadingUtil {
             return (Session) currentEntityManager;
         }
 
-        // TODO markus 2016-06-20: Backward compatibility. Remove ASAP.
-        if (currentEntityManager instanceof org.hibernate.ejb.HibernateEntityManager) {
-            return ((org.hibernate.ejb.HibernateEntityManager) currentEntityManager).getSession();
-        }
         if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
             return ((org.hibernate.jpa.HibernateEntityManager) currentEntityManager).getSession();
         }
