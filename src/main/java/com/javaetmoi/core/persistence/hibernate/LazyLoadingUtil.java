@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -13,24 +13,20 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.hibernate.Hibernate;
-import org.hibernate.HibernateException;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
-import org.hibernate.collection.internal.PersistentMap;
-import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.persister.collection.CollectionPersister;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
-import org.hibernate.tuple.component.ComponentTuplizer;
-import org.hibernate.type.ComponentType;
-import org.hibernate.type.Type;
+import org.hibernate.type.*;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -42,38 +38,53 @@ import org.hibernate.type.Type;
  * @author Antoine Rey
  */
 public class LazyLoadingUtil {
-
     /**
      * No-arg constructor
      */
     private LazyLoadingUtil() {
-        // Private visibility because utility class
+        // Private visibility because utility class.
     }
 
     /**
      * Populate a lazy-initialized object graph by recursivity.
      * 
      * <p>
-     * This method deeply navigates into a graph of entities in order to resolve uninitialized
-     * Hibernate proxies.<br>
-     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from
-     * the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate
-     * session.
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
      * 
      * @param currentSession
      *            Hibernate session still open
      * @param entities
-     *            a {@link Collection} of Hibernate entities to load
+     *            A {@link Collection} of attached Hibernate entities to load
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
      *         input parameter. Useful when calling this method in a return statement.
-     * 
      */
-    public static <E> Collection<E> deepHydrate(final Session currentSession, Collection<E> entities) {
+    public static <E> Collection<E> deepHydrate(Session currentSession, Collection<E> entities) {
+        return deepHydrate(currentSession.getSessionFactory(), entities);
+    }
+
+    /**
+     * Populate a lazy-initialized object graph by recursivity.
+     *
+     * <p>
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * </p>
+     *
+     * @param sessionFactory
+     *            Hibernate session factory
+     * @param entities
+     *            A {@link Collection} of attached Hibernate entities to load
+     * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
+     *         input parameter. Useful when calling this method in a return statement.
+     */
+    public static <E> Collection<E> deepHydrate(SessionFactory sessionFactory, Collection<E> entities) {
         IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
-            deepInflateEntity(currentSession, entity, recursiveGuard);
+            // TODO markus 2016-06-19: How to determine entity type?
+            deepInflateEntity((SessionFactoryImplementor) sessionFactory, entity, null, recursiveGuard);
         }
         return entities;
     }
@@ -82,164 +93,147 @@ public class LazyLoadingUtil {
      * Populate a lazy-initialized object graph by recursivity.
      * 
      * <p>
-     * This method deeply navigates into a graph of entities in order to resolve uninitialized
-     * Hibernate proxies.<br>
-     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from
-     * the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate
-     * session.
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
      * 
      * @param currentSession
      *            Hibernate session still open
      * @param entity
-     *            a single Hibernate entity or a simple java class referencing entities
-     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Usefull
+     *            A single attached Hibernate entity or a simple java class referencing entities
+     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
      *         when calling this method in a return statement.
-     * 
      */
-    public static <E> E deepHydrate(final Session currentSession, E entity) {
+    public static <E> E deepHydrate(Session currentSession, E entity) {
+        return deepHydrate(currentSession.getSessionFactory(), entity);
+    }
+
+    /**
+     * Populate a lazy-initialized object graph by recursivity.
+     *
+     * <p>
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * </p>
+     *
+     * @param sessionFactory
+     *            Hibernate session factory
+     * @param entity
+     *            A single attached Hibernate entity or a simple java class referencing entities
+     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
+     *         when calling this method in a return statement.
+     */
+    public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
         IdentitySet recursiveGuard = new IdentitySet();
-        deepInflateEntity(currentSession, entity, recursiveGuard);
+        // TODO markus 2016-06-19: How to determine entity type?
+        deepInflateEntity((SessionFactoryImplementor) sessionFactory, entity, null, recursiveGuard);
         return entity;
     }
 
-    @SuppressWarnings("unchecked")
-    private static void deepInflateEntity(final Session currentSession, Object entity,
-            IdentitySet recursiveGuard) throws HibernateException {
-        if (entity == null || !recursiveGuard.add(entity)) {
-            return;
-        }
-
-        Class<?> clazz = entity.getClass();
-        Object target = entity;
-        if (entity instanceof HibernateProxy) {
-            LazyInitializer initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
-            clazz = initializer.getPersistentClass();
-            target = initializer.getImplementation();
-        }
-
-        // TODO Use metamodel instead for future releases...
-        ClassMetadata classMetadata;
-        try {
-            classMetadata = currentSession.getSessionFactory().getClassMetadata(clazz);
-            if (classMetadata == null) {
-                return;
-            }
-        } catch (Exception e) {
-            return;
-        }
-
-
-        if (!Hibernate.isInitialized(entity)) {
-            Hibernate.initialize(entity);
-        }
-
-        String[] propertyNames = classMetadata.getPropertyNames();
-        Type[] propertyTypes = classMetadata.getPropertyTypes();
-        for (int i = 0, n = propertyNames.length; i < n; i++) {
-            Object propertyValue = classMetadata.getPropertyValue(target, propertyNames[i]);
-            deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes" })
-    private static void deepInflateProperty(Object propertyValue, Type propertyType,
-            Session currentSession, IdentitySet recursiveGuard) {
+    private static void deepInflateProperty(
+            SessionFactoryImplementor sessionFactory, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
         if (propertyValue == null) {
             return; // null guard
         }
 
-        if (propertyType.isEntityType()) {
-            deepInflateEntity(currentSession, propertyValue, recursiveGuard);
-        } else if (propertyType.isCollectionType()) {
-            // Handle PersistentBag, PersistentList and PersistentIndentifierBag
-            if (propertyValue instanceof List) {
-                deepInflateCollection(currentSession, recursiveGuard, (List) propertyValue);
-            } else if (propertyValue instanceof Map) {
-                deepInflateMap(currentSession, recursiveGuard, (Map) propertyValue);
-            } else if (propertyValue instanceof Set) {
-                deepInflateCollection(currentSession, recursiveGuard, (Set) propertyValue);
+        if (propertyType instanceof EntityType) {
+            deepInflateEntity(sessionFactory, propertyValue, (EntityType) propertyType, recursiveGuard);
+        } else if (propertyType instanceof ComponentType) {
+            // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
+            deepInflateComponent(sessionFactory, propertyValue, (ComponentType) propertyType, recursiveGuard);
+        } else if (propertyType instanceof MapType) {
+            deepInflateMap(sessionFactory, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
+        } else if (propertyType instanceof CollectionType) {
+            if (propertyValue instanceof Collection) {
+                deepInflateCollection(sessionFactory, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
             } else {
-                throw new UnsupportedOperationException("Unsupported collection type: "
-                        + propertyValue.getClass().getSimpleName());
-            }
-        } else if (propertyType.isComponentType()) {
-            if (propertyType instanceof ComponentType) {
-                // i.e. @Embeddable annotation (see
-                // https://github.com/arey/hibernate-hydrate/issues/1)
-                deepInflateComponent(currentSession, propertyValue, (ComponentType) propertyType,
-                        recursiveGuard);
+                throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
+                      propertyType.getClass().getSimpleName(), propertyValue.getClass().getSimpleName()));
             }
         }
     }
 
-    private static void deepInflateComponent(Session currentSession, Object componentValue,
-            ComponentType componentType, IdentitySet recursiveGuard) {
-        if (componentValue == null || !recursiveGuard.add(componentValue)) {
+    private static void deepInflateEntity(
+            SessionFactoryImplementor sessionFactory, Object entity, EntityType entityType, IdentitySet recursiveGuard) {
+        if (entity == null || !recursiveGuard.add(entity)) {
+            return;
+        }
+        Hibernate.initialize(entity);
+
+        String name = entityType != null? entityType.getName() : entity.getClass().getName();
+        Object target = entity;
+        if (entity instanceof HibernateProxy) {
+            LazyInitializer initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
+            name = initializer.getEntityName();
+            target = initializer.getImplementation();
+        }
+
+        EntityPersister persister = sessionFactory.getMetamodel().entityPersisters().get(name);
+        if (persister == null) {
             return;
         }
 
-        ComponentTuplizer tuplizer = componentType.getComponentTuplizer();
-        Type[] propertyTypes = componentType.getSubtypes();
-        for (int i = 0; i < propertyTypes.length; i++) {
-            Object propertyValue = tuplizer.getPropertyValue(componentValue, i);
-            deepInflateProperty(propertyValue, propertyTypes[i], currentSession, recursiveGuard);
+        String[] propertyNames = persister.getPropertyNames();
+        Type[] propertyTypes = persister.getPropertyTypes();
+        for (int i = 0, n = propertyNames.length; i < n; i++) {
+            Object propertyValue = persister.getPropertyValue(target, propertyNames[i]);
+            deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
-
     }
 
-    private static void deepInflateMap(Session currentSession, IdentitySet recursiveGuard,
-            @SuppressWarnings("rawtypes") Map map) {
+    private static void deepInflateComponent(
+            SessionFactoryImplementor sessionFactory, Object component, ComponentType componentType, IdentitySet recursiveGuard) {
+        if (component == null || !recursiveGuard.add(component)) {
+            return;
+        }
+
+        Type[] propertyTypes = componentType.getSubtypes();
+        for (int i = 0; i < propertyTypes.length; i++) {
+            Object propertyValue = componentType.getPropertyValue(component, i);
+            deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
+        }
+    }
+
+    private static void deepInflateMap(
+            SessionFactoryImplementor sessionFactory, Map<?, ?> map, MapType mapType, IdentitySet recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
+        Hibernate.initialize(map);
 
-        if (map instanceof PersistentMap) {
-            if (!((PersistentMap) map).wasInitialized()) {
-                Hibernate.initialize(map);
-            }
-        }
-
-        if (map.size() > 0) {
-            // First map keys
-            @SuppressWarnings("rawtypes")
-            Set keySet = map.keySet();
-            for (Object key : keySet) {
-                deepInflateEntity(currentSession, key, recursiveGuard);
-            }
-            // Then map values
-            deepInflateCollection(currentSession, recursiveGuard, map.values());
-        }
-    }
-
-    private static void deepInflateCollection(Session currentSession, IdentitySet recursiveGuard,
-            @SuppressWarnings("rawtypes") Collection collection) {
-        if (collection == null || !recursiveGuard.add(collection)) {
+        if (map.isEmpty()) {
             return;
         }
 
-        if (collection.size() > 0) {
-            ComponentType collectionType = null;
-            if (collection instanceof PersistentCollection && !((PersistentCollection) collection).isUnreferenced()) {
-                // The isUnreferenced() test is useful for some persistent bags that does not have any role
-                String role = ((PersistentCollection) collection).getRole();
-                Type type = currentSession.getSessionFactory().getCollectionMetadata(role).getElementType();
-                if (type instanceof ComponentType) {
-                    // ManyToMany relationship with @Embeddable annotation (see
-                    // https://github.com/arey/hibernate-hydrate/issues/3)
-                    collectionType = (ComponentType) type;
-                }
-            }
-            for (Object item : collection) {
-                if (item == null) {
-                    continue;
-                } else if (collectionType != null) {
-                    deepInflateComponent(currentSession, item, collectionType, recursiveGuard);
-                } else {
-                    deepInflateEntity(currentSession, item, recursiveGuard);
-                }
-            }
+        CollectionPersister persister = sessionFactory.getMetamodel().collectionPersister(mapType.getRole());
+
+        // First map keys
+        Type indexType = persister.getIndexType();
+        for (Object index : map.keySet()) {
+            deepInflateProperty(sessionFactory, index, indexType, recursiveGuard);
+        }
+        // Then map values
+        Type elementType = mapType.getElementType(sessionFactory);
+        for (Object element : map.values()) {
+            deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
+        }
+    }
+
+    private static void deepInflateCollection(
+            SessionFactoryImplementor sessionFactory, Collection<?> collection, CollectionType collectionType, IdentitySet recursiveGuard) {
+        if (collection == null || !recursiveGuard.add(collection)) {
+            return;
+        }
+        Hibernate.initialize(collection);
+
+        if (collection.isEmpty()) {
+            return;
+        }
+
+        Type elementType = collectionType.getElementType(sessionFactory);
+        for (Object element : collection) {
+            deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
         }
     }
 }

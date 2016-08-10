@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,8 @@ import java.util.Collection;
 
 import javax.persistence.EntityManager;
 
-import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -30,7 +31,6 @@ import org.hibernate.ejb.HibernateEntityManager;
  */
 
 public class JpaLazyLoadingUtil {
-
     /**
      * No-arg constructor
      */
@@ -42,67 +42,55 @@ public class JpaLazyLoadingUtil {
      * Populate a lazy-initialized object graph by recursivity.
      * 
      * <p>
-     * This method deeply navigates into a graph of entities in order to resolve uninitialized
-     * Hibernate proxies.<br>
-     * The goal is to avoid any {@link org.hibernate.LazyInitializationException} once entities are detached from
-     * the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate
-     * session.
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
      * 
      * @param currentEntityManager
-     *            current JPA entity manager still open
+     *            Current JPA entity manager still open
      * @param entities
-     *            a {@link Collection} of Hibernate entities to load
+     *            A {@link Collection} of attached Hibernate entities to load
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
-     *         input parameter. Usefull when calling this method in a return statement.
-     * 
+     *         input parameter. Useful when calling this method in a return statement.
      */
-    public static <E> Collection<E> deepHydrate(final EntityManager currentEntityManager,
-            Collection<E> entities) {
-        if (currentEntityManager instanceof HibernateEntityManager) {
-            HibernateEntityManager entityManager = (HibernateEntityManager) currentEntityManager;
-            return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entities);
-        } else
-            if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
-                org.hibernate.jpa.HibernateEntityManager entityManager = (HibernateEntityManager) currentEntityManager;
-                return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entities);
-            }            
-        throw new RuntimeException(
-                "Only the Hibernate implementation of JPA is currently supported");
+    public static <E> Collection<E> deepHydrate(EntityManager currentEntityManager, Collection<E> entities) {
+        return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entities);
     }
 
     /**
      * Populate a lazy-initialized object graph by recursivity.
      * 
      * <p>
-     * This method deeply navigates into a graph of entities in order to resolve uninitialized
-     * Hibernate proxies.<br>
-     * The goal is to avoid any {@link org.hibernate.LazyInitializationException} once entities are detached from
-     * the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate
-     * session.
+     * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
      * 
      * @param currentEntityManager
-     *            current JPA entity manager still open
+     *            Current JPA entity manager still open
      * @param entity
-     *            a single Hibernate entity or a simple java class referencing entities
-     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Usefull
+     *            A single attached Hibernate entity or a simple java class referencing entities
+     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
      *         when calling this method in a return statement.
-     * 
      */
-    public static <E> E deepHydrate(final EntityManager currentEntityManager, E entity) {
-        if (currentEntityManager instanceof HibernateEntityManager) {
-            HibernateEntityManager entityManager = (HibernateEntityManager) currentEntityManager;
-            return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entity);
-        } else
-        if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
-            org.hibernate.jpa.HibernateEntityManager entityManager = (org.hibernate.jpa.HibernateEntityManager) currentEntityManager;
-            return LazyLoadingUtil.deepHydrate(entityManager.getSession(), entity);
-        }
-        throw new RuntimeException(
-                "Only the Hibernate implementation of JPA is currently supported");
+    public static <E> E deepHydrate(EntityManager currentEntityManager, E entity) {
+        return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entity);
     }
 
+   /**
+    * Get Hibernate {@link Session} from {@link EntityManager}.
+    */
+    private static Session getSession(EntityManager currentEntityManager) {
+        // Hibernate 5.2+
+        if (currentEntityManager instanceof Session) {
+            return (Session) currentEntityManager;
+        }
+
+        if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
+            return ((org.hibernate.jpa.HibernateEntityManager) currentEntityManager).getSession();
+        }
+
+        throw new RuntimeException("Only the Hibernate implementation of JPA is currently supported.");
+    }
 }
