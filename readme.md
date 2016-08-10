@@ -22,7 +22,14 @@ A french article titled *Say goodbye to LazyInitializationException* : http://ja
 Download the jar though Maven:
 
 ```xml
-<!-- Either Hibernate 5 support -->
+<!-- Either Hibernate 5.2 and above support -->
+<dependency>
+  <groupId>com.javaetmoi.core</groupId>
+  <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
+  <version>5.2.0</version>
+</dependency> 
+
+<!-- or Hibernate 5.0 and 5.1 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
