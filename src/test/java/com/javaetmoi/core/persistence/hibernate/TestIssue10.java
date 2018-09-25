@@ -30,7 +30,7 @@ class TestIssue10 {
     private TransactionTemplate transactionTemplate;
 
     @Autowired
-    private DBUnitLoader dbUnitLoader;
+    private TestDBUnitLoader dbUnitLoader;
 
     /**
      * Populate entities graph and embedded database
