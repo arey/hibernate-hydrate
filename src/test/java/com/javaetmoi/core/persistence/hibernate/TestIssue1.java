@@ -13,32 +13,29 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.TransactionStatus;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.javaetmoi.core.persistence.hibernate.domain.Foo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/1 fix
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration("TestLazyLoadingUtil-context.xml")
-public class TestIssue1 {
+class TestIssue1 {
 
     @Autowired
-    private SessionFactory   sessionFactory;
+    private SessionFactory      sessionFactory;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -47,28 +44,24 @@ public class TestIssue1 {
     private DBUnitLoader        dbUnitLoader;
 
     /**
-     * Populate entities graph and embbeded database
+     * Populate entities graph and embedded database
      */
-    @Before
+    @BeforeEach
     @Transactional
-    public void setUp() {
+    void setUp() {
         dbUnitLoader.loadDatabase(getClass());
     }
 
     @Test
-    public void nestedListInEmbeddable() {
+    void nestedListInEmbeddable() {
 
-        Foo dbFoo = transactionTemplate.execute(new TransactionCallback<Foo>() {
-
-            public Foo doInTransaction(TransactionStatus status) {
-                Foo foo = (Foo) sessionFactory.getCurrentSession().get(Foo.class, 1);
-                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), foo);
-                return foo;
-            }
+        Foo dbFoo = transactionTemplate.execute(status -> {
+            Foo foo = sessionFactory.getCurrentSession().get(Foo.class, 1);
+            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), foo);
         });
         assertNotNull(dbFoo.getBar());
         assertNotNull(dbFoo.getBar().getBizs());
-        assertEquals("Fix the LazyInitializationException", 2, dbFoo.getBar().getBizs().size());
+        assertEquals(2, dbFoo.getBar().getBizs().size(), "Fix the LazyInitializationException");
         assertNotNull(dbFoo.getBar().getBizs().get(0));
     }
 

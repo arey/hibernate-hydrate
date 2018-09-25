@@ -76,35 +76,39 @@
 
 
   <properties>
+    <!-- L'encoding des sources -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+
     <!-- Version of third libraries -->
     <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>5.2.0.Final</version.hibernate>
-    <version.hibernate-javassist>3.20.0-GA</version.hibernate-javassist>
-    <version.hibernate-jpa-2.1-api>1.0.0.Final</version.hibernate-jpa-2.1-api>
-    <version.logback>1.1.7</version.logback>
+    <version.hibernate>5.3.6.Final</version.hibernate>
+    <version.hibernate-javassist>3.23.1-GA</version.hibernate-javassist>
+    <version.hibernate-jpa-2.1-api>1.0.2.Final</version.hibernate-jpa-2.1-api>
+    <version.logback>1.2.3</version.logback>
 
     <!-- * For testing purpose -->
-    <version.junit>4.12</version.junit>
-    <version.spring>4.3.0.RELEASE</version.spring>
-    <version.h2>1.4.192</version.h2>
-    <version.dbunit>2.5.2</version.dbunit>
-    <version.commons-lang3>3.4</version.commons-lang3>
+    <version.junit>5.3.1</version.junit>
+    <version.spring>5.1.0.RELEASE</version.spring>
+    <version.h2>1.4.197</version.h2>
+    <version.dbunit>2.5.4</version.dbunit>
+    <version.commons-lang3>3.8.1</version.commons-lang3>
     <version.ehcache>2.6.11</version.ehcache>
-    <version.unitils>3.4.2</version.unitils>
-    <version.mockito>1.10.19</version.mockito>
+    <version.unitils>3.4.6</version.unitils>
+    <version.mockito>2.22.0</version.mockito>
 
     <!-- Version of maven plugins -->
     <version.plugin.maven-eclipse-plugin>2.9</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-compiler-plugin>2.3</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-resources-plugin>2.4.3</version.plugin.maven-resources-plugin>
     <version.plugin.maven-source-plugin>2.1.2</version.plugin.maven-source-plugin>
+    <version.plugin.maven-surefire-plugin>2.22.0</version.plugin.maven-surefire-plugin>
     <version.plugin.maven-javadoc-plugin>2.7</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.5</version.plugin.maven-release-plugin>
     <version.plugin.nexus-staging-maven-plugin>1.6.2</version.plugin.nexus-staging-maven-plugin>
     <version.plugin.maven-gpg-plugin>1.5</version.plugin.maven-gpg-plugin>
-
-    <!-- L'encoding des sources -->
-    <source.encoding>UTF-8</source.encoding>
   </properties>
 
   <dependencies>
@@ -133,8 +137,14 @@
     <!-- Tests -->
     <!-- * JUnit -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${version.junit}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <version>${version.junit}</version>
       <scope>test</scope>
     </dependency>
@@ -171,7 +181,7 @@
       <version>${version.mockito}</version>
       <scope>test</scope>
     </dependency>
-    <!-- * H2 embbeded database -->
+    <!-- * H2 embedded database -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
@@ -215,19 +225,16 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${version.plugin.maven-compiler-plugin}</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <encoding>${source.encoding}</encoding>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>${version.plugin.maven-resources-plugin}</version>
-        <configuration>
-          <encoding>${source.encoding}</encoding>
-        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${version.plugin.maven-surefire-plugin}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
