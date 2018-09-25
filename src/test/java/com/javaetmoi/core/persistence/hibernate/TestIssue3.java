@@ -41,13 +41,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestIssue3 {
 
 	@Autowired
-    private SessionFactory   sessionFactory;
+    private SessionFactory      sessionFactory;
 
 	@Autowired
 	private TransactionTemplate transactionTemplate;
 
 	@Autowired
-	private DBUnitLoader dbUnitLoader;
+	private DBUnitLoader        dbUnitLoader;
 
 	/**
 	 * Populate entities graph and embedded database
