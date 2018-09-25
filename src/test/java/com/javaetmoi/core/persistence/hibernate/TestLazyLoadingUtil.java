@@ -56,7 +56,7 @@ class TestLazyLoadingUtil {
     private TransactionTemplate transactionTemplate;
 
     @Autowired
-    private TestDBUnitLoader dbUnitLoader;
+    private DBUnitLoader dbUnitLoader;
 
     private Employee            james, tom;
 

@@ -43,6 +43,6 @@
 
   <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" c:dataSource-ref="dataSource" />
 
-  <bean id="dbUnitLoader" class="com.javaetmoi.core.persistence.hibernate.TestDBUnitLoader" />
+  <bean id="dbUnitLoader" class="com.javaetmoi.core.persistence.hibernate.DBUnitLoader" />
 
 </beans>

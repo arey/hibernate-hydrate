@@ -44,9 +44,9 @@ import java.util.List;
  * @author arey
  * 
  */
-public class TestDBUnitLoader {
+public class DBUnitLoader {
 
-    static final Logger LOG = LoggerFactory.getLogger(TestDBUnitLoader.class);
+    static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
 
     @Autowired
     private DataSource  dataSource;
