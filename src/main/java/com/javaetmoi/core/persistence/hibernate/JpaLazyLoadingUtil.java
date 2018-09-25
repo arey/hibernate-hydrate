@@ -53,7 +53,7 @@ public class JpaLazyLoadingUtil {
      *         input parameter. Useful when calling this method in a return statement.
      */
     public static <C extends Collection<E>, E> C deepHydrate(EntityManager currentEntityManager, C entities) {
-        return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entities);
+        return LazyLoadingUtil.deepHydrate(currentEntityManager.unwrap(Session.class), entities);
     }
 
     /**
@@ -73,22 +73,6 @@ public class JpaLazyLoadingUtil {
      *         when calling this method in a return statement.
      */
     public static <E> E deepHydrate(EntityManager currentEntityManager, E entity) {
-        return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entity);
-    }
-
-   /**
-    * Get Hibernate {@link Session} from {@link EntityManager}.
-    */
-    private static Session getSession(EntityManager currentEntityManager) {
-        // Hibernate 5.2+
-        if (currentEntityManager instanceof Session) {
-            return (Session) currentEntityManager;
-        }
-
-        if (currentEntityManager instanceof org.hibernate.jpa.HibernateEntityManager) {
-            return ((org.hibernate.jpa.HibernateEntityManager) currentEntityManager).getSession();
-        }
-
-        throw new RuntimeException("Only the Hibernate implementation of JPA is currently supported.");
+        return LazyLoadingUtil.deepHydrate(currentEntityManager.unwrap(Session.class), entity);
     }
 }

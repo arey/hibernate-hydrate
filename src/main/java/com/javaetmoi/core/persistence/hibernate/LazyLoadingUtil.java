@@ -81,10 +81,11 @@ public class LazyLoadingUtil {
      *         input parameter. Useful when calling this method in a return statement.
      */
     public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
+        SessionFactoryImplementor sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
         IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
             // TODO markus 2016-06-19: How to determine entity type?
-            deepInflateEntity((SessionFactoryImplementor) sessionFactory, entity, null, recursiveGuard);
+            deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
         }
         return entities;
     }
@@ -125,9 +126,10 @@ public class LazyLoadingUtil {
      *         when calling this method in a return statement.
      */
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
+        SessionFactoryImplementor sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
         IdentitySet recursiveGuard = new IdentitySet();
         // TODO markus 2016-06-19: How to determine entity type?
-        deepInflateEntity((SessionFactoryImplementor) sessionFactory, entity, null, recursiveGuard);
+        deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
         return entity;
     }
 
