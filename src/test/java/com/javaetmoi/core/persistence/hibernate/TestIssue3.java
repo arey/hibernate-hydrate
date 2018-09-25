@@ -13,38 +13,32 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.IdentifierLoadAccess;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
+import org.hibernate.IdentifierLoadAccess;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration("TestLazyLoadingUtil-context.xml")
-public class TestIssue3 {
+class TestIssue3 {
 
 	@Autowired
     private SessionFactory   sessionFactory;
@@ -56,26 +50,21 @@ public class TestIssue3 {
 	private DBUnitLoader dbUnitLoader;
 
 	/**
-	 * Populate entities graph and embbeded database
+	 * Populate entities graph and embedded database
 	 */
-	@Before
+	@BeforeEach
 	@Transactional
-	public void setUp() {
+	void setUp() {
 		dbUnitLoader.loadDatabase(getClass());
 	}
 
 	@Test
-	public void listWithEmbeddableClass() {
+	void listWithEmbeddableClass() {
 
-		Plan dbContainer = transactionTemplate
-				.execute(new TransactionCallback<Plan>() {
-
-					public Plan doInTransaction(TransactionStatus status) {
-						Plan plan = (Plan) sessionFactory.getCurrentSession().get(Plan.class, 1);
-						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), plan);
-						return plan;
-					}
-				});
+		Plan dbContainer = transactionTemplate.execute(status -> {
+			Plan plan = sessionFactory.getCurrentSession().get(Plan.class, 1);
+			return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), plan);
+		});
 		assertEquals(new Integer(1), dbContainer.getId());
 		assertEquals(1, dbContainer.getTransfers().size());
 		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan()
@@ -83,17 +72,11 @@ public class TestIssue3 {
 	}
 
 	@Test
-	public void listWithMappedEntity() {
-		Holder dbContainer = transactionTemplate
-				.execute(new TransactionCallback<Holder>() {
-
-					public Holder doInTransaction(TransactionStatus status) {
-						Holder system = (Holder) sessionFactory.getCurrentSession().get(Holder.class, 1);
-						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
-								system);
-						return system;
-					}
-				});
+	void listWithMappedEntity() {
+		Holder dbContainer = transactionTemplate.execute(status -> {
+			Holder system = sessionFactory.getCurrentSession().get(Holder.class, 1);
+			return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+		});
 		assertEquals(new Integer(1), dbContainer.getId());
 		assertNotNull(dbContainer.getSystem());
 		assertEquals(new Integer(1), dbContainer.getSystem().getId());
@@ -103,16 +86,13 @@ public class TestIssue3 {
 
 	@Test
 	public void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		List<System> dbContainer = transactionTemplate
-				.execute(new TransactionCallback<List<System>>() {
-					public List<System> doInTransaction(TransactionStatus status) {
-						List<System> system = (List<System>) sessionFactory.getCurrentSession()
-								.createCriteria(System.class)
-								.addOrder(Order.asc("systemNumber")).list();
-						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-						return system;
-					}
-				});
+		List<System> dbContainer = transactionTemplate.execute(status -> {
+			List<System> system = (List<System>) sessionFactory.getCurrentSession()
+					.createCriteria(System.class)
+					.addOrder(Order.asc("systemNumber")).list();
+			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+			return system;
+		});
 		assertNotNull(dbContainer);
 		assertFalse(dbContainer.isEmpty());
 		assertEquals(2, dbContainer.size());
@@ -123,32 +103,29 @@ public class TestIssue3 {
 	}
 
 	@Test
-	public void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		List<System> dbContainer = transactionTemplate
-				.execute(new TransactionCallback<List<System>>() {
-					public List<System> doInTransaction(TransactionStatus status) {
-						IdentifierLoadAccess<Holder> loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
-						Holder holder = loadAccess.getReference(1);
-						System system = holder.getSystem();
-						system.setName("system1A");
-						system.setSystemNumber("1A");
-						SubSystem subSystem1 = system.getSubSystems().get(0);
-						subSystem1.setName("subsystem1A");
-						subSystem1.setSystemNumber("1-1A");
-						SubSystem subSystem2 = system.getSubSystems().get(1);
-						subSystem2.setName("subsystem21");
-						subSystem2.setSystemNumber("1-21");
-						sessionFactory.getCurrentSession().save(subSystem1);
-						sessionFactory.getCurrentSession().save(subSystem2);
-						sessionFactory.getCurrentSession().save(system);
-						sessionFactory.getCurrentSession().save(holder);
+	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
+		List<System> dbContainer = transactionTemplate.execute(status -> {
+			IdentifierLoadAccess<Holder> loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
+			Holder holder = loadAccess.getReference(1);
+			System system = holder.getSystem();
+			system.setName("system1A");
+			system.setSystemNumber("1A");
+			SubSystem subSystem1 = system.getSubSystems().get(0);
+			subSystem1.setName("subsystem1A");
+			subSystem1.setSystemNumber("1-1A");
+			SubSystem subSystem2 = system.getSubSystems().get(1);
+			subSystem2.setName("subsystem21");
+			subSystem2.setSystemNumber("1-21");
+			sessionFactory.getCurrentSession().save(subSystem1);
+			sessionFactory.getCurrentSession().save(subSystem2);
+			sessionFactory.getCurrentSession().save(system);
+			sessionFactory.getCurrentSession().save(holder);
 
-						List<System> retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
-								.createCriteria(System.class)
-								.addOrder(Order.asc("systemNumber")).list();
-						LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-						return retrievedSystems;
-					}
-				});
+			List<System> retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
+					.createCriteria(System.class)
+					.addOrder(Order.asc("systemNumber")).list();
+			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+			return retrievedSystems;
+		});
 	}
 }
