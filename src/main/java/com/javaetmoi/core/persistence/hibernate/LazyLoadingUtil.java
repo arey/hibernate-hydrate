@@ -61,7 +61,7 @@ public class LazyLoadingUtil {
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
      *         input parameter. Useful when calling this method in a return statement.
      */
-    public static <E> Collection<E> deepHydrate(Session currentSession, Collection<E> entities) {
+    public static <C extends Collection<E>, E> C deepHydrate(Session currentSession, C entities) {
         return deepHydrate(currentSession.getSessionFactory(), entities);
     }
 
@@ -80,7 +80,7 @@ public class LazyLoadingUtil {
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
      *         input parameter. Useful when calling this method in a return statement.
      */
-    public static <E> Collection<E> deepHydrate(SessionFactory sessionFactory, Collection<E> entities) {
+    public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
         IdentitySet recursiveGuard = new IdentitySet();
         for (Object entity : entities) {
             // TODO markus 2016-06-19: How to determine entity type?

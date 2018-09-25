@@ -13,12 +13,11 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.Collection;
-
-import javax.persistence.EntityManager;
-
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
+
+import javax.persistence.EntityManager;
+import java.util.Collection;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -29,7 +28,6 @@ import org.hibernate.Session;
  * 
  * @author Antoine Rey
  */
-
 public class JpaLazyLoadingUtil {
     /**
      * No-arg constructor
@@ -54,7 +52,7 @@ public class JpaLazyLoadingUtil {
      * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
      *         input parameter. Useful when calling this method in a return statement.
      */
-    public static <E> Collection<E> deepHydrate(EntityManager currentEntityManager, Collection<E> entities) {
+    public static <C extends Collection<E>, E> C deepHydrate(EntityManager currentEntityManager, C entities) {
         return LazyLoadingUtil.deepHydrate(getSession(currentEntityManager), entities);
     }
 
