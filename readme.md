@@ -81,7 +81,7 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 * Uses [Maven](http://maven.apache.org/) as a build tool
 * Uses [Cloudbees](http://www.cloudbees.com/foss) and [Travis CI](http://www.travis-ci.org) for continuous integration builds whenever code is pushed into GitHub
-* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) and [Markus Heiden](https://github.com/markus-s24) for their pull requests
+* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) and [Markus Heiden](https://github.com/markusheiden) for their pull requests
  
 
 ## Build Status ##
