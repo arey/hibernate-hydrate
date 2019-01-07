@@ -26,7 +26,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
-  <version>5.2.0</version>
+  <version>5.2.1</version>
 </dependency> 
 
 <!-- or Hibernate 5.0 and 5.1 support -->
@@ -89,7 +89,3 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 Travis: [![Build
 Status](https://travis-ci.org/arey/hibernate-hydrate.png?branch=master)](https://travis-ci.org/arey/hibernate-hydrate)
 
-Cloudbees Jenkins: [![Build
-Status](https://javaetmoi.ci.cloudbees.com/job/hibernate-hydrate/badge/icon)](https://javaetmoi.ci.cloudbees.com/job/hibernate-hydrate/)
-
-Bitdeli: [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/arey/hibernate-hydrate/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
