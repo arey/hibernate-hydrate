@@ -1,5 +1,9 @@
 # Hibernate Hydrate #
 
+[![Build
+Status](https://travis-ci.org/arey/hibernate-hydrate.png?branch=master)](https://travis-ci.org/arey/hibernate-hydrate)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate)
+
 The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hydrate) project is to populate a graph of persistent entities and thus avoid the famous [LazyInitializationException](http://docs.jboss.org/hibernate/orm/3.6/javadocs/org/hibernate/LazyInitializationException.html).
 
 ## Features ##
