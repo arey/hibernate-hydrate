@@ -82,7 +82,10 @@ public class LazyLoadingUtil {
      */
     public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
         SessionFactoryImplementor sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
-        IdentitySet recursiveGuard = new IdentitySet();
+        // Reduce resizes for big collections.
+        // *2 to compensate for the load factor.
+        int capacity = Math.max(entities.size() * 2, 32);
+        IdentitySet recursiveGuard = new IdentitySet(capacity);
         for (Object entity : entities) {
             // TODO markus 2016-06-19: How to determine entity type?
             deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
