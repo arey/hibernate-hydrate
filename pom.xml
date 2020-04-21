@@ -73,9 +73,6 @@
     <developerConnection>scm:git:ssh://git@github.com/arey/hibernate-hydrate.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
-  <prerequisites>
-    <maven>3.6</maven>
-  </prerequisites>
 
   <properties>
     <!-- L'encoding des sources -->
