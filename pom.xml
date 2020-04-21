@@ -74,7 +74,6 @@
     <tag>HEAD</tag>
   </scm>
 
-
   <properties>
     <!-- L'encoding des sources -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -83,49 +82,40 @@
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <!-- Version of third libraries -->
-    <!-- * JPA 2 and Hibernate dependencies -->
-    <version.hibernate>5.4.8.Final</version.hibernate>
-    <version.hibernate-jpa-2.1-api>1.0.2.Final</version.hibernate-jpa-2.1-api>
-    <version.logback>1.2.3</version.logback>
+    <!-- * Hibernate dependencies -->
+    <version.hibernate>5.4.14.Final</version.hibernate>
 
     <!-- * For testing purpose -->
-    <version.junit>5.5.2</version.junit>
-    <version.spring>5.2.1.RELEASE</version.spring>
-    <version.h2>1.4.200</version.h2>
-    <version.dbunit>2.6.0</version.dbunit>
-    <version.commons-lang3>3.9</version.commons-lang3>
+    <version.commons-lang3>3.10</version.commons-lang3>
+    <version.dbunit>2.7.0</version.dbunit>
     <version.ehcache>2.6.11</version.ehcache>
+    <version.h2>1.4.200</version.h2>
+    <version.junit>5.6.2</version.junit>
+    <version.logback>1.2.3</version.logback>
+    <version.mockito>3.3.3</version.mockito>
+    <version.spring>5.2.5.RELEASE</version.spring>
     <version.unitils>3.4.6</version.unitils>
-    <version.mockito>3.1.0</version.mockito>
 
     <!-- Version of maven plugins -->
-    <version.plugin.maven-eclipse-plugin>2.10</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-compiler-plugin>3.8.1</version.plugin.maven-compiler-plugin>
-    <version.plugin.maven-resources-plugin>2.7</version.plugin.maven-resources-plugin>
-    <version.plugin.maven-source-plugin>3.2.0</version.plugin.maven-source-plugin>
-    <version.plugin.maven-surefire-plugin>3.0.0-M3</version.plugin.maven-surefire-plugin>
-    <version.plugin.maven-javadoc-plugin>3.1.1</version.plugin.maven-javadoc-plugin>
-    <version.plugin.maven-release-plugin>2.5.2</version.plugin.maven-release-plugin>
-    <version.plugin.nexus-staging-maven-plugin>1.6.8</version.plugin.nexus-staging-maven-plugin>
+    <version.plugin.maven-eclipse-plugin>2.10</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
+    <version.plugin.maven-javadoc-plugin>3.2.0</version.plugin.maven-javadoc-plugin>
+    <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
+    <version.plugin.maven-resources-plugin>3.1.0</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-source-plugin>3.2.1</version.plugin.maven-source-plugin>
+    <version.plugin.nexus-staging-maven-plugin>1.6.8</version.plugin.nexus-staging-maven-plugin>
+    <version.plugin.maven-surefire-plugin>3.0.0-M4</version.plugin.maven-surefire-plugin>
   </properties>
 
   <dependencies>
 
-
-    <!-- JPA -->
-    <dependency>
-      <groupId>org.hibernate.javax.persistence</groupId>
-      <artifactId>hibernate-jpa-2.1-api</artifactId>
-      <version>${version.hibernate-jpa-2.1-api}</version>
-    </dependency>
     <!-- Hibernate -->
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>${version.hibernate}</version>
     </dependency>
-
 
     <!-- Tests -->
     <!-- * JUnit -->
@@ -358,6 +348,5 @@
       </build>
     </profile>
   </profiles>
-
 
 </project>
