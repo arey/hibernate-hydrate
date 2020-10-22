@@ -37,9 +37,9 @@
       </roles>
     </developer>
     <developer>
-      <id>markus-s24</id>
+      <id>markusheiden</id>
       <name>Markus Heiden</name>
-      <email>markus.heiden@s24.com</email>
+      <email>markus@markusheiden.de</email>
       <roles>
         <role>Java Developer</role>
       </roles>
@@ -83,17 +83,17 @@
 
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
-    <version.hibernate>5.4.14.Final</version.hibernate>
+    <version.hibernate>5.4.22.Final</version.hibernate>
 
     <!-- * For testing purpose -->
-    <version.commons-lang3>3.10</version.commons-lang3>
+    <version.commons-lang3>3.11</version.commons-lang3>
     <version.dbunit>2.7.0</version.dbunit>
     <version.ehcache>2.6.11</version.ehcache>
     <version.h2>1.4.200</version.h2>
-    <version.junit>5.6.2</version.junit>
+    <version.junit>5.7.0</version.junit>
     <version.logback>1.2.3</version.logback>
-    <version.mockito>3.3.3</version.mockito>
-    <version.spring>5.2.5.RELEASE</version.spring>
+    <version.mockito>3.5.15</version.mockito>
+    <version.spring>5.2.9.RELEASE</version.spring>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
@@ -102,10 +102,10 @@
     <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
     <version.plugin.maven-javadoc-plugin>3.2.0</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
-    <version.plugin.maven-resources-plugin>3.1.0</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-resources-plugin>3.2.0</version.plugin.maven-resources-plugin>
     <version.plugin.maven-source-plugin>3.2.1</version.plugin.maven-source-plugin>
     <version.plugin.nexus-staging-maven-plugin>1.6.8</version.plugin.nexus-staging-maven-plugin>
-    <version.plugin.maven-surefire-plugin>3.0.0-M4</version.plugin.maven-surefire-plugin>
+    <version.plugin.maven-surefire-plugin>3.0.0-M5</version.plugin.maven-surefire-plugin>
   </properties>
 
   <dependencies>
