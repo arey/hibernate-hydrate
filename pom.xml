@@ -344,8 +344,8 @@
               </execution>
             </executions>
             <configuration>
-              <!-- Required for GitHub Actions  prevent GPG from using pinentry programs -->
-              <!-- Avoid to avoid a gpg: signing failed: Inappropriate ioctl for device error -->
+              <!-- Required for GitHub Actions: prevent GPG from using pinentry programs -->
+              <!-- Avoid a GPG signing failed: Inappropriate ioctl for device error -->
               <gpgArguments>
                 <arg>--pinentry-mode</arg>
                 <arg>loopback</arg>
