@@ -8,8 +8,7 @@
 name: Release and publish package to the Maven Central Repository
 
 on:
-  release:
-    types: [ published ]
+  workflow_dispatch:
     inputs:
       releaseVersion:
         description: "Default version to use when preparing a release."
