@@ -1,7 +1,7 @@
 # Thanks to Bastien Jansen
 # http://bjansen.github.io/java/2021/02/03/deploying-to-maven-central-using-github-actions.html
 
-name: Release
+name: Release and publish package to the Maven Central Repository
 
 on:
   release:
@@ -33,8 +33,13 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Publish to Apache Maven Central
-        run: mvn -Prelease deploy -X
+      - name: Configure Git user
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+
+      - name: Maven Release then Publish to Apache Maven Central
+        run: mvn -B -Prelease release:prepare release:perform
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
