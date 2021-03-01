@@ -1,11 +1,24 @@
-# Thanks to Bastien Jansen
-# http://bjansen.github.io/java/2021/02/03/deploying-to-maven-central-using-github-actions.html
+# This workflow does a Maven Release then publishes the artefacts into Maven Central.
+#
+# Sources :
+# - http://bjansen.github.io/java/2021/02/03/deploying-to-maven-central-using-github-actions.html
+# - https://blog.frankel.ch/github-actions-maven-releases/
+# - https://stackoverflow.com/questions/58254332/maven-release-from-github-actions
 
 name: Release and publish package to the Maven Central Repository
 
 on:
   release:
     types: [ published ]
+    inputs:
+      releaseVersion:
+        description: "Default version to use when preparing a release."
+        required: true
+        default: "X.Y.Z"
+      developmentVersion:
+        description: "Default version to use for new local working copy."
+        required: true
+        default: "X.Y.Z-SNAPSHOT"
 
 jobs:
   release:
@@ -37,7 +50,7 @@ jobs:
           git config user.name "GitHub Actions"
 
       - name: Maven Release then Publish to Apache Maven Central
-        run: mvn -B release:prepare release:perform
+        run: mvn -B release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
