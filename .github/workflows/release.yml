@@ -10,10 +10,6 @@ name: Release and publish package to the Maven Central Repository
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: "The branch to checkout when cutting the release."
-        required: true
-        default: "master"
       releaseVersion:
         description: "Default version to use when preparing a release."
         required: true
@@ -32,7 +28,7 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ GITHUB_REF }}
 
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
@@ -57,7 +53,7 @@ jobs:
           git config --global author.name "${GITHUB_ACTOR}"
 
       - name: Maven Release then publish artefacts to the Apache Maven Central
-        run: mvn -B release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} -Dusername=$GITHUB_ACTOR -Dpassword=$GITHUB_TOKEN
+        run: mvn -B -X release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} -Dusername=$GITHUB_ACTOR -Dpassword=$GITHUB_TOKEN
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
