@@ -1,7 +1,6 @@
 # Hibernate Hydrate #
 
-[![Build
-Status](https://travis-ci.org/arey/hibernate-hydrate.png?branch=master)](https://travis-ci.org/arey/hibernate-hydrate)
+[![Build Status](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml/badge.svg)](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate)
 
 The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hydrate) project is to populate a graph of persistent entities and thus avoid the famous [LazyInitializationException](http://docs.jboss.org/hibernate/orm/3.6/javadocs/org/hibernate/LazyInitializationException.html).
@@ -55,7 +54,7 @@ Download the jar though Maven:
 </dependency> 
 ```
 
-Hybernate Hydrate artefacts are available from [Maven Central](http://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate5-hydrate/)
+Hybernate Hydrate artefacts are available from [Maven Central](https://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate5-hydrate/)
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate5-hydrate)
 
@@ -80,11 +79,17 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 ``mvn eclipse:clean eclipse:eclipse``
 
+## Release
+
+This project artefact is published to Maven Central.
+The Maven Release Plugin is used to release the project with Maven.
+The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow automates the process.
+
 
 ## Credits ##
 
 * Uses [Maven](http://maven.apache.org/) as a build tool
-* Uses [Cloudbees](http://www.cloudbees.com/foss) and [Travis CI](http://www.travis-ci.org) for continuous integration builds whenever code is pushed into GitHub
+* Uses [GitHub Actions](https://github.com/features/actions) and [Travis CI](http://www.travis-ci.org) for continuous integration builds whenever code is pushed into GitHub
 * [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) and [Markus Heiden](https://github.com/markusheiden) for their pull requests
  
 
@@ -92,4 +97,6 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 Travis: [![Build
 Status](https://travis-ci.org/arey/hibernate-hydrate.png?branch=master)](https://travis-ci.org/arey/hibernate-hydrate)
+
+GitHub Actions: [![Java CI](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml/badge.svg)](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml)
 
