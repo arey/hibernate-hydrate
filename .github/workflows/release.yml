@@ -4,6 +4,7 @@
 # - http://bjansen.github.io/java/2021/02/03/deploying-to-maven-central-using-github-actions.html
 # - https://blog.frankel.ch/github-actions-maven-releases/
 # - https://stackoverflow.com/questions/58254332/maven-release-from-github-actions
+# - https://gist.github.com/faph/20331648cdc0b492eba0f4d83f69eaa5
 
 name: Maven Release
 
