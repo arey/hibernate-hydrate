@@ -54,7 +54,7 @@ jobs:
           git config --global author.name "${GITHUB_ACTOR}"
 
       - name: Maven Release then publish artefacts to the Apache Maven Central
-        run: mvn -B -X release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} -Dusername=$GITHUB_ACTOR -Dpassword=$GITHUB_TOKEN
+        run: mvn -B release:prepare release:perform -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} -Dusername=$GITHUB_ACTOR -Dpassword=$GITHUB_TOKEN
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
