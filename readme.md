@@ -90,7 +90,7 @@ The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/re
 
 * Uses [Maven](http://maven.apache.org/) as a build tool
 * Uses [GitHub Actions](https://github.com/features/actions) and [Travis CI](http://www.travis-ci.org) for continuous integration builds whenever code is pushed into GitHub
-* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery] (https://github.com/mcobery) and [Markus Heiden](https://github.com/markusheiden) for their pull requests
+* [Izaak (John) Alpert](https://github.com/karlhungus) and [Marc Cobery](https://github.com/mcobery) and [Markus Heiden](https://github.com/markusheiden) for their pull requests
  
 
 ## Build Status ##
