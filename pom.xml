@@ -82,6 +82,7 @@
 
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
+    <!-- * Last Hibernate supported version  -->
     <version.hibernate>5.6.3.Final</version.hibernate>
 
     <!-- * For testing purpose -->
@@ -353,6 +354,20 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <profile>
+      <id>hibernate-5.4</id>
+      <properties>
+        <version.hibernate>5.4.22.Final</version.hibernate>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>hibernate-5.2</id>
+      <properties>
+        <version.hibernate>5.2.0.Final</version.hibernate>
+      </properties>
     </profile>
   </profiles>
 

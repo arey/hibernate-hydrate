@@ -7,7 +7,11 @@ on: [push]
 
 jobs:
   build:
+    name: Hibernate ${{ matrix.mapper }} Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mapper: [ last, hibernate-5.4, hibernate-5.2 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 1.8
@@ -21,4 +25,4 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots verify
+        run: mvn --batch-mode --update-snapshots verify -P ${{ matrix.mapper }}
