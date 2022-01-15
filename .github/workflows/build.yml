@@ -6,8 +6,12 @@ name: Java CI
 on: [push]
 
 jobs:
-  linux:
+  build:
+    name: Hibernate ${{ matrix.mapper }} Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mapper: [ last, hibernate-5.4, hibernate-5.2 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 1.8
@@ -20,14 +24,5 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
-  build:
-    name: Hibernate ${{ matrix.mapper }} Build
-    needs: linux
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mapper: [last, hibernate-5.4, hibernate-5.2]
-    steps:
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify -P ${{ matrix.mapper }}
