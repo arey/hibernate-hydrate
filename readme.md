@@ -29,7 +29,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
-  <version>5.2.2</version>
+  <version>5.2.3</version>
 </dependency> 
 
 <!-- or Hibernate 5.0 and 5.1 support -->
