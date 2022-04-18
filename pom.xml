@@ -73,6 +73,15 @@
     <tag>HEAD</tag>
   </scm>
 
+  <!-- TODO markus 2022-04-18: Remove when Spring 6 has been released. -->
+  <repositories>
+    <repository>
+      <id>repository.spring.milestone</id>
+      <name>Spring Milestone Repository</name>
+      <url>https://repo.spring.io/milestone</url>
+    </repository>
+  </repositories>
+
   <properties>
     <!-- L'encoding des sources -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,7 +103,7 @@
     <version.logback>1.2.11</version.logback>
     <version.mockito>4.4.0</version.mockito>
     <!-- TODO markus 2022-04-18: Waiting for a Spring version with Hibernate 6 support... -->
-    <version.spring>5.3.19</version.spring>
+    <version.spring>6.0.0-M3</version.spring>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
@@ -113,7 +122,7 @@
 
     <!-- Hibernate -->
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>${version.hibernate}</version>
     </dependency>
