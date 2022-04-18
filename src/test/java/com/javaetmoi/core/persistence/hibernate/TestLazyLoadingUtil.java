@@ -19,7 +19,7 @@ import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.SessionFactory;
-import org.hibernate.collection.internal.PersistentMap;
+import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.unitils.reflectionassert.ReflectionAssert;
 import org.unitils.reflectionassert.ReflectionComparatorMode;
 
-import javax.persistence.ManyToOne;
+import jakarta.persistence.ManyToOne;
 
 import static org.junit.jupiter.api.Assertions.*;
 

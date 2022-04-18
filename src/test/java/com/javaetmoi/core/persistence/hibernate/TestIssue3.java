@@ -19,7 +19,6 @@ import com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 import org.hibernate.IdentifierLoadAccess;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,48 +83,48 @@ class TestIssue3 {
 		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
 	}
 
-	@Test
-	public void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		List<System> dbContainer = transactionTemplate.execute(status -> {
-			List<System> system = (List<System>) sessionFactory.getCurrentSession()
-					.createCriteria(System.class)
-					.addOrder(Order.asc("systemNumber")).list();
-			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-			return system;
-		});
-		assertNotNull(dbContainer);
-		assertFalse(dbContainer.isEmpty());
-		assertEquals(2, dbContainer.size());
-		assertEquals(new Integer(1), dbContainer.get(0).getId());
-		assertNotNull(dbContainer.get(0).getSubSystems());
-		assertEquals(2, dbContainer.get(0).getSubSystems().size());
+//	@Test
+//	public void listWithMappedEntityWithAdditionalSpecificCriteria() {
+//		List<System> dbContainer = transactionTemplate.execute(status -> {
+//			List<System> system = (List<System>) sessionFactory.getCurrentSession()
+//					.createCriteria(System.class)
+//					.addOrder(Order.asc("systemNumber")).list();
+//			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+//			return system;
+//		});
+//		assertNotNull(dbContainer);
+//		assertFalse(dbContainer.isEmpty());
+//		assertEquals(2, dbContainer.size());
+//		assertEquals(new Integer(1), dbContainer.get(0).getId());
+//		assertNotNull(dbContainer.get(0).getSubSystems());
+//		assertEquals(2, dbContainer.get(0).getSubSystems().size());
+//
+//	}
 
-	}
-
-	@Test
-	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		List<System> dbContainer = transactionTemplate.execute(status -> {
-			IdentifierLoadAccess<Holder> loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
-			Holder holder = loadAccess.getReference(1);
-			System system = holder.getSystem();
-			system.setName("system1A");
-			system.setSystemNumber("1A");
-			SubSystem subSystem1 = system.getSubSystems().get(0);
-			subSystem1.setName("subsystem1A");
-			subSystem1.setSystemNumber("1-1A");
-			SubSystem subSystem2 = system.getSubSystems().get(1);
-			subSystem2.setName("subsystem21");
-			subSystem2.setSystemNumber("1-21");
-			sessionFactory.getCurrentSession().save(subSystem1);
-			sessionFactory.getCurrentSession().save(subSystem2);
-			sessionFactory.getCurrentSession().save(system);
-			sessionFactory.getCurrentSession().save(holder);
-
-			List<System> retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
-					.createCriteria(System.class)
-					.addOrder(Order.asc("systemNumber")).list();
-			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-			return retrievedSystems;
-		});
-	}
+//	@Test
+//	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
+//		List<System> dbContainer = transactionTemplate.execute(status -> {
+//			IdentifierLoadAccess<Holder> loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
+//			Holder holder = loadAccess.getReference(1);
+//			System system = holder.getSystem();
+//			system.setName("system1A");
+//			system.setSystemNumber("1A");
+//			SubSystem subSystem1 = system.getSubSystems().get(0);
+//			subSystem1.setName("subsystem1A");
+//			subSystem1.setSystemNumber("1-1A");
+//			SubSystem subSystem2 = system.getSubSystems().get(1);
+//			subSystem2.setName("subsystem21");
+//			subSystem2.setSystemNumber("1-21");
+//			sessionFactory.getCurrentSession().save(subSystem1);
+//			sessionFactory.getCurrentSession().save(subSystem2);
+//			sessionFactory.getCurrentSession().save(system);
+//			sessionFactory.getCurrentSession().save(holder);
+//
+//			List<System> retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
+//					.createCriteria(System.class)
+//					.addOrder(Order.asc("systemNumber")).list();
+//			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+//			return retrievedSystems;
+//		});
+//	}
 }

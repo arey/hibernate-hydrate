@@ -16,7 +16,7 @@ package com.javaetmoi.core.persistence.hibernate;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.Collection;
 
 /**
