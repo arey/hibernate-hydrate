@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration("TestLazyLoadingUtil-context.xml")
+@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestIssue3 {
 
 	@Autowired
