@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
+import org.hibernate.metamodel.mapping.AttributeMapping;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.*;
 
@@ -181,10 +182,10 @@ public class LazyLoadingUtil {
         }
 
         var propertyTypes = descriptor.getPropertyTypes();
-        for (int i = 0, n = descriptor.getNumberOfAttributeMappings(); i < n; i++) {
-            var attributeMapping = descriptor.getAttributeMapping(i);
+        for (var attributeMapping : descriptor.getAttributeMappings()) {
             var propertyValue = attributeMapping.getValue(target);
-            deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
+            var propertyType = propertyTypes[attributeMapping.getStateArrayPosition()];
+            deepInflateProperty(sessionFactory, propertyValue, propertyType, recursiveGuard);
         }
     }
 
