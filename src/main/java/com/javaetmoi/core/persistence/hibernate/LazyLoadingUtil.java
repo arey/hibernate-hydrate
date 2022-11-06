@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class LazyLoadingUtil {
     /**
-     * No-arg constructor,
+     * No-arg constructor.
      */
     private LazyLoadingUtil() {
         // Private visibility because utility class.
