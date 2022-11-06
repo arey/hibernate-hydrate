@@ -17,11 +17,8 @@ import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
-import jakarta.persistence.criteria.Order;
-import org.hibernate.IdentifierLoadAccess;
-import org.hibernate.Session;
+import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -80,12 +77,12 @@ class TestIssue3 {
 	void listWithMappedEntity() {
 		var dbContainer = transactionTemplate.execute(status -> {
 			var entityManager = sessionFactory.getCurrentSession();
-			var system = entityManager.get(Holder.class, 1);
-			return LazyLoadingUtil.deepHydrate(entityManager, system);
+			var holder = entityManager.get(Holder.class, 1);
+			return LazyLoadingUtil.deepHydrate(entityManager, holder);
 		});
-		assertEquals(new Integer(1), dbContainer.getId());
+		assertEquals(1, dbContainer.getId());
 		assertNotNull(dbContainer.getSystem());
-		assertEquals(new Integer(1), dbContainer.getSystem().getId());
+		assertEquals(1, dbContainer.getSystem().getId());
 		assertNotNull(dbContainer.getSystem().getSubSystems());
 		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
 	}
@@ -94,14 +91,8 @@ class TestIssue3 {
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
 		var dbContainer = transactionTemplate.execute(status -> {
 			var entityManager = sessionFactory.getCurrentSession();
-			var builder = entityManager.getCriteriaBuilder();
-			var query = builder.createQuery(System.class);
-			var from = query.from(System.class);
-			query.orderBy(builder.asc(from.get("systemNumber")));
-			var select = query.select(from);
-			var systems = entityManager.createQuery(select).getResultList();
-			LazyLoadingUtil.deepHydrate(entityManager, systems);
-			return systems;
+			var systems = selectAllSystemsOrderedByNumber(entityManager);
+			return LazyLoadingUtil.deepHydrate(entityManager, systems);
 		});
 		assertNotNull(dbContainer);
 		assertFalse(dbContainer.isEmpty());
@@ -131,15 +122,18 @@ class TestIssue3 {
 			entityManager.persist(system);
 			entityManager.persist(holder);
 
-			var builder = entityManager.getCriteriaBuilder();
-			var query = builder.createQuery(System.class);
-			var from = query.from(System.class);
-			query.orderBy(builder.asc(from.get("systemNumber")));
-			var select = query.select(from);
-			var systems = entityManager.createQuery(select).getResultList();
-			LazyLoadingUtil.deepHydrate(entityManager, system);
-			return systems;
+			selectAllSystemsOrderedByNumber(entityManager);
+			return LazyLoadingUtil.deepHydrate(entityManager, system);
 		});
 		// TODO markus 2022-11-06: Don't we need some assertions here?
+	}
+
+	private List<System> selectAllSystemsOrderedByNumber(EntityManager entityManager) {
+		var builder = entityManager.getCriteriaBuilder();
+		var query = builder.createQuery(System.class);
+		var from = query.from(System.class);
+		query.orderBy(builder.asc(from.get("systemNumber")));
+		var select = query.select(from);
+		return entityManager.createQuery(select).getResultList();
 	}
 }
