@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration
+@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestLazyLoadingUtil {
 
     @Autowired
