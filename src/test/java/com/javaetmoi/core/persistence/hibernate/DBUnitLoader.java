@@ -47,13 +47,13 @@ import org.springframework.util.ResourceUtils;
  */
 public class DBUnitLoader {
 
-    static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
 
     private final DataSource   dataSource;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public DBUnitLoader(JdbcTemplate jdbcTemplate) {
+    DBUnitLoader(JdbcTemplate jdbcTemplate) {
         this.dataSource = jdbcTemplate.getDataSource();
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -88,9 +88,9 @@ public class DBUnitLoader {
             try {
                 dataSet = flatXmlDataSetBuilder.build(url.openStream());
             } catch (DataSetException e) {
-                throw new RuntimeException("Error while reading dadaset " + dataSetLocation, e);
+                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
             } catch (IOException e) {
-                throw new RuntimeException("Error while reading dadaset " + dataSetLocation, e);
+                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
             }
             dataSets.add(dataSet);
         }
