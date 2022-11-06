@@ -49,11 +49,14 @@ public class DBUnitLoader {
 
     static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
 
-    @Autowired
-    private DataSource  dataSource;
+    private final DataSource   dataSource;
 
-    @Autowired
-    JdbcTemplate        jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public DBUnitLoader(JdbcTemplate jdbcTemplate) {
+        this.dataSource = jdbcTemplate.getDataSource();
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     /**
      * Generate a default location based on the name of the given class. If the class is named

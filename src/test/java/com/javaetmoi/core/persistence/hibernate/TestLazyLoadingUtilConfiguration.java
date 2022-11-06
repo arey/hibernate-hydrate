@@ -58,7 +58,7 @@ public class TestLazyLoadingUtilConfiguration {
     }
 
     @Bean
-    public DBUnitLoader dbUnitLoader() {
-        return new DBUnitLoader();
+    public DBUnitLoader dbUnitLoader(JdbcTemplate jdbcTemplate) {
+        return new DBUnitLoader(jdbcTemplate);
     }
 }
