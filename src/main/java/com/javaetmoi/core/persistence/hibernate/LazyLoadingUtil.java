@@ -175,14 +175,15 @@ public class LazyLoadingUtil {
             target = initializer.getImplementation();
         }
 
-        var persister = sessionFactory.getMetamodel().entityPersisters().get(name);
-        if (persister == null) {
+        var descriptor = sessionFactory.getMappingMetamodel().getEntityDescriptor(name);
+        if (descriptor == null) {
             return;
         }
 
-        var propertyTypes = persister.getPropertyTypes();
-        for (int i = 0, n = propertyTypes.length; i < n; i++) {
-            var propertyValue = persister.getPropertyValue(target, i);
+        var propertyTypes = descriptor.getPropertyTypes();
+        for (int i = 0, n = descriptor.getNumberOfAttributeMappings(); i < n; i++) {
+            var attributeMapping = descriptor.getAttributeMapping(i);
+            var propertyValue = attributeMapping.getValue(target);
             deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
@@ -215,14 +216,14 @@ public class LazyLoadingUtil {
             return;
         }
 
-        var persister = sessionFactory.getMetamodel().collectionPersister(mapType.getRole());
+        var descriptor = sessionFactory.getMappingMetamodel().getCollectionDescriptor(mapType.getRole());
 
-        // First map keys
-        var indexType = persister.getIndexType();
+        // First map keys.
+        var indexType = descriptor.getIndexType();
         for (var index : map.keySet()) {
             deepInflateProperty(sessionFactory, index, indexType, recursiveGuard);
         }
-        // Then map values
+        // Then map values.
         var elementType = mapType.getElementType(sessionFactory);
         for (var element : map.values()) {
             deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
