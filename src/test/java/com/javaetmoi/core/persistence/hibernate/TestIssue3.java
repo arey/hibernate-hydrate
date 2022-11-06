@@ -15,7 +15,6 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
-import com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
