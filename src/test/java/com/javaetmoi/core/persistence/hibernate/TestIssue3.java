@@ -107,14 +107,14 @@ class TestIssue3 {
 		var dbContainer = transactionTemplate.execute(status -> {
 			var entityManager = sessionFactory.getCurrentSession();
 			var loadAccess = entityManager.byId(Holder.class);
-			Holder holder = loadAccess.getReference(1);
-			System system = holder.getSystem();
+			var holder = loadAccess.getReference(1);
+			var system = holder.getSystem();
 			system.setName("system1A");
 			system.setSystemNumber("1A");
-			SubSystem subSystem1 = system.getSubSystems().get(0);
+			var subSystem1 = system.getSubSystems().get(0);
 			subSystem1.setName("subsystem1A");
 			subSystem1.setSystemNumber("1-1A");
-			SubSystem subSystem2 = system.getSubSystems().get(1);
+			var subSystem2 = system.getSubSystems().get(1);
 			subSystem2.setName("subsystem21");
 			subSystem2.setSystemNumber("1-21");
 			entityManager.persist(subSystem1);
