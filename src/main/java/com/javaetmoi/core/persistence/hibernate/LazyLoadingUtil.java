@@ -19,10 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.persister.collection.CollectionPersister;
-import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.proxy.LazyInitializer;
 import org.hibernate.type.*;
 
 import java.util.Collection;
@@ -39,14 +36,14 @@ import java.util.Map;
  */
 public class LazyLoadingUtil {
     /**
-     * No-arg constructor
+     * No-arg constructor,
      */
     private LazyLoadingUtil() {
         // Private visibility because utility class.
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursivity.
+     * Populate a lazy-initialized object graph by recursion.
      * 
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
@@ -66,7 +63,7 @@ public class LazyLoadingUtil {
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursivity.
+     * Populate a lazy-initialized object graph by recursion.
      *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
@@ -81,12 +78,12 @@ public class LazyLoadingUtil {
      *         input parameter. Useful when calling this method in a return statement.
      */
     public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
-        SessionFactoryImplementor sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
+        var sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
         // Reduce resizes for big collections.
         // *2 to compensate for the load factor.
         int capacity = Math.max(entities.size() * 2, 32);
-        IdentitySet recursiveGuard = new IdentitySet(capacity);
-        for (Object entity : entities) {
+        var recursiveGuard = new IdentitySet<>(capacity);
+        for (var entity : entities) {
             // TODO markus 2016-06-19: How to determine entity type?
             deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
         }
@@ -94,7 +91,7 @@ public class LazyLoadingUtil {
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursivity.
+     * Populate a lazy-initialized object graph by recursion.
      * 
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
@@ -114,7 +111,7 @@ public class LazyLoadingUtil {
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursivity.
+     * Populate a lazy-initialized object graph by recursion.
      *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
@@ -129,15 +126,17 @@ public class LazyLoadingUtil {
      *         when calling this method in a return statement.
      */
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
-        SessionFactoryImplementor sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
-        IdentitySet recursiveGuard = new IdentitySet();
+        var sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
+        var recursiveGuard = new IdentitySet<>();
         // TODO markus 2016-06-19: How to determine entity type?
         deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
         return entity;
     }
 
     private static void deepInflateProperty(
-            SessionFactoryImplementor sessionFactory, Object propertyValue, Type propertyType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory,
+            Object propertyValue, Type propertyType,
+            IdentitySet<Object> recursiveGuard) {
         if (propertyValue == null) {
             return; // null guard
         }
@@ -160,47 +159,53 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateEntity(
-            SessionFactoryImplementor sessionFactory, Object entity, EntityType entityType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory,
+            Object entity, EntityType entityType,
+            IdentitySet<Object> recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
         Hibernate.initialize(entity);
 
-        String name = entityType != null? entityType.getName() : entity.getClass().getName();
+        var name = entityType != null? entityType.getName() : entity.getClass().getName();
         Object target = entity;
         if (entity instanceof HibernateProxy) {
-            LazyInitializer initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
+            var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
             name = initializer.getEntityName();
             target = initializer.getImplementation();
         }
 
-        EntityPersister persister = sessionFactory.getMetamodel().entityPersisters().get(name);
+        var persister = sessionFactory.getMetamodel().entityPersisters().get(name);
         if (persister == null) {
             return;
         }
 
-        Type[] propertyTypes = persister.getPropertyTypes();
+        var propertyTypes = persister.getPropertyTypes();
         for (int i = 0, n = propertyTypes.length; i < n; i++) {
-            Object propertyValue = persister.getPropertyValue(target, i);
+            var propertyValue = persister.getPropertyValue(target, i);
             deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
 
     private static void deepInflateComponent(
-            SessionFactoryImplementor sessionFactory, Object component, ComponentType componentType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory,
+            Object component, ComponentType componentType,
+            IdentitySet<Object> recursiveGuard) {
         if (component == null || !recursiveGuard.add(component)) {
             return;
         }
 
-        Type[] propertyTypes = componentType.getSubtypes();
+        var propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
-            Object propertyValue = componentType.getPropertyValue(component, i);
+            var propertyValue = componentType.getPropertyValue(component, i);
             deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
 
     private static void deepInflateMap(
-            SessionFactoryImplementor sessionFactory, Map<?, ?> map, MapType mapType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory,
+            Map<?, ?> map, MapType mapType,
+            IdentitySet<Object> recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
@@ -210,22 +215,24 @@ public class LazyLoadingUtil {
             return;
         }
 
-        CollectionPersister persister = sessionFactory.getMetamodel().collectionPersister(mapType.getRole());
+        var persister = sessionFactory.getMetamodel().collectionPersister(mapType.getRole());
 
         // First map keys
-        Type indexType = persister.getIndexType();
-        for (Object index : map.keySet()) {
+        var indexType = persister.getIndexType();
+        for (var index : map.keySet()) {
             deepInflateProperty(sessionFactory, index, indexType, recursiveGuard);
         }
         // Then map values
-        Type elementType = mapType.getElementType(sessionFactory);
-        for (Object element : map.values()) {
+        var elementType = mapType.getElementType(sessionFactory);
+        for (var element : map.values()) {
             deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
         }
     }
 
     private static void deepInflateCollection(
-            SessionFactoryImplementor sessionFactory, Collection<?> collection, CollectionType collectionType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory,
+            Collection<?> collection, CollectionType collectionType,
+            IdentitySet<Object> recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
@@ -235,8 +242,8 @@ public class LazyLoadingUtil {
             return;
         }
 
-        Type elementType = collectionType.getElementType(sessionFactory);
-        for (Object element : collection) {
+        var elementType = collectionType.getElementType(sessionFactory);
+        for (var element : collection) {
             deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
         }
     }
