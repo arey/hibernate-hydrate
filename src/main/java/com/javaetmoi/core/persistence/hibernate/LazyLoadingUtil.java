@@ -85,7 +85,6 @@ public class LazyLoadingUtil {
         int capacity = Math.max(entities.size() * 2, 32);
         var recursiveGuard = new IdentitySet<>(capacity);
         for (var entity : entities) {
-            // TODO markus 2016-06-19: How to determine entity type?
             deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
         }
         return entities;
@@ -159,6 +158,18 @@ public class LazyLoadingUtil {
         }
     }
 
+    /**
+     * Populate a lazy-initialized object graph by recursion.
+     *
+     * @param mappingMetamodel
+     *            The mapping metamodel.
+     * @param entity
+     *            The entity. May be {@code null}.
+     * @param entityType
+     *            The type of the entity. {@code null} if not known.
+     * @param recursiveGuard
+     *            A guard to avoid endless recursion.
+     */
     private static void deepInflateEntity(
             MappingMetamodelImplementor mappingMetamodel,
             Object entity, EntityType entityType,
@@ -168,16 +179,16 @@ public class LazyLoadingUtil {
         }
         Hibernate.initialize(entity);
 
-        var name = entityType != null ? entityType.getName() : null;
+        var entityName = entityType != null ? entityType.getAssociatedEntityName() : null;
         var target = entity;
         if (entity instanceof HibernateProxy) {
             var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
-            name = initializer.getEntityName();
+            entityName = initializer.getEntityName();
             target = initializer.getImplementation();
         }
 
-        var descriptor = name != null ?
-                mappingMetamodel.getEntityDescriptor(name) :
+        var descriptor = entityName != null ?
+                mappingMetamodel.getEntityDescriptor(entityName) :
                 mappingMetamodel.getEntityDescriptor(entity.getClass());
         if (descriptor == null) {
             return;
@@ -202,7 +213,8 @@ public class LazyLoadingUtil {
         var propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
             var propertyValue = componentType.getPropertyValue(component, i);
-            deepInflateProperty(mappingMetamodel, propertyValue, propertyTypes[i], recursiveGuard);
+            var propertyType = propertyTypes[i];
+            deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
         }
     }
 
