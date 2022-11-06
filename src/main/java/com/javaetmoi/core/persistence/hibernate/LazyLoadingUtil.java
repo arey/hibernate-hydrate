@@ -20,6 +20,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metamodel.mapping.AttributeMapping;
+import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.*;
 
@@ -168,15 +169,18 @@ public class LazyLoadingUtil {
         }
         Hibernate.initialize(entity);
 
-        var name = entityType != null? entityType.getName() : entity.getClass().getName();
-        Object target = entity;
+        var name = entityType != null ? entityType.getName() : null;
+        var target = entity;
         if (entity instanceof HibernateProxy) {
             var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
             name = initializer.getEntityName();
             target = initializer.getImplementation();
         }
 
-        var descriptor = sessionFactory.getMappingMetamodel().getEntityDescriptor(name);
+        var mappingMetamodel = sessionFactory.getMappingMetamodel();
+        var descriptor = name != null ?
+                mappingMetamodel.getEntityDescriptor(name) :
+                mappingMetamodel.getEntityDescriptor(entity.getClass());
         if (descriptor == null) {
             return;
         }
@@ -217,18 +221,14 @@ public class LazyLoadingUtil {
             return;
         }
 
-        var descriptor = sessionFactory.getMappingMetamodel().getCollectionDescriptor(mapType.getRole());
-
-        // First map keys.
+        var mappingMetamodel = sessionFactory.getMappingMetamodel();
+        var descriptor = mappingMetamodel.getCollectionDescriptor(mapType.getRole());
         var indexType = descriptor.getIndexType();
-        for (var index : map.keySet()) {
+        var elementType = descriptor.getElementType();
+        map.forEach((index, element) -> {
             deepInflateProperty(sessionFactory, index, indexType, recursiveGuard);
-        }
-        // Then map values.
-        var elementType = mapType.getElementType(sessionFactory);
-        for (var element : map.values()) {
             deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
-        }
+        });
     }
 
     private static void deepInflateCollection(
@@ -244,9 +244,10 @@ public class LazyLoadingUtil {
             return;
         }
 
-        var elementType = collectionType.getElementType(sessionFactory);
-        for (var element : collection) {
-            deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
-        }
+        var mappingMetamodel = sessionFactory.getMappingMetamodel();
+        var descriptor = mappingMetamodel.getCollectionDescriptor(collectionType.getRole());
+        var elementType = descriptor.getElementType();
+        collection.forEach(element ->
+                deepInflateProperty(sessionFactory, element, elementType, recursiveGuard));
     }
 }
