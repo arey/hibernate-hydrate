@@ -65,12 +65,12 @@ class TestIssue3 {
 	@Disabled("Hibernate 6 seems to not support this or is buggy.")
 	@Test
 	void listWithEmbeddableClass() {
-
 		var dbContainer = transactionTemplate.execute(status -> {
-			var plan = sessionFactory.getCurrentSession().get(Plan.class, 1);
-			return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), plan);
+			var entityManager = sessionFactory.getCurrentSession();
+			var plan = entityManager.get(Plan.class, 1);
+			return LazyLoadingUtil.deepHydrate(entityManager, plan);
 		});
-		assertEquals(new Integer(1), dbContainer.getId());
+		assertEquals(1, dbContainer.getId());
 		assertEquals(1, dbContainer.getTransfers().size());
 		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan()
 				.getEvents().size());
@@ -79,8 +79,9 @@ class TestIssue3 {
 	@Test
 	void listWithMappedEntity() {
 		var dbContainer = transactionTemplate.execute(status -> {
-			var system = sessionFactory.getCurrentSession().get(Holder.class, 1);
-			return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+			var entityManager = sessionFactory.getCurrentSession();
+			var system = entityManager.get(Holder.class, 1);
+			return LazyLoadingUtil.deepHydrate(entityManager, system);
 		});
 		assertEquals(new Integer(1), dbContainer.getId());
 		assertNotNull(dbContainer.getSystem());
@@ -105,36 +106,40 @@ class TestIssue3 {
 		assertNotNull(dbContainer);
 		assertFalse(dbContainer.isEmpty());
 		assertEquals(2, dbContainer.size());
-		assertEquals(new Integer(1), dbContainer.get(0).getId());
+		assertEquals(1, dbContainer.get(0).getId());
 		assertNotNull(dbContainer.get(0).getSubSystems());
 		assertEquals(2, dbContainer.get(0).getSubSystems().size());
-
 	}
 
-//	@Test
-//	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-//		var dbContainer = transactionTemplate.execute(status -> {
-//			var loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
-//			Holder holder = loadAccess.getReference(1);
-//			System system = holder.getSystem();
-//			system.setName("system1A");
-//			system.setSystemNumber("1A");
-//			SubSystem subSystem1 = system.getSubSystems().get(0);
-//			subSystem1.setName("subsystem1A");
-//			subSystem1.setSystemNumber("1-1A");
-//			SubSystem subSystem2 = system.getSubSystems().get(1);
-//			subSystem2.setName("subsystem21");
-//			subSystem2.setSystemNumber("1-21");
-//			sessionFactory.getCurrentSession().save(subSystem1);
-//			sessionFactory.getCurrentSession().save(subSystem2);
-//			sessionFactory.getCurrentSession().save(system);
-//			sessionFactory.getCurrentSession().save(holder);
-//
-//			var retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
-//					.createCriteria(System.class)
-//					.addOrder(Order.asc("systemNumber")).list();
-//			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-//			return retrievedSystems;
-//		});
-//	}
+	@Test
+	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
+		var dbContainer = transactionTemplate.execute(status -> {
+			var entityManager = sessionFactory.getCurrentSession();
+			var loadAccess = entityManager.byId(Holder.class);
+			Holder holder = loadAccess.getReference(1);
+			System system = holder.getSystem();
+			system.setName("system1A");
+			system.setSystemNumber("1A");
+			SubSystem subSystem1 = system.getSubSystems().get(0);
+			subSystem1.setName("subsystem1A");
+			subSystem1.setSystemNumber("1-1A");
+			SubSystem subSystem2 = system.getSubSystems().get(1);
+			subSystem2.setName("subsystem21");
+			subSystem2.setSystemNumber("1-21");
+			entityManager.persist(subSystem1);
+			entityManager.persist(subSystem2);
+			entityManager.persist(system);
+			entityManager.persist(holder);
+
+			var builder = entityManager.getCriteriaBuilder();
+			var query = builder.createQuery(System.class);
+			var from = query.from(System.class);
+			query.orderBy(builder.asc(from.get("systemNumber")));
+			var select = query.select(from);
+			var systems = entityManager.createQuery(select).getResultList();
+			LazyLoadingUtil.deepHydrate(entityManager, system);
+			return systems;
+		});
+		// TODO markus 2022-11-06: Don't we need some assertions here?
+	}
 }
