@@ -19,7 +19,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.mapping.AttributeMapping;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.*;
@@ -80,14 +79,14 @@ public class LazyLoadingUtil {
      *         input parameter. Useful when calling this method in a return statement.
      */
     public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
-        var sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
+        var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         // Reduce resizes for big collections.
         // *2 to compensate for the load factor.
         int capacity = Math.max(entities.size() * 2, 32);
         var recursiveGuard = new IdentitySet<>(capacity);
         for (var entity : entities) {
             // TODO markus 2016-06-19: How to determine entity type?
-            deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
+            deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
         }
         return entities;
     }
@@ -128,31 +127,31 @@ public class LazyLoadingUtil {
      *         when calling this method in a return statement.
      */
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
-        var sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
+        var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         var recursiveGuard = new IdentitySet<>();
         // TODO markus 2016-06-19: How to determine entity type?
-        deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
+        deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
         return entity;
     }
 
     private static void deepInflateProperty(
-            SessionFactoryImplementor sessionFactory,
+            MappingMetamodelImplementor mappingMetamodel,
             Object propertyValue, Type propertyType,
             IdentitySet<Object> recursiveGuard) {
         if (propertyValue == null) {
-            return; // null guard
+            return;
         }
 
         if (propertyType instanceof EntityType) {
-            deepInflateEntity(sessionFactory, propertyValue, (EntityType) propertyType, recursiveGuard);
+            deepInflateEntity(mappingMetamodel, propertyValue, (EntityType) propertyType, recursiveGuard);
         } else if (propertyType instanceof ComponentType) {
             // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
-            deepInflateComponent(sessionFactory, propertyValue, (ComponentType) propertyType, recursiveGuard);
+            deepInflateComponent(mappingMetamodel, propertyValue, (ComponentType) propertyType, recursiveGuard);
         } else if (propertyType instanceof MapType) {
-            deepInflateMap(sessionFactory, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
+            deepInflateMap(mappingMetamodel, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
         } else if (propertyType instanceof CollectionType) {
             if (propertyValue instanceof Collection) {
-                deepInflateCollection(sessionFactory, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
+                deepInflateCollection(mappingMetamodel, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
             } else {
                 throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
                       propertyType.getClass().getSimpleName(), propertyValue.getClass().getSimpleName()));
@@ -161,7 +160,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateEntity(
-            SessionFactoryImplementor sessionFactory,
+            MappingMetamodelImplementor mappingMetamodel,
             Object entity, EntityType entityType,
             IdentitySet<Object> recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
@@ -177,7 +176,6 @@ public class LazyLoadingUtil {
             target = initializer.getImplementation();
         }
 
-        var mappingMetamodel = sessionFactory.getMappingMetamodel();
         var descriptor = name != null ?
                 mappingMetamodel.getEntityDescriptor(name) :
                 mappingMetamodel.getEntityDescriptor(entity.getClass());
@@ -189,12 +187,12 @@ public class LazyLoadingUtil {
         for (var attributeMapping : descriptor.getAttributeMappings()) {
             var propertyValue = attributeMapping.getValue(target);
             var propertyType = propertyTypes[attributeMapping.getStateArrayPosition()];
-            deepInflateProperty(sessionFactory, propertyValue, propertyType, recursiveGuard);
+            deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
         }
     }
 
     private static void deepInflateComponent(
-            SessionFactoryImplementor sessionFactory,
+            MappingMetamodelImplementor mappingMetamodel,
             Object component, ComponentType componentType,
             IdentitySet<Object> recursiveGuard) {
         if (component == null || !recursiveGuard.add(component)) {
@@ -204,12 +202,12 @@ public class LazyLoadingUtil {
         var propertyTypes = componentType.getSubtypes();
         for (int i = 0; i < propertyTypes.length; i++) {
             var propertyValue = componentType.getPropertyValue(component, i);
-            deepInflateProperty(sessionFactory, propertyValue, propertyTypes[i], recursiveGuard);
+            deepInflateProperty(mappingMetamodel, propertyValue, propertyTypes[i], recursiveGuard);
         }
     }
 
     private static void deepInflateMap(
-            SessionFactoryImplementor sessionFactory,
+            MappingMetamodelImplementor mappingMetamodel,
             Map<?, ?> map, MapType mapType,
             IdentitySet<Object> recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
@@ -221,18 +219,17 @@ public class LazyLoadingUtil {
             return;
         }
 
-        var mappingMetamodel = sessionFactory.getMappingMetamodel();
         var descriptor = mappingMetamodel.getCollectionDescriptor(mapType.getRole());
         var indexType = descriptor.getIndexType();
         var elementType = descriptor.getElementType();
         map.forEach((index, element) -> {
-            deepInflateProperty(sessionFactory, index, indexType, recursiveGuard);
-            deepInflateProperty(sessionFactory, element, elementType, recursiveGuard);
+            deepInflateProperty(mappingMetamodel, index, indexType, recursiveGuard);
+            deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard);
         });
     }
 
     private static void deepInflateCollection(
-            SessionFactoryImplementor sessionFactory,
+            MappingMetamodelImplementor mappingMetamodel,
             Collection<?> collection, CollectionType collectionType,
             IdentitySet<Object> recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
@@ -244,10 +241,9 @@ public class LazyLoadingUtil {
             return;
         }
 
-        var mappingMetamodel = sessionFactory.getMappingMetamodel();
         var descriptor = mappingMetamodel.getCollectionDescriptor(collectionType.getRole());
         var elementType = descriptor.getElementType();
         collection.forEach(element ->
-                deepInflateProperty(sessionFactory, element, elementType, recursiveGuard));
+                deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard));
     }
 }
