@@ -57,8 +57,8 @@ class TestIssue3 {
 		dbUnitLoader.loadDatabase(getClass());
 	}
 
-	// TODO markus 2022-11-06: Fix this or report a bug to Hibernate.
-	@Disabled("Hibernate 6 seems to not support this or is buggy.")
+	// TODO markus 2022-11-13: Re-enable when bug has been fixed in Hibernate.
+	@Disabled("Broken because of Hibernate bug HHH-15713")
 	@Test
 	void listWithEmbeddableClass() {
 		var dbContainer = transactionTemplate.execute(status -> {
