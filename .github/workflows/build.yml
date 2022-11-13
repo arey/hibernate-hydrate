@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapper: [ last, hibernate-5.4, hibernate-5.2 ]
+        mapper: [ last, hibernate-6.0 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 1.8

@@ -367,16 +367,13 @@
     </profile>
 
     <profile>
-      <id>hibernate-5.4</id>
-      <properties>
-        <version.hibernate>5.4.22.Final</version.hibernate>
-      </properties>
+      <id>last</id>
     </profile>
 
     <profile>
-      <id>hibernate-5.2</id>
+      <id>hibernate-6.0</id>
       <properties>
-        <version.hibernate>5.2.0.Final</version.hibernate>
+        <version.hibernate>6.0.2.Final</version.hibernate>
       </properties>
     </profile>
   </profiles>
