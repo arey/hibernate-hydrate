@@ -33,7 +33,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
+ * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a> fix.
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
