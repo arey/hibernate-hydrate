@@ -124,7 +124,11 @@ class TestIssue3 {
 			selectAllSystemsOrderedByNumber(entityManager);
 			return LazyLoadingUtil.deepHydrate(entityManager, system);
 		});
-		// TODO markus 2022-11-06: Don't we need some assertions here?
+		assertEquals(1, dbContainer.getId());
+		assertNotNull(dbContainer.getSubSystems());
+		assertEquals(2, dbContainer.getSubSystems().size());
+		assertEquals(1, dbContainer.getSubSystems().get(0).getId());
+		assertEquals(2, dbContainer.getSubSystems().get(1).getId());
 	}
 
 	private List<System> selectAllSystemsOrderedByNumber(EntityManager entityManager) {
