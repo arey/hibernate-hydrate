@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
-  <version>5.2.4-SNAPSHOT</version>
-  <artifactId>javaetmoi-hibernate5-hydrate</artifactId>
+  <version>6.0.0-SNAPSHOT</version>
+  <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 4.x)</description>
@@ -14,7 +14,7 @@
       <id>arey</id>
       <name>Antoine Rey</name>
       <email>antoine@javaetmoi.com</email>
-      <url>http://javaetmoi.com</url>
+      <url>https://javaetmoi.com</url>
       <timezone>+1</timezone>
       <roles>
         <role>Java Developer</role>
@@ -46,7 +46,7 @@
     </developer>
   </developers>
 
-  <!-- Continous Integration build hosted by CloudBees -->
+  <!-- Continuous Integration build hosted by CloudBees -->
   <ciManagement>
     <system>jenkins</system>
     <url>https://javaetmoi.ci.cloudbees.com/job/Hibernate-Hydrate/</url>
@@ -73,46 +73,56 @@
     <tag>HEAD</tag>
   </scm>
 
+  <!-- TODO markus 2022-04-18: Remove when Spring 6 has been released. -->
+  <repositories>
+    <repository>
+      <id>repository.spring.milestone</id>
+      <name>Spring Milestone Repository</name>
+      <url>https://repo.spring.io/milestone</url>
+    </repository>
+  </repositories>
+
   <properties>
     <!-- L'encoding des sources -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
 
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
     <!-- * Last Hibernate supported version  -->
-    <version.hibernate>5.6.3.Final</version.hibernate>
+    <version.hibernate>6.1.5.Final</version.hibernate>
 
     <!-- * For testing purpose -->
     <version.commons-lang3>3.12.0</version.commons-lang3>
-    <version.dbunit>2.7.2</version.dbunit>
+    <version.dbunit>2.7.3</version.dbunit>
     <version.ehcache>2.6.11</version.ehcache>
-    <version.h2>2.1.210</version.h2>
-    <version.junit>5.8.2</version.junit>
-    <version.logback>1.2.10</version.logback>
-    <version.mockito>4.2.0</version.mockito>
-    <version.spring>5.3.14</version.spring>
+    <version.h2>2.1.214</version.h2>
+    <version.junit>5.9.1</version.junit>
+    <version.logback>1.4.4</version.logback>
+    <version.mockito>4.8.1</version.mockito>
+    <!-- TODO markus 2022-04-18: Waiting for an official Spring 6 version... -->
+    <version.spring>6.0.0-RC3</version.spring>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
-    <version.plugin.maven-compiler-plugin>3.8.1</version.plugin.maven-compiler-plugin>
+    <version.plugin.maven-compiler-plugin>3.10.1</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-eclipse-plugin>2.10</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
-    <version.plugin.maven-javadoc-plugin>3.2.0</version.plugin.maven-javadoc-plugin>
+    <version.plugin.maven-javadoc-plugin>3.4.1</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
-    <version.plugin.maven-resources-plugin>3.2.0</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-resources-plugin>3.3.0</version.plugin.maven-resources-plugin>
     <version.plugin.maven-source-plugin>3.2.1</version.plugin.maven-source-plugin>
     <version.plugin.nexus-staging-maven-plugin>1.6.8</version.plugin.nexus-staging-maven-plugin>
-    <version.plugin.maven-surefire-plugin>3.0.0-M5</version.plugin.maven-surefire-plugin>
+    <version.plugin.maven-surefire-plugin>3.0.0-M7</version.plugin.maven-surefire-plugin>
   </properties>
 
   <dependencies>
 
     <!-- Hibernate -->
     <dependency>
-      <groupId>org.hibernate</groupId>
+      <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-core</artifactId>
       <version>${version.hibernate}</version>
     </dependency>
@@ -326,7 +336,7 @@
               </execution>
             </executions>
             <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <additionalOptions>-Xdoclint:none</additionalOptions>
             </configuration>
           </plugin>
           <!--GPG Signed Artefacts required by Maven Central -->
@@ -357,16 +367,13 @@
     </profile>
 
     <profile>
-      <id>hibernate-5.4</id>
-      <properties>
-        <version.hibernate>5.4.22.Final</version.hibernate>
-      </properties>
+      <id>last</id>
     </profile>
 
     <profile>
-      <id>hibernate-5.2</id>
+      <id>hibernate-6.0</id>
       <properties>
-        <version.hibernate>5.2.0.Final</version.hibernate>
+        <version.hibernate>6.0.2.Final</version.hibernate>
       </properties>
     </profile>
   </profiles>

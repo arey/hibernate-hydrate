@@ -15,12 +15,11 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
-import com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
-import org.hibernate.IdentifierLoadAccess;
+import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +33,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit test for the https://github.com/arey/hibernate-hydrate/issues/3 fix
+ * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a> fix.
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration("TestLazyLoadingUtil-context.xml")
+@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestIssue3 {
 
 	@Autowired
@@ -58,14 +57,16 @@ class TestIssue3 {
 		dbUnitLoader.loadDatabase(getClass());
 	}
 
+	// TODO markus 2022-11-13: Re-enable when bug has been fixed in Hibernate.
+	@Disabled("Broken because of Hibernate bug HHH-15713")
 	@Test
 	void listWithEmbeddableClass() {
-
-		Plan dbContainer = transactionTemplate.execute(status -> {
-			Plan plan = sessionFactory.getCurrentSession().get(Plan.class, 1);
-			return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), plan);
+		var dbContainer = transactionTemplate.execute(status -> {
+			var entityManager = sessionFactory.getCurrentSession();
+			var plan = entityManager.get(Plan.class, 1);
+			return LazyLoadingUtil.deepHydrate(entityManager, plan);
 		});
-		assertEquals(new Integer(1), dbContainer.getId());
+		assertEquals(1, dbContainer.getId());
 		assertEquals(1, dbContainer.getTransfers().size());
 		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan()
 				.getEvents().size());
@@ -73,59 +74,69 @@ class TestIssue3 {
 
 	@Test
 	void listWithMappedEntity() {
-		Holder dbContainer = transactionTemplate.execute(status -> {
-			Holder system = sessionFactory.getCurrentSession().get(Holder.class, 1);
-			return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
+		var dbContainer = transactionTemplate.execute(status -> {
+			var entityManager = sessionFactory.getCurrentSession();
+			var holder = entityManager.get(Holder.class, 1);
+			return LazyLoadingUtil.deepHydrate(entityManager, holder);
 		});
-		assertEquals(new Integer(1), dbContainer.getId());
+		assertEquals(1, dbContainer.getId());
 		assertNotNull(dbContainer.getSystem());
-		assertEquals(new Integer(1), dbContainer.getSystem().getId());
+		assertEquals(1, dbContainer.getSystem().getId());
 		assertNotNull(dbContainer.getSystem().getSubSystems());
 		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
 	}
 
 	@Test
-	public void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		List<System> dbContainer = transactionTemplate.execute(status -> {
-			List<System> system = (List<System>) sessionFactory.getCurrentSession()
-					.createCriteria(System.class)
-					.addOrder(Order.asc("systemNumber")).list();
-			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-			return system;
+	void listWithMappedEntityWithAdditionalSpecificCriteria() {
+		var dbContainer = transactionTemplate.execute(status -> {
+			var entityManager = sessionFactory.getCurrentSession();
+			var systems = selectAllSystemsOrderedByNumber(entityManager);
+			return LazyLoadingUtil.deepHydrate(entityManager, systems);
 		});
 		assertNotNull(dbContainer);
 		assertFalse(dbContainer.isEmpty());
 		assertEquals(2, dbContainer.size());
-		assertEquals(new Integer(1), dbContainer.get(0).getId());
+		assertEquals(1, dbContainer.get(0).getId());
 		assertNotNull(dbContainer.get(0).getSubSystems());
 		assertEquals(2, dbContainer.get(0).getSubSystems().size());
-
 	}
 
 	@Test
 	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		List<System> dbContainer = transactionTemplate.execute(status -> {
-			IdentifierLoadAccess<Holder> loadAccess = sessionFactory.getCurrentSession().byId(Holder.class);
-			Holder holder = loadAccess.getReference(1);
-			System system = holder.getSystem();
+		var dbContainer = transactionTemplate.execute(status -> {
+			var entityManager = sessionFactory.getCurrentSession();
+			var loadAccess = entityManager.byId(Holder.class);
+			var holder = loadAccess.getReference(1);
+			var system = holder.getSystem();
 			system.setName("system1A");
 			system.setSystemNumber("1A");
-			SubSystem subSystem1 = system.getSubSystems().get(0);
+			var subSystem1 = system.getSubSystems().get(0);
 			subSystem1.setName("subsystem1A");
 			subSystem1.setSystemNumber("1-1A");
-			SubSystem subSystem2 = system.getSubSystems().get(1);
+			var subSystem2 = system.getSubSystems().get(1);
 			subSystem2.setName("subsystem21");
 			subSystem2.setSystemNumber("1-21");
-			sessionFactory.getCurrentSession().save(subSystem1);
-			sessionFactory.getCurrentSession().save(subSystem2);
-			sessionFactory.getCurrentSession().save(system);
-			sessionFactory.getCurrentSession().save(holder);
+			entityManager.persist(subSystem1);
+			entityManager.persist(subSystem2);
+			entityManager.persist(system);
+			entityManager.persist(holder);
 
-			List<System> retrievedSystems = (List<System>) sessionFactory.getCurrentSession()
-					.createCriteria(System.class)
-					.addOrder(Order.asc("systemNumber")).list();
-			LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), system);
-			return retrievedSystems;
+			selectAllSystemsOrderedByNumber(entityManager);
+			return LazyLoadingUtil.deepHydrate(entityManager, system);
 		});
+		assertEquals(1, dbContainer.getId());
+		assertNotNull(dbContainer.getSubSystems());
+		assertEquals(2, dbContainer.getSubSystems().size());
+		assertEquals(1, dbContainer.getSubSystems().get(0).getId());
+		assertEquals(2, dbContainer.getSubSystems().get(1).getId());
+	}
+
+	private List<System> selectAllSystemsOrderedByNumber(EntityManager entityManager) {
+		var builder = entityManager.getCriteriaBuilder();
+		var query = builder.createQuery(System.class);
+		var from = query.from(System.class);
+		query.orderBy(builder.asc(from.get("systemNumber")));
+		var select = query.select(from);
+		return entityManager.createQuery(select).getResultList();
 	}
 }

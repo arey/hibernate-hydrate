@@ -13,8 +13,8 @@
  */
 package com.javaetmoi.core.persistence.hibernate.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 public class Biz {

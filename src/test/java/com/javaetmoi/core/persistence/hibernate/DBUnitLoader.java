@@ -47,13 +47,16 @@ import org.springframework.util.ResourceUtils;
  */
 public class DBUnitLoader {
 
-    static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
 
-    @Autowired
-    private DataSource  dataSource;
+    private final DataSource   dataSource;
 
-    @Autowired
-    JdbcTemplate        jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    DBUnitLoader(JdbcTemplate jdbcTemplate) {
+        this.dataSource = jdbcTemplate.getDataSource();
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     /**
      * Generate a default location based on the name of the given class. If the class is named
@@ -85,9 +88,9 @@ public class DBUnitLoader {
             try {
                 dataSet = flatXmlDataSetBuilder.build(url.openStream());
             } catch (DataSetException e) {
-                throw new RuntimeException("Error while reading dadaset " + dataSetLocation, e);
+                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
             } catch (IOException e) {
-                throw new RuntimeException("Error while reading dadaset " + dataSetLocation, e);
+                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
             }
             dataSets.add(dataSet);
         }

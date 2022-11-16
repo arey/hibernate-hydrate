@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/10 fix
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration("TestLazyLoadingUtil-context.xml")
+@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestIssue10 {
 
     @Autowired
