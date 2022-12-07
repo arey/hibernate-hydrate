@@ -9,7 +9,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 
 * Utility class to populate a lazy-initialized object graph by recursivity
 * Supports JPA with Hibernate as provider
-* Supports third Hibernate 3.x, Hibernate 4.x and Hibernate 5.x
+* Supports Hibernate 3.x to 6.x (with different artefactId)
 
 ## Getting Help ##
 
