@@ -13,26 +13,24 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a> fix.
