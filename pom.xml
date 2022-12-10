@@ -361,9 +361,9 @@
     </profile>
 
     <profile>
-      <id>hibernate-6.0</id>
+      <id>hibernate-6.1</id>
       <properties>
-        <version.hibernate>6.0.2.Final</version.hibernate>
+        <version.hibernate>6.1.6.Final</version.hibernate>
       </properties>
     </profile>
   </profiles>
