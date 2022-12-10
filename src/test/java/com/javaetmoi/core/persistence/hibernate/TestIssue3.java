@@ -19,7 +19,6 @@ import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +56,6 @@ class TestIssue3 {
 		dbUnitLoader.loadDatabase(getClass());
 	}
 
-	// TODO markus 2022-11-13: Re-enable when bug has been fixed in Hibernate.
-	@Disabled("Broken because of Hibernate bug HHH-15713")
 	@Test
 	void listWithEmbeddableClass() {
 		var dbContainer = transactionTemplate.execute(status -> {
