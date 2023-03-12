@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
+import org.hibernate.metamodel.mapping.AttributeMapping;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.*;
@@ -195,6 +196,8 @@ public class LazyLoadingUtil {
         }
 
         var propertyTypes = descriptor.getPropertyTypes();
+        // Explicitly use Iterable here to be backward compatible to Hibernate 6.1.
+        Iterable<AttributeMapping> attributeMappings = descriptor.getAttributeMappings();
         for (var attributeMapping : descriptor.getAttributeMappings()) {
             var propertyValue = attributeMapping.getValue(target);
             var propertyType = propertyTypes[attributeMapping.getStateArrayPosition()];
