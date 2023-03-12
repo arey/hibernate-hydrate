@@ -36,7 +36,7 @@ public class Address {
     @ManyToOne(fetch = FetchType.LAZY)
     private Employee employee;
 
-    @OneToOne
+    @ManyToOne
     private Country  country;
 
     public Address() {
