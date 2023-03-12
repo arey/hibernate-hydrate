@@ -363,7 +363,7 @@
     <profile>
       <id>hibernate-6.1</id>
       <properties>
-        <version.hibernate>6.1.6.Final</version.hibernate>
+        <version.hibernate>6.1.7.Final</version.hibernate>
       </properties>
     </profile>
   </profiles>
