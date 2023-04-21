@@ -5,7 +5,7 @@
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
-  <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 4.x)</description>
+  <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 6.x)</description>
   <inceptionYear>2012</inceptionYear>
   <url>https://github.com/arey/hibernate-hydrate</url>
 
