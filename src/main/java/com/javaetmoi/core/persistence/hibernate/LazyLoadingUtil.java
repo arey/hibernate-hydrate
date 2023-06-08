@@ -155,7 +155,7 @@ public class LazyLoadingUtil {
                 deepInflateCollection(mappingMetamodel, (Collection<?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
             } else {
                 throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
-                      propertyType.getClass().getSimpleName(), propertyValue.getClass().getSimpleName()));
+                      propertyValue.getClass().getSimpleName(), propertyType.getNavigableRole().getFullPath()));
             }
         }
     }
