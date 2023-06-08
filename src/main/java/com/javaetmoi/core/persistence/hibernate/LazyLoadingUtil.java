@@ -146,7 +146,7 @@ public class LazyLoadingUtil {
         if (propertyType instanceof EntityValuedModelPart) {
             deepInflateEntity(mappingMetamodel, propertyValue, (EntityValuedModelPart) propertyType, recursiveGuard);
         } else if (propertyType instanceof EmbeddableValuedModelPart) {
-            deepInflateComponent(mappingMetamodel, propertyValue, (EmbeddableValuedModelPart) propertyType, recursiveGuard);
+            deepInflateEmbeddable(mappingMetamodel, propertyValue, (EmbeddableValuedModelPart) propertyType, recursiveGuard);
         } else if (propertyType instanceof PluralAttributeMapping) {
             if (propertyValue instanceof Map) {
                 deepInflateMap(mappingMetamodel, (Map<?, ?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
@@ -198,16 +198,16 @@ public class LazyLoadingUtil {
         });
     }
 
-    private static void deepInflateComponent(
-            MappingMetamodel mappingMetamodel, Object component, EmbeddableValuedModelPart componentType,
+    private static void deepInflateEmbeddable(
+            MappingMetamodel mappingMetamodel, Object embeddable, EmbeddableValuedModelPart componentType,
             IdentitySet<Object> recursiveGuard) {
-        if (component == null || !recursiveGuard.add(component)) {
+        if (embeddable == null || !recursiveGuard.add(embeddable)) {
             return;
         }
 
         var descriptor = componentType.getEmbeddableTypeDescriptor();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
-            var propertyValue = attributeMapping.getValue(component);
+            var propertyValue = attributeMapping.getValue(embeddable);
             deepInflateProperty(mappingMetamodel, propertyValue, attributeMapping, recursiveGuard);
         });
     }
