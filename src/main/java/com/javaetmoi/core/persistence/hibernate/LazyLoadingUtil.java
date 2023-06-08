@@ -225,9 +225,8 @@ public class LazyLoadingUtil {
         }
         Hibernate.initialize(map);
 
-        var attributeMapping = mapType.getCollectionDescriptor().getAttributeMapping();
-        var indexType = attributeMapping.getIndexDescriptor();
-        var elementType = attributeMapping.getElementDescriptor();
+        var indexType = mapType.getIndexDescriptor();
+        var elementType = mapType.getElementDescriptor();
         map.forEach((index, element) -> {
             deepInflateProperty(mappingMetamodel, index, indexType, recursiveGuard);
             deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard);
