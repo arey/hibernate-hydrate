@@ -150,6 +150,7 @@ public final class LazyLoadingUtil {
         if (entity == null) {
             return;
         }
+
         var entityType = mappingMetamodel.getEntityDescriptor(entity.getClass());
         deepInflateEntity(mappingMetamodel, entity, entityType, recursiveGuard);
     }
