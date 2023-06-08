@@ -255,6 +255,19 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>jboss</id>
+      <name>JBoss Public Repository Group</name>
+      <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <!-- Deploy snapshots to the Sonatype OSSRH (OSS Repository Hosting) -->
   <distributionManagement>
     <downloadUrl>https://github.com/arey/hybernate-hydrate</downloadUrl>
