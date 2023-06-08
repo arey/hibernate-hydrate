@@ -25,7 +25,6 @@ import org.hibernate.metamodel.mapping.EntityMappingType;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
-import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Collection;
@@ -132,7 +131,7 @@ public class LazyLoadingUtil {
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
         var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         var recursiveGuard = new IdentitySet<>();
-        // TODO markus 2016-06-19: How to determine entity type?
+        // TODO markus 2016-06-19: How to determine the entity type?
         deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
         return entity;
     }
