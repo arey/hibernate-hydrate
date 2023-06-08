@@ -84,8 +84,7 @@ public class LazyLoadingUtil {
     public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
         var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         // Reduce resizes for big collections.
-        // *2 to compensate for the load factor.
-        int capacity = Math.max(entities.size() * 2, 32);
+        int capacity = Math.max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);
         for (var entity : entities) {
             deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
