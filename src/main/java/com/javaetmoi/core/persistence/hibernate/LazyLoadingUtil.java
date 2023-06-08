@@ -156,8 +156,7 @@ public final class LazyLoadingUtil {
     }
 
     private static void deepInflateProperty(
-            MappingMetamodel mappingMetamodel,
-            Object propertyValue, ModelPart propertyType,
+            MappingMetamodel mappingMetamodel, Object propertyValue, ModelPart propertyType,
             IdentitySet<Object> recursiveGuard) {
         if (propertyValue == null) {
             return;
@@ -179,18 +178,6 @@ public final class LazyLoadingUtil {
         }
     }
 
-    /**
-     * Populate a lazy-initialized object graph by recursion.
-     *
-     * @param mappingMetamodel
-     *            The mapping metamodel.
-     * @param entity
-     *            The entity. May be {@code null}.
-     * @param entityType
-     *            The type of the entity. {@code null} if not known.
-     * @param recursiveGuard
-     *            A guard to avoid endless recursion.
-     */
     private static void deepInflateEntity(
             MappingMetamodel mappingMetamodel, Object entity, EntityValuedModelPart entityType,
             IdentitySet<Object> recursiveGuard) {
