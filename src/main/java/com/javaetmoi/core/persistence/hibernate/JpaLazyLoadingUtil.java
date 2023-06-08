@@ -28,7 +28,7 @@ import java.util.Collection;
  * 
  * @author Antoine Rey
  */
-public class JpaLazyLoadingUtil {
+public final class JpaLazyLoadingUtil {
     /**
      * No-arg constructor
      */

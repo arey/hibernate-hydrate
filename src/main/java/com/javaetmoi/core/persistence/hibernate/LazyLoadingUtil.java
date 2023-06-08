@@ -39,7 +39,7 @@ import java.util.Map;
  * 
  * @author Antoine Rey
  */
-public class LazyLoadingUtil {
+public final class LazyLoadingUtil {
     /**
      * No-arg constructor.
      */
@@ -88,7 +88,7 @@ public class LazyLoadingUtil {
         int capacity = Math.max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);
         entities.forEach(entity ->
-            deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard));
+                deepInflateEntity(mappingMetamodel, entity, recursiveGuard));
         return entities;
     }
 
@@ -130,9 +130,28 @@ public class LazyLoadingUtil {
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
         var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         var recursiveGuard = new IdentitySet<>();
-        // TODO markus 2016-06-19: How to determine the entity type?
-        deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
+        deepInflateEntity(mappingMetamodel, entity, recursiveGuard);
         return entity;
+    }
+
+    /**
+     * Populate a lazy-initialized object graph by recursion. Recursion entry point.
+     *
+     * @param mappingMetamodel
+     *            The mapping metamodel.
+     * @param entity
+     *            The entity. May be {@code null}.
+     * @param recursiveGuard
+     *            A guard to avoid endless recursion.
+     */
+    private static void deepInflateEntity(
+            MappingMetamodel mappingMetamodel, Object entity,
+            IdentitySet<Object> recursiveGuard) {
+        if (entity == null) {
+            return;
+        }
+        var entityType = mappingMetamodel.getEntityDescriptor(entity.getClass());
+        deepInflateEntity(mappingMetamodel, entity, entityType, recursiveGuard);
     }
 
     private static void deepInflateProperty(
@@ -186,9 +205,7 @@ public class LazyLoadingUtil {
             descriptor = mappingMetamodel.getEntityDescriptor(initializer.getEntityName());
             target = initializer.getImplementation();
         } else {
-            descriptor = entityType != null ?
-                    entityType.getEntityMappingType() :
-                    mappingMetamodel.getEntityDescriptor(entity.getClass());
+            descriptor = entityType.getEntityMappingType();
             target = entity;
         }
 
