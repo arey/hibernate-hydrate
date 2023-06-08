@@ -21,9 +21,11 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metamodel.MappingMetamodel;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
+import org.hibernate.metamodel.mapping.EntityMappingType;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
+import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Collection;
@@ -180,22 +182,18 @@ public class LazyLoadingUtil {
         }
         Hibernate.initialize(entity);
 
-        String entityName;
+        EntityMappingType descriptor;
         Object target;
         if (entity instanceof HibernateProxy) {
             var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
-            entityName = initializer.getEntityName();
+            descriptor = mappingMetamodel.getEntityDescriptor(initializer.getEntityName());
             target = initializer.getImplementation();
-        } else {
-            entityName = entityType != null ? entityType.getEntityMappingType().getEntityName() : null;
+        } else if (entityType != null) {
+            descriptor = entityType.getEntityMappingType();
             target = entity;
-        }
-
-        var descriptor = entityName != null ?
-                mappingMetamodel.getEntityDescriptor(entityName) :
-                mappingMetamodel.getEntityDescriptor(entity.getClass());
-        if (descriptor == null) {
-            return;
+        } else {
+            descriptor = mappingMetamodel.getEntityDescriptor(entity.getClass());
+            target = entity;
         }
 
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
