@@ -19,7 +19,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
+import org.hibernate.metamodel.MappingMetamodel;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.type.*;
 
@@ -134,7 +134,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateProperty(
-            MappingMetamodelImplementor mappingMetamodel,
+            MappingMetamodel mappingMetamodel,
             Object propertyValue, Type propertyType,
             IdentitySet<Object> recursiveGuard) {
         if (propertyValue == null) {
@@ -171,7 +171,7 @@ public class LazyLoadingUtil {
      *            A guard to avoid endless recursion.
      */
     private static void deepInflateEntity(
-            MappingMetamodelImplementor mappingMetamodel,
+            MappingMetamodel mappingMetamodel,
             Object entity, EntityType entityType,
             IdentitySet<Object> recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
@@ -206,7 +206,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateComponent(
-            MappingMetamodelImplementor mappingMetamodel,
+            MappingMetamodel mappingMetamodel,
             Object component, ComponentType componentType,
             IdentitySet<Object> recursiveGuard) {
         if (component == null || !recursiveGuard.add(component)) {
@@ -222,7 +222,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateMap(
-            MappingMetamodelImplementor mappingMetamodel,
+            MappingMetamodel mappingMetamodel,
             Map<?, ?> map, MapType mapType,
             IdentitySet<Object> recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
@@ -244,7 +244,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateCollection(
-            MappingMetamodelImplementor mappingMetamodel,
+            MappingMetamodel mappingMetamodel,
             Collection<?> collection, CollectionType collectionType,
             IdentitySet<Object> recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
