@@ -188,11 +188,10 @@ public class LazyLoadingUtil {
             var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
             descriptor = mappingMetamodel.getEntityDescriptor(initializer.getEntityName());
             target = initializer.getImplementation();
-        } else if (entityType != null) {
-            descriptor = entityType.getEntityMappingType();
-            target = entity;
         } else {
-            descriptor = mappingMetamodel.getEntityDescriptor(entity.getClass());
+            descriptor = entityType != null ?
+                    entityType.getEntityMappingType() :
+                    mappingMetamodel.getEntityDescriptor(entity.getClass());
             target = entity;
         }
 
