@@ -87,9 +87,8 @@ public class LazyLoadingUtil {
         // Reduce resizes for big collections.
         int capacity = Math.max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);
-        for (var entity : entities) {
-            deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
-        }
+        entities.forEach(entity ->
+            deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard));
         return entities;
     }
 
@@ -173,8 +172,7 @@ public class LazyLoadingUtil {
      *            A guard to avoid endless recursion.
      */
     private static void deepInflateEntity(
-            MappingMetamodel mappingMetamodel,
-            Object entity, EntityValuedModelPart entityType,
+            MappingMetamodel mappingMetamodel, Object entity, EntityValuedModelPart entityType,
             IdentitySet<Object> recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
@@ -201,8 +199,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateComponent(
-            MappingMetamodel mappingMetamodel,
-            Object component, EmbeddableValuedModelPart componentType,
+            MappingMetamodel mappingMetamodel, Object component, EmbeddableValuedModelPart componentType,
             IdentitySet<Object> recursiveGuard) {
         if (component == null || !recursiveGuard.add(component)) {
             return;
@@ -216,8 +213,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateMap(
-            MappingMetamodel mappingMetamodel,
-            Map<?, ?> map, PluralAttributeMapping mapType,
+            MappingMetamodel mappingMetamodel, Map<?, ?> map, PluralAttributeMapping mapType,
             IdentitySet<Object> recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
@@ -233,8 +229,7 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateCollection(
-            MappingMetamodel mappingMetamodel,
-            Collection<?> collection, PluralAttributeMapping collectionType,
+            MappingMetamodel mappingMetamodel, Collection<?> collection, PluralAttributeMapping collectionType,
             IdentitySet<Object> recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
