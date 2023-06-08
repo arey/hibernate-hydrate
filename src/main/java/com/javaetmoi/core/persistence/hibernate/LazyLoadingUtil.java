@@ -20,8 +20,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metamodel.MappingMetamodel;
+import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
+import org.hibernate.metamodel.mapping.EntityValuedModelPart;
+import org.hibernate.metamodel.mapping.ModelPart;
+import org.hibernate.metamodel.mapping.PluralAttributeMapping;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.type.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -135,22 +138,21 @@ public class LazyLoadingUtil {
 
     private static void deepInflateProperty(
             MappingMetamodel mappingMetamodel,
-            Object propertyValue, Type propertyType,
+            Object propertyValue, ModelPart propertyType,
             IdentitySet<Object> recursiveGuard) {
         if (propertyValue == null) {
             return;
         }
 
-        if (propertyType instanceof EntityType) {
-            deepInflateEntity(mappingMetamodel, propertyValue, (EntityType) propertyType, recursiveGuard);
-        } else if (propertyType instanceof ComponentType) {
-            // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
-            deepInflateComponent(mappingMetamodel, propertyValue, (ComponentType) propertyType, recursiveGuard);
-        } else if (propertyType instanceof MapType) {
-            deepInflateMap(mappingMetamodel, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
-        } else if (propertyType instanceof CollectionType) {
-            if (propertyValue instanceof Collection) {
-                deepInflateCollection(mappingMetamodel, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
+        if (propertyType instanceof EntityValuedModelPart) {
+            deepInflateEntity(mappingMetamodel, propertyValue, (EntityValuedModelPart) propertyType, recursiveGuard);
+        } else if (propertyType instanceof EmbeddableValuedModelPart) {
+            deepInflateComponent(mappingMetamodel, propertyValue, (EmbeddableValuedModelPart) propertyType, recursiveGuard);
+        } else if (propertyType instanceof PluralAttributeMapping) {
+            if (propertyValue instanceof Map) {
+                deepInflateMap(mappingMetamodel, (Map<?, ?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
+            } else if (propertyValue instanceof Collection) {
+                deepInflateCollection(mappingMetamodel, (Collection<?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
             } else {
                 throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
                       propertyType.getClass().getSimpleName(), propertyValue.getClass().getSimpleName()));
@@ -172,7 +174,7 @@ public class LazyLoadingUtil {
      */
     private static void deepInflateEntity(
             MappingMetamodel mappingMetamodel,
-            Object entity, EntityType entityType,
+            Object entity, EntityValuedModelPart entityType,
             IdentitySet<Object> recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
@@ -186,7 +188,7 @@ public class LazyLoadingUtil {
             entityName = initializer.getEntityName();
             target = initializer.getImplementation();
         } else {
-            entityName = entityType != null ? entityType.getAssociatedEntityName() : null;
+            entityName = entityType != null ? entityType.getEntityMappingType().getEntityName() : null;
             target = entity;
         }
 
@@ -197,46 +199,39 @@ public class LazyLoadingUtil {
             return;
         }
 
-        var propertyTypes = descriptor.getPropertyTypes();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
-            var propertyType = propertyTypes[attributeMapping.getStateArrayPosition()];
-            deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
+            deepInflateProperty(mappingMetamodel, propertyValue, attributeMapping, recursiveGuard);
         });
     }
 
     private static void deepInflateComponent(
             MappingMetamodel mappingMetamodel,
-            Object component, ComponentType componentType,
+            Object component, EmbeddableValuedModelPart componentType,
             IdentitySet<Object> recursiveGuard) {
         if (component == null || !recursiveGuard.add(component)) {
             return;
         }
 
-        var propertyTypes = componentType.getSubtypes();
-        for (int i = 0; i < propertyTypes.length; i++) {
-            var propertyValue = componentType.getPropertyValue(component, i);
-            var propertyType = propertyTypes[i];
-            deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
-        }
+        var descriptor = componentType.getEmbeddableTypeDescriptor();
+        descriptor.getAttributeMappings().forEach(attributeMapping -> {
+            var propertyValue = attributeMapping.getValue(component);
+            deepInflateProperty(mappingMetamodel, propertyValue, attributeMapping, recursiveGuard);
+        });
     }
 
     private static void deepInflateMap(
             MappingMetamodel mappingMetamodel,
-            Map<?, ?> map, MapType mapType,
+            Map<?, ?> map, PluralAttributeMapping mapType,
             IdentitySet<Object> recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
         Hibernate.initialize(map);
 
-        if (map.isEmpty()) {
-            return;
-        }
-
-        var descriptor = mappingMetamodel.getCollectionDescriptor(mapType.getRole());
-        var indexType = descriptor.getIndexType();
-        var elementType = descriptor.getElementType();
+        var attributeMapping = mapType.getCollectionDescriptor().getAttributeMapping();
+        var indexType = attributeMapping.getIndexDescriptor();
+        var elementType = attributeMapping.getElementDescriptor();
         map.forEach((index, element) -> {
             deepInflateProperty(mappingMetamodel, index, indexType, recursiveGuard);
             deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard);
@@ -245,19 +240,14 @@ public class LazyLoadingUtil {
 
     private static void deepInflateCollection(
             MappingMetamodel mappingMetamodel,
-            Collection<?> collection, CollectionType collectionType,
+            Collection<?> collection, PluralAttributeMapping collectionType,
             IdentitySet<Object> recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
         Hibernate.initialize(collection);
 
-        if (collection.isEmpty()) {
-            return;
-        }
-
-        var descriptor = mappingMetamodel.getCollectionDescriptor(collectionType.getRole());
-        var elementType = descriptor.getElementType();
+        var elementType = collectionType.getElementDescriptor();
         collection.forEach(element ->
                 deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard));
     }
