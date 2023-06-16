@@ -1,17 +1,20 @@
 /*
  * Copyright 2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
 package com.javaetmoi.core.persistence.hibernate;
+
+import java.util.Collection;
+import java.util.Map;
 
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
@@ -26,16 +29,13 @@ import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.util.Collection;
-import java.util.Map;
-
 /**
  * Set of helper methods that fetch a complete entity graph.
- * 
+ *
  * <p>
  * Provides a lazy way to resolve all Hibernate proxies.
  * </p>
- * 
+ *
  * @author Antoine Rey
  */
 public final class LazyLoadingUtil {
@@ -48,13 +48,13 @@ public final class LazyLoadingUtil {
 
     /**
      * Populate a lazy-initialized object graph by recursion.
-     * 
+     *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
-     * 
+     *
      * @param currentSession
      *            Hibernate session still open
      * @param entities
@@ -93,13 +93,13 @@ public final class LazyLoadingUtil {
 
     /**
      * Populate a lazy-initialized object graph by recursion.
-     * 
+     *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
-     * 
+     *
      * @param currentSession
      *            Hibernate session still open
      * @param entity
@@ -170,7 +170,7 @@ public final class LazyLoadingUtil {
                 deepInflateCollection((Collection<?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
             } else {
                 throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
-                      propertyValue.getClass().getSimpleName(), propertyType.getNavigableRole().getFullPath()));
+                        propertyValue.getClass().getSimpleName(), propertyType.getNavigableRole().getFullPath()));
             }
         }
     }
