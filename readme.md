@@ -77,7 +77,7 @@ Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.mav
 
 * GitHub is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). 
   If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
-* Each major version of Hibernate has it own git branch: Hibernate 6 on the master, Hibernate 4 on the hibernate4 branch and Hibernate 3 on the hibernate3 branch
+* Each major version of Hibernate has it own git branch: Hibernate 6.2 on the master, Hibernate 4 on the hibernate4 branch and Hibernate 3 on the hibernate3 branch
 
 ### Development environment installation ###
 
