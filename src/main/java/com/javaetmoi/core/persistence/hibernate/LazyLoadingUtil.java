@@ -13,9 +13,6 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -28,6 +25,9 @@ import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
 import org.hibernate.proxy.HibernateProxy;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
