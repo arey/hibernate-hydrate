@@ -29,10 +29,10 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
-  <version>6.2.2</version>
-</dependency> 
+  <version>6.3.0</version>
+</dependency>
 
-<!-- or Hibernate 6.0 and 6.1 support -->
+<!-- or Hibernate 6.1.6 and 6.2 and above support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
@@ -67,6 +67,8 @@ Download the jar though Maven:
   <version>2.2</version>
 </dependency> 
 ```
+
+Please note that we are not able to support Hibernate versions 6.0 up to 6.1.5 due to bugs in them.
 
 Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate6-hydrate/)
 
