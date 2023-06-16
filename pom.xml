@@ -255,6 +255,17 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <!-- Deploy snapshots to the Sonatype OSSRH (OSS Repository Hosting) -->
   <distributionManagement>
     <downloadUrl>https://github.com/arey/hybernate-hydrate</downloadUrl>
