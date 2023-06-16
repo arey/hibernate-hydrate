@@ -25,7 +25,14 @@ A french article titled *Say goodbye to LazyInitializationException* : http://ja
 Download the jar though Maven:
 
 ```xml
-<!-- Either Hibernate 6 and above support -->
+<!-- Either Hibernate 6.2 and above support -->
+<dependency>
+  <groupId>com.javaetmoi.core</groupId>
+  <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
+  <version>6.3.0</version>
+</dependency> 
+
+<!-- or Hibernate 6.0, 6.1, and 6.2 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
@@ -53,7 +60,7 @@ Download the jar though Maven:
   <version>2.2</version>
 </dependency> 
 
-<!-- Or Hibernate 3 support -->
+<!-- or Hibernate 3 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate3-hydrate</artifactId>
