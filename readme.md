@@ -29,10 +29,10 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
-  <version>6.3.0</version>
+  <version>6.2.2</version>
 </dependency> 
 
-<!-- or Hibernate 6.0, 6.1, and 6.2 support -->
+<!-- or Hibernate 6.0 and 6.1 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
