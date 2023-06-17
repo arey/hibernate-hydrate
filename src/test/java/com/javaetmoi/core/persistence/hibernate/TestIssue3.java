@@ -13,6 +13,7 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
@@ -29,9 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestIssue3 extends AbstractTest {
 	@Test
 	void listWithEmbeddableClass() {
-		var plan = transactional(session ->
-				LazyLoadingUtil.deepHydrate(session,
-						session.get(Plan.class, 1)));
+		var plan = getDeepHydratedEntity(Plan.class, 1);
 		assertEquals(1, plan.getId());
 		assertEquals(1, plan.getTransfers().size());
 		assertEquals(2, plan.getTransfers().get(0).getSubPlan()
@@ -40,9 +39,7 @@ class TestIssue3 extends AbstractTest {
 
 	@Test
 	void listWithMappedEntity() {
-		var holder = transactional(session ->
-				LazyLoadingUtil.deepHydrate(session,
-						session.get(Holder.class, 1)));
+		var holder = getDeepHydratedEntity(Holder.class, 1);
 		assertEquals(1, holder.getId());
 		assertNotNull(holder.getSystem());
 		assertEquals(1, holder.getSystem().getId());

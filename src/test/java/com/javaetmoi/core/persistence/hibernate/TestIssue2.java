@@ -25,9 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue2 extends AbstractTest {
     @Test
     void nestedListUsingMappedSuperclass() {
-        var parent = transactional(session ->
-                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
-                        session.get(Parent.class, 1L)));
+        var parent = getDeepHydratedEntity(Parent.class, 1);
         assertEquals(Long.valueOf(1), parent.getId());
         assertEquals("Parent 1", parent.getName());
         assertEquals(2, parent.getChildren().size());

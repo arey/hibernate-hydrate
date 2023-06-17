@@ -25,9 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue1 extends AbstractTest {
     @Test
     void nestedListInEmbeddable() {
-        var foo = transactional(session ->
-                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
-                        session.get(Foo.class, 1)));
+        var foo = getDeepHydratedEntity(Foo.class, 1);
         assertNotNull(foo.getBar());
         assertNotNull(foo.getBar().getBizs());
         assertEquals(2, foo.getBar().getBizs().size(), "Fix the LazyInitializationException");

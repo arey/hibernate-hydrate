@@ -26,6 +26,17 @@ public class AbstractTest {
         sessionFactory.getStatistics().clear();
     }
 
+    protected <E> E getDeepHydratedEntity(Class<E> entityClass, long entityId) {
+        return transactional(session ->
+                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
+                        session.get(entityClass, entityId)));
+    }
+
+    protected <E> E getEntity(Class<E> entityClass, long entityId) {
+        return transactional(session ->
+                session.get(entityClass, entityId));
+    }
+
     private static DataSource dataSource() {
         var dataSource = new JdbcDataSource();
         dataSource.setURL(DATABASE_URL);
