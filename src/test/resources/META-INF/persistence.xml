@@ -1,17 +1,17 @@
-<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
-             version="2.0">
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
   <persistence-unit name="hibernate-hydrate" transaction-type="JTA">
     <properties>
       <property name="hibernate.connection.url" value="jdbc:h2:~/hibernate-hydrate" />
       <property name="hibernate.connection.username" value="" />
       <property name="hibernate.transaction.jta.platform" value="org.hibernate.testing.jta.TestingJtaPlatformImpl" />
       <property name="hibernate.current_session_context_class" value="org.hibernate.context.internal.ThreadLocalSessionContext" />
-      <!--property name="hibernate.show_sql" value="true"/-->
-      <property name="hibernate.format_sql" value="true" />
       <property name="hibernate.hbm2ddl.auto" value="create-drop" />
       <property name="hibernate.generate_statistics" value="true" />
+      <property name="hibernate.show_sql" value="false" />
+      <property name="hibernate.format_sql" value="true" />
     </properties>
   </persistence-unit>
 </persistence>
