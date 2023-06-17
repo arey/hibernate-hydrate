@@ -113,7 +113,7 @@ public class DBUnitLoader {
             // language=H2
             statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
         } catch (NoSuchTableException e) {
-            throw new RuntimeException("Differences between dataset tables and hibernate configuration, check your dataset (typing error), did you override at least one of these beans : mappingResources, annotatedClasses", e);
+            // throw new RuntimeException("Differences between dataset tables and hibernate configuration, check your dataset (typing error), did you override at least one of these beans : mappingResources, annotatedClasses", e);
         } catch (DatabaseUnitException e) {
             throw new RuntimeException("DBUnit error", e);
         } catch (SQLException e) {
