@@ -25,12 +25,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue2 extends AbstractTest {
     @Test
     void nestedListUsingMappedSuperclass() {
-        var parent = getDeepHydratedEntity(Parent.class, 1);
-        assertEquals(Long.valueOf(1), parent.getId());
-        assertEquals("Parent 1", parent.getName());
-        assertEquals(2, parent.getChildren().size());
-        assertNotNull("Child 10", parent.getChildren().get(0).getName());
-        assertNotNull("Parent 1", parent.getChildren().get(0).getParent().getName());
-    }
+        var dbParent = getDeepHydratedEntity(Parent.class, 1);
 
+        assertEquals(Long.valueOf(1), dbParent.getId());
+        assertEquals("Parent 1", dbParent.getName());
+        assertEquals(2, dbParent.getChildren().size());
+        assertNotNull("Child 10", dbParent.getChildren().get(0).getName());
+        assertNotNull("Parent 1", dbParent.getChildren().get(0).getParent().getName());
+    }
 }

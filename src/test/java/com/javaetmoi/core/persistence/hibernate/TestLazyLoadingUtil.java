@@ -81,6 +81,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     void lazyInitializationExceptionOnPersistentMap() {
         // Load each entity in a transaction
         var dbJames = getEntity(Employee.class, 1);
+
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get(0));
     }
@@ -93,6 +94,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     void lazyInitializationExceptionOnPersistentCollection() {
         // Load each entity in a transaction
         var dbJames = getEntity(Employee.class, 1);
+
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getProjects().contains(android));
     }
@@ -105,6 +107,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     void lazyInitializationExceptionWithManyToOne() {
         // Load each entity in a transaction
         var dbLyon = getEntity(Address.class, 200);
+
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbLyon.getEmployee().getName());
     }

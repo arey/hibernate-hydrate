@@ -13,7 +13,6 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
@@ -30,34 +29,35 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestIssue3 extends AbstractTest {
 	@Test
 	void listWithEmbeddableClass() {
-		var plan = getDeepHydratedEntity(Plan.class, 1);
-		assertEquals(1, plan.getId());
-		assertEquals(1, plan.getTransfers().size());
-		assertEquals(2, plan.getTransfers().get(0).getSubPlan()
+		var dbPlan = getDeepHydratedEntity(Plan.class, 1);
+
+		assertEquals(1, dbPlan.getId());
+		assertEquals(1, dbPlan.getTransfers().size());
+		assertEquals(2, dbPlan.getTransfers().get(0).getSubPlan()
 				.getEvents().size());
 	}
 
 	@Test
 	void listWithMappedEntity() {
-		var holder = getDeepHydratedEntity(Holder.class, 1);
-		assertEquals(1, holder.getId());
-		assertNotNull(holder.getSystem());
-		assertEquals(1, holder.getSystem().getId());
-		assertNotNull(holder.getSystem().getSubSystems());
-		assertEquals(2, holder.getSystem().getSubSystems().size());
+		var dbHolder = getDeepHydratedEntity(Holder.class, 1);
+
+		assertEquals(1, dbHolder.getId());
+		assertNotNull(dbHolder.getSystem());
+		assertEquals(1, dbHolder.getSystem().getId());
+		assertNotNull(dbHolder.getSystem().getSubSystems());
+		assertEquals(2, dbHolder.getSystem().getSubSystems().size());
 	}
 
 	@Test
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		var systems = transactional(session ->
+		var dbSystems = transactional(session ->
 				LazyLoadingUtil.deepHydrate(session,
 						selectAllSystemsOrderedByNumber(session)));
-		assertNotNull(systems);
-		assertFalse(systems.isEmpty());
-		assertEquals(2, systems.size());
-		assertEquals(1, systems.get(0).getId());
-		assertNotNull(systems.get(0).getSubSystems());
-		assertEquals(2, systems.get(0).getSubSystems().size());
+
+		assertEquals(2, dbSystems.size());
+		assertEquals(1, dbSystems.get(0).getId());
+		assertNotNull(dbSystems.get(0).getSubSystems());
+		assertEquals(2, dbSystems.get(0).getSubSystems().size());
 	}
 
 	@Test
@@ -82,6 +82,7 @@ class TestIssue3 extends AbstractTest {
 			selectAllSystemsOrderedByNumber(session);
 			return LazyLoadingUtil.deepHydrate(session, system);
 		});
+
 		assertEquals(1, dbSystem.getId());
 		assertNotNull(dbSystem.getSubSystems());
 		assertEquals(2, dbSystem.getSubSystems().size());

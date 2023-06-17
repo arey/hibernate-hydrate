@@ -15,10 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue10 extends AbstractTest {
     @Test
     void oneToOneBidirectionalRelationship() {
-        var customer = getDeepHydratedEntity(Customer.class, 1);
-        assertEquals(Integer.valueOf(1), customer.getId());
-        assertNotNull(customer.getPassport());
-        assertEquals(Integer.valueOf(1), customer.getPassport().getId());
-        assertEquals(Integer.valueOf(1),customer.getPassport().getOwner().getId());
+        var dbCustomer = getDeepHydratedEntity(Customer.class, 1);
+
+        assertEquals(1, dbCustomer.getId());
+        assertNotNull(dbCustomer.getPassport());
+        assertEquals(1, dbCustomer.getPassport().getId());
+        assertEquals(1, dbCustomer.getPassport().getOwner().getId());
     }
 }

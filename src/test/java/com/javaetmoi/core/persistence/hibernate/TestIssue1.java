@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue1 extends AbstractTest {
     @Test
     void nestedListInEmbeddable() {
-        var foo = getDeepHydratedEntity(Foo.class, 1);
-        assertNotNull(foo.getBar());
-        assertNotNull(foo.getBar().getBizs());
-        assertEquals(2, foo.getBar().getBizs().size(), "Fix the LazyInitializationException");
-        assertNotNull(foo.getBar().getBizs().get(0));
-    }
+        var dbFoo = getDeepHydratedEntity(Foo.class, 1);
 
+        assertNotNull(dbFoo.getBar());
+        assertNotNull(dbFoo.getBar().getBizs());
+        assertEquals(2, dbFoo.getBar().getBizs().size(), "Fix the LazyInitializationException");
+        assertNotNull(dbFoo.getBar().getBizs().get(0));
+    }
 }
