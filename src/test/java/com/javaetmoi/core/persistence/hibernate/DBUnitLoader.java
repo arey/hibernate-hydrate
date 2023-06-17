@@ -53,7 +53,7 @@ public class DBUnitLoader {
     /**
      * Generate a default location based on the name of the given class. If the class is named
      * com.example.MyTest, DBUnitLoad loads your DBUnit dataset from
-     * "classpath:/com/example/MyTest-dataset.xml".
+     * "com/example/MyTest-dataset.xml".
      * 
      * @param testClass
      */
@@ -62,7 +62,7 @@ public class DBUnitLoader {
     }
 
     private String buildDefaultDataSetLocation(Class<?> testClass) {
-        return "classpath:" + testClass.getName().replace(".", "/") + "-dataset.xml";
+        return testClass.getName().replace(".", "/") + "-dataset.xml";
     }
 
     public void loadDatabase(String... dataSetLocations) {
@@ -72,9 +72,9 @@ public class DBUnitLoader {
             throw new IllegalArgumentException("Dataset location is mandatory");
         }
 
-        for (String dataSetLocation : dataSetLocations) {
-            URL url = retrieveDataSetURL(dataSetLocation);
-            FlatXmlDataSetBuilder flatXmlDataSetBuilder = new FlatXmlDataSetBuilder();
+        for (var dataSetLocation : dataSetLocations) {
+            var url = retrieveDataSetURL(dataSetLocation);
+            var flatXmlDataSetBuilder = new FlatXmlDataSetBuilder();
             flatXmlDataSetBuilder.setColumnSensing(true);
             IDataSet dataSet;
             try {
@@ -90,7 +90,7 @@ public class DBUnitLoader {
         } catch (SQLException e) {
             throw new RuntimeException("Getting JDBC data source", e);
         }
-        DatabaseConfig config = dbConn.getConfig();
+        var config = dbConn.getConfig();
         config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
         try {
             executeDeleteAll(dataSets, dbConn);
@@ -132,7 +132,7 @@ public class DBUnitLoader {
     private URL retrieveDataSetURL(String dataSetLocation) {
         var url = getClass().getClassLoader().getResource(dataSetLocation);
         if (url == null) {
-            throw new IllegalArgumentException("No dataSet file located at " + url);
+            throw new IllegalArgumentException("No dataSet file located at " + dataSetLocation);
         }
         return url;
     }

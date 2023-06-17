@@ -22,11 +22,12 @@ public class TestLazyLoadingUtilConfiguration {
 
     public static SessionFactory sessionFactory(DataSource dataSource) {
         var config = new Configuration();
+        config.setProperty("hibernate.connection.url", DATABASE_URL);
+        config.setProperty("hibernate.archive.autodetection", "class");
         //config.setProperty("hibernate.format_sql", "true");
         config.setProperty("hibernate.show_sql", "true");
         config.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         config.setProperty("hibernate.generate_statistics", "true");
-        config.configure();
         return config.buildSessionFactory();
     }
 
