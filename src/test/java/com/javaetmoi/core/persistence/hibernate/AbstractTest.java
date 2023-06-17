@@ -6,21 +6,37 @@ import org.h2.jdbcx.JdbcDataSource;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.junit.jupiter.api.BeforeEach;
 
-public class TestLazyLoadingUtilConfiguration {
+public class AbstractTest {
     public static final String DATABASE_URL = "jdbc:h2:~/hibernate-hydrate";
 
-    public static DataSource dataSource() {
+    private final DataSource dataSource = dataSource();
+    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
+    protected final SessionFactory sessionFactory = sessionFactory(dataSource);
+
+    /**
+     * Populate entities graph and embedded database
+     */
+    @BeforeEach
+    void setUpDatabase() {
+        dbUnitLoader.loadDatabase(getClass());
+
+        // Reset Hibernate Statistics
+        sessionFactory.getStatistics().clear();
+    }
+
+    private static DataSource dataSource() {
         var dataSource = new JdbcDataSource();
         dataSource.setURL(DATABASE_URL);
         return dataSource;
     }
 
-    public static DBUnitLoader dbUnitLoader(DataSource dataSource) {
+    private static DBUnitLoader dbUnitLoader(DataSource dataSource) {
         return new DBUnitLoader(dataSource);
     }
 
-    public static SessionFactory sessionFactory(DataSource dataSource) {
+    private static SessionFactory sessionFactory(DataSource dataSource) {
         var config = new Configuration();
         config.setProperty("hibernate.connection.url", DATABASE_URL);
         config.setProperty("hibernate.archive.autodetection", "class");
@@ -31,7 +47,7 @@ public class TestLazyLoadingUtilConfiguration {
         return config.buildSessionFactory();
     }
 
-    public static <R> R transactional(SessionFactory sessionFactory, Transactional<R> action) {
+    protected <R> R transactional(Transactional<R> action) {
         var session = sessionFactory.openSession();
         var tx = session.beginTransaction();
         var result = action.doInTransaction(session);
@@ -41,7 +57,7 @@ public class TestLazyLoadingUtilConfiguration {
     }
 
     @FunctionalInterface
-    public static interface Transactional<R> {
+    protected static interface Transactional<R> {
         R doInTransaction(Session session);
     }
 }

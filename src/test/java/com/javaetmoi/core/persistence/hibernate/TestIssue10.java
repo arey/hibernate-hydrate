@@ -1,16 +1,8 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import javax.sql.DataSource;
-
 import com.javaetmoi.core.persistence.hibernate.domain.Customer;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -19,29 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * <p>
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/10 fix
  */
-class TestIssue10 {
-
-    private final DataSource dataSource = dataSource();
-    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-    private final SessionFactory sessionFactory = sessionFactory(dataSource);
-
-    /**
-     * Populate entities graph and embedded database
-     */
-    @BeforeEach
-    void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-    }
-
+class TestIssue10 extends AbstractTest {
     @Test
     void oneToOneBidirectionalRelationship() {
-        var dbContainer = transactional(sessionFactory, session -> {
-            var customer = session.get(Customer.class, 1);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), customer);
-        });
-        assertEquals(Integer.valueOf(1), dbContainer.getId());
-        assertNotNull(dbContainer.getPassport());
-        assertEquals(Integer.valueOf(1), dbContainer.getPassport().getId());
-        assertEquals(Integer.valueOf(1),dbContainer.getPassport().getOwner().getId());
+        var customer = transactional(session ->
+                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
+                        session.get(Customer.class, 1)));
+        assertEquals(Integer.valueOf(1), customer.getId());
+        assertNotNull(customer.getPassport());
+        assertEquals(Integer.valueOf(1), customer.getPassport().getId());
+        assertEquals(Integer.valueOf(1),customer.getPassport().getOwner().getId());
     }
 }

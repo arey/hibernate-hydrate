@@ -17,79 +17,55 @@ import com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder;
 import com.javaetmoi.core.persistence.hibernate.manyToOneList.System;
 import jakarta.persistence.EntityManager;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import javax.sql.DataSource;
-
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a> fix.
  */
-class TestIssue3 {
-
-	private final DataSource dataSource = dataSource();
-	private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-	private final SessionFactory sessionFactory = sessionFactory(dataSource);
-
-	/**
-	 * Populate entities graph and embedded database
-	 */
-	@BeforeEach
-	void setUp() {
-		dbUnitLoader.loadDatabase(getClass());
-	}
-
+class TestIssue3 extends AbstractTest {
 	@Test
 	void listWithEmbeddableClass() {
-		var dbContainer = transactional(sessionFactory, session -> {
-			var plan = session.get(Plan.class, 1);
-			return LazyLoadingUtil.deepHydrate(session, plan);
-		});
-		assertEquals(1, dbContainer.getId());
-		assertEquals(1, dbContainer.getTransfers().size());
-		assertEquals(2, dbContainer.getTransfers().get(0).getSubPlan()
+		var plan = transactional(session ->
+				LazyLoadingUtil.deepHydrate(session,
+						session.get(Plan.class, 1)));
+		assertEquals(1, plan.getId());
+		assertEquals(1, plan.getTransfers().size());
+		assertEquals(2, plan.getTransfers().get(0).getSubPlan()
 				.getEvents().size());
 	}
 
 	@Test
 	void listWithMappedEntity() {
-		var dbContainer = transactional(sessionFactory, session -> {
-			var holder = session.get(Holder.class, 1);
-			return LazyLoadingUtil.deepHydrate(session, holder);
-		});
-		assertEquals(1, dbContainer.getId());
-		assertNotNull(dbContainer.getSystem());
-		assertEquals(1, dbContainer.getSystem().getId());
-		assertNotNull(dbContainer.getSystem().getSubSystems());
-		assertEquals(2, dbContainer.getSystem().getSubSystems().size());
+		var holder = transactional(session ->
+				LazyLoadingUtil.deepHydrate(session,
+						session.get(Holder.class, 1)));
+		assertEquals(1, holder.getId());
+		assertNotNull(holder.getSystem());
+		assertEquals(1, holder.getSystem().getId());
+		assertNotNull(holder.getSystem().getSubSystems());
+		assertEquals(2, holder.getSystem().getSubSystems().size());
 	}
 
 	@Test
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		var dbContainer = transactional(sessionFactory, session -> {
-			var systems = selectAllSystemsOrderedByNumber(session);
-			return LazyLoadingUtil.deepHydrate(session, systems);
-		});
-		assertNotNull(dbContainer);
-		assertFalse(dbContainer.isEmpty());
-		assertEquals(2, dbContainer.size());
-		assertEquals(1, dbContainer.get(0).getId());
-		assertNotNull(dbContainer.get(0).getSubSystems());
-		assertEquals(2, dbContainer.get(0).getSubSystems().size());
+		var systems = transactional(session ->
+				LazyLoadingUtil.deepHydrate(session,
+						selectAllSystemsOrderedByNumber(session)));
+		assertNotNull(systems);
+		assertFalse(systems.isEmpty());
+		assertEquals(2, systems.size());
+		assertEquals(1, systems.get(0).getId());
+		assertNotNull(systems.get(0).getSubSystems());
+		assertEquals(2, systems.get(0).getSubSystems().size());
 	}
 
 	@Test
 	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		var dbContainer = transactional(sessionFactory, session -> {
+		var dbSystem = transactional(session -> {
 			var loadAccess = session.byId(Holder.class);
 			var holder = loadAccess.getReference(1);
 			var system = holder.getSystem();
@@ -109,11 +85,11 @@ class TestIssue3 {
 			selectAllSystemsOrderedByNumber(session);
 			return LazyLoadingUtil.deepHydrate(session, system);
 		});
-		assertEquals(1, dbContainer.getId());
-		assertNotNull(dbContainer.getSubSystems());
-		assertEquals(2, dbContainer.getSubSystems().size());
-		assertEquals(1, dbContainer.getSubSystems().get(0).getId());
-		assertEquals(2, dbContainer.getSubSystems().get(1).getId());
+		assertEquals(1, dbSystem.getId());
+		assertNotNull(dbSystem.getSubSystems());
+		assertEquals(2, dbSystem.getSubSystems().size());
+		assertEquals(1, dbSystem.getSubSystems().get(0).getId());
+		assertEquals(2, dbSystem.getSubSystems().get(1).getId());
 	}
 
 	private List<System> selectAllSystemsOrderedByNumber(EntityManager entityManager) {

@@ -13,48 +13,26 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import javax.sql.DataSource;
-
 import com.javaetmoi.core.persistence.hibernate.domain.Parent;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/2 fix
  */
-class TestIssue2 {
-
-    private final DataSource dataSource = dataSource();
-    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-    private final SessionFactory sessionFactory = sessionFactory(dataSource);
-
-    /**
-     * Populate entities graph and embedded database
-     */
-    @BeforeEach
-    void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-    }
-
+class TestIssue2 extends AbstractTest {
     @Test
     void nestedListUsingMappedSuperclass() {
-        var dbParent = transactional(sessionFactory, session -> {
-            var parent = session.get(Parent.class, 1L);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), parent);
-        });
-        assertEquals(Long.valueOf(1), dbParent.getId());
-        assertEquals("Parent 1", dbParent.getName());
-        assertEquals(2, dbParent.getChildren().size());
-        assertNotNull("Child 10", dbParent.getChildren().get(0).getName());
-        assertNotNull("Parent 1", dbParent.getChildren().get(0).getParent().getName());
+        var parent = transactional(session ->
+                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
+                        session.get(Parent.class, 1L)));
+        assertEquals(Long.valueOf(1), parent.getId());
+        assertEquals("Parent 1", parent.getName());
+        assertEquals(2, parent.getChildren().size());
+        assertNotNull("Child 10", parent.getChildren().get(0).getName());
+        assertNotNull("Parent 1", parent.getChildren().get(0).getParent().getName());
     }
 
 }

@@ -13,14 +13,11 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import javax.sql.DataSource;
-
 import com.javaetmoi.core.persistence.hibernate.domain.Address;
 import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
-import org.hibernate.SessionFactory;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.stat.Statistics;
@@ -33,24 +30,17 @@ import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import jakarta.persistence.ManyToOne;
 
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
 /**
  * Unit test of the {@link LazyLoadingUtil} class.
  * 
  * @author arey
  */
-class TestLazyLoadingUtil {
+class TestLazyLoadingUtil extends AbstractTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestLazyLoadingUtil.class);
-
-    private final DataSource dataSource = dataSource();
-    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-    private final SessionFactory sessionFactory = sessionFactory(dataSource);
 
     private Employee james, tom;
 
@@ -64,12 +54,7 @@ class TestLazyLoadingUtil {
      * Populate entities graph and embedded database
      */
     @BeforeEach
-    void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-
-        // Reset Hibernate Statistics
-        sessionFactory.getStatistics().clear();
-
+    void setUpEntities() {
         france = new Country(1000, "France");
         james = new Employee(1, "James", "Developer");
         tom = new Employee(2, "Tom", "Project Manager");
@@ -97,7 +82,7 @@ class TestLazyLoadingUtil {
     @Test
     void lazyInitializationExceptionOnPersistentMap() {
         // Load each entity in a transaction
-        var dbJames = transactional(sessionFactory, session ->
+        var dbJames = transactional(session ->
                 session.get(Employee.class, 1));
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get(0));
@@ -110,7 +95,7 @@ class TestLazyLoadingUtil {
     @Test
     void lazyInitializationExceptionOnPersistentCollection() {
         // Load each entity in a transaction
-        var dbJames = transactional(sessionFactory, session ->
+        var dbJames = transactional(session ->
                 session.get(Employee.class, 1));
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getProjects().contains(android));
@@ -123,7 +108,7 @@ class TestLazyLoadingUtil {
     @Test
     void lazyInitializationExceptionWithManyToOne() {
         // Load each entity in a transaction
-        var dbLyon = transactional(sessionFactory, session ->
+        var dbLyon = transactional(session ->
                 session.get(Address.class, 200));
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbLyon.getEmployee().getName());
@@ -136,10 +121,9 @@ class TestLazyLoadingUtil {
     @Test
     void deepResolveEmployee() {
         // Loading an entity and hydrating its graph is done in a single transaction
-        Employee dbJames = transactional(sessionFactory, session -> {
-            var employee = session.get(Employee.class, 1);
-            return LazyLoadingUtil.deepHydrate(session, employee);
-        });
+        var dbJames = transactional(session ->
+                LazyLoadingUtil.deepHydrate(session,
+                        session.get(Employee.class, 1)));
 
         // Assertions
 
@@ -151,36 +135,36 @@ class TestLazyLoadingUtil {
         assertEquals(james.getAddresses().size(),
                 dbJames.getAddresses().size(),
                 "Same addresses size");
-        Address dbJamesParis = dbJames.getAddresses().get(paris.getType());
+        var dbJamesParis = dbJames.getAddresses().get(paris.getType());
         LOGGER.debug("James Paris address toString(): {}", dbJamesParis.toString());
-        ReflectionAssert.assertReflectionEquals(
+        assertReflectionEquals(
                 "Comparing James Paris address with ReflectionAssert", paris, dbJamesParis,
                 ReflectionComparatorMode.LENIENT_ORDER);
         assertEquals(paris, dbJamesParis, "Compare James Paris address");
-        Address dbJamesLaDefense = dbJames.getAddresses().get(ladefense.getType());
+        var dbJamesLaDefense = dbJames.getAddresses().get(ladefense.getType());
         LOGGER.debug("James La Defense address toString(): {}", dbJamesLaDefense.toString());
-        ReflectionAssert.assertReflectionEquals(
+        assertReflectionEquals(
                 "Comparing James La Defense address with ReflectionAssert", ladefense,
                 dbJamesLaDefense, ReflectionComparatorMode.LENIENT_ORDER);
         assertEquals(dbJamesLaDefense, ladefense, "Compare James La Defense address");
 
         // - Projects
         assertTrue(dbJames.getProjects().contains(android));
-        ReflectionAssert.assertReflectionEquals(
+        assertReflectionEquals(
                 "Compare in-memory and database loaded projects with RelectionUtils",
                 james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
-        ReflectionAssert.assertReflectionEquals(james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
+        assertReflectionEquals(james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Full employee
         LOGGER.debug("James toString(): {}", dbJames.toString());
-        ReflectionAssert.assertReflectionEquals(
+        assertReflectionEquals(
                 "Compare in-memory and database loaded employees with RelectionUtils", dbJames,
                 james, ReflectionComparatorMode.LENIENT_ORDER);
-        ReflectionAssert.assertReflectionEquals("Compare in-memory and database loaded employees with the equals method",
+        assertReflectionEquals("Compare in-memory and database loaded employees with the equals method",
                 james, dbJames, ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Generated SQL statements number
-        Statistics statistics = sessionFactory.getStatistics();
+        var statistics = sessionFactory.getStatistics();
         assertEquals(8, statistics.getEntityLoadCount(),
                 "All 8 entities are loaded: france, james, tom, android, iphone, paris, la d�fense and lyon");
         assertEquals(6, statistics.getCollectionFetchCount(),
@@ -194,10 +178,9 @@ class TestLazyLoadingUtil {
     @Test
     void deepResolveAddress() {
         // Loading an entity and hydrating its graph is done in a single transaction
-        Address dbLyon = transactional(sessionFactory, session -> {
-            var address = session.get(Address.class, 200);
-            return LazyLoadingUtil.deepHydrate(session, address);
-        });
+        var dbLyon = transactional(session ->
+                LazyLoadingUtil.deepHydrate(session,
+                        session.get(Address.class, 200)));
 
         assertEquals(dbLyon.getEmployee().getName(), tom.getName(),
                 "No LazyInitializationException should be thrown");
@@ -208,5 +191,4 @@ class TestLazyLoadingUtil {
                 dbLyon.getEmployee().getProjects().size(),
                 "Compare projetcs size");
     }
-
 }

@@ -13,47 +13,25 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import javax.sql.DataSource;
-
 import com.javaetmoi.core.persistence.hibernate.domain.Foo;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
-import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/1 fix
  */
-class TestIssue1 {
-
-    private final DataSource dataSource = dataSource();
-    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-    private final SessionFactory sessionFactory = sessionFactory(dataSource);
-
-    /**
-     * Populate entities graph and embedded database
-     */
-    @BeforeEach
-    void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-    }
-
+class TestIssue1 extends AbstractTest {
     @Test
     void nestedListInEmbeddable() {
-        var dbFoo = transactional(sessionFactory, session -> {
-            var foo = session.get(Foo.class, 1);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), foo);
-        });
-        assertNotNull(dbFoo.getBar());
-        assertNotNull(dbFoo.getBar().getBizs());
-        assertEquals(2, dbFoo.getBar().getBizs().size(), "Fix the LazyInitializationException");
-        assertNotNull(dbFoo.getBar().getBizs().get(0));
+        var foo = transactional(session ->
+                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
+                        session.get(Foo.class, 1)));
+        assertNotNull(foo.getBar());
+        assertNotNull(foo.getBar().getBizs());
+        assertEquals(2, foo.getBar().getBizs().size(), "Fix the LazyInitializationException");
+        assertNotNull(foo.getBar().getBizs().get(0));
     }
 
 }
