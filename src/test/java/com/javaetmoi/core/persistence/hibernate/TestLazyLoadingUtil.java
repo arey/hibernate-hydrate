@@ -18,6 +18,7 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
+import org.hibernate.SessionFactory;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +81,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     @Test
     void lazyInitializationExceptionOnPersistentMap() {
         // Load each entity in a transaction
-        var dbJames = getEntity(Employee.class, 1);
+        var dbJames = findEntity(Employee.class, 1);
 
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get(0));
@@ -93,7 +94,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     @Test
     void lazyInitializationExceptionOnPersistentCollection() {
         // Load each entity in a transaction
-        var dbJames = getEntity(Employee.class, 1);
+        var dbJames = findEntity(Employee.class, 1);
 
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getProjects().contains(android));
@@ -106,7 +107,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     @Test
     void lazyInitializationExceptionWithManyToOne() {
         // Load each entity in a transaction
-        var dbLyon = getEntity(Address.class, 200);
+        var dbLyon = findEntity(Address.class, 200);
 
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbLyon.getEmployee().getName());
@@ -119,7 +120,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     @Test
     void deepResolveEmployee() {
         // Loading an entity and hydrating its graph is done in a single transaction
-        var dbJames = getDeepHydratedEntity(Employee.class, 1);
+        var dbJames = findDeepHydratedEntity(Employee.class, 1);
 
         // Assertions
 
@@ -160,7 +161,7 @@ class TestLazyLoadingUtil extends AbstractTest {
                 james, dbJames, ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Generated SQL statements number
-        var statistics = sessionFactory.getStatistics();
+        var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
         assertEquals(8, statistics.getEntityLoadCount(),
                 "All 8 entities are loaded: france, james, tom, android, iphone, paris, la d�fense and lyon");
         assertEquals(6, statistics.getCollectionFetchCount(),
@@ -174,7 +175,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     @Test
     void deepResolveAddress() {
         // Loading an entity and hydrating its graph is done in a single transaction
-        var dbLyon = getDeepHydratedEntity(Address.class, 200);
+        var dbLyon = findDeepHydratedEntity(Address.class, 200);
 
         assertEquals(dbLyon.getEmployee().getName(), tom.getName(),
                 "No LazyInitializationException should be thrown");

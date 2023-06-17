@@ -1,7 +1,6 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.domain.Customer;
-import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue10 extends AbstractTest {
     @Test
     void oneToOneBidirectionalRelationship() {
-        var dbCustomer = getDeepHydratedEntity(Customer.class, 1);
+        var dbCustomer = findDeepHydratedEntity(Customer.class, 1);
 
         assertEquals(1, dbCustomer.getId());
         assertNotNull(dbCustomer.getPassport());

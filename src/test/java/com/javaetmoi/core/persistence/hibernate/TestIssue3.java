@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestIssue3 extends AbstractTest {
 	@Test
 	void listWithEmbeddableClass() {
-		var dbPlan = getDeepHydratedEntity(Plan.class, 1);
+		var dbPlan = findDeepHydratedEntity(Plan.class, 1);
 
 		assertEquals(1, dbPlan.getId());
 		assertEquals(1, dbPlan.getTransfers().size());
@@ -39,7 +39,7 @@ class TestIssue3 extends AbstractTest {
 
 	@Test
 	void listWithMappedEntity() {
-		var dbHolder = getDeepHydratedEntity(Holder.class, 1);
+		var dbHolder = findDeepHydratedEntity(Holder.class, 1);
 
 		assertEquals(1, dbHolder.getId());
 		assertNotNull(dbHolder.getSystem());
@@ -50,9 +50,9 @@ class TestIssue3 extends AbstractTest {
 
 	@Test
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		var dbSystems = transactional(session ->
-				LazyLoadingUtil.deepHydrate(session,
-						selectAllSystemsOrderedByNumber(session)));
+		var dbSystems = transactional(entityManager ->
+				JpaLazyLoadingUtil.deepHydrate(entityManager,
+						selectAllSystemsOrderedByNumber(entityManager)));
 
 		assertEquals(2, dbSystems.size());
 		assertEquals(1, dbSystems.get(0).getId());
@@ -62,9 +62,8 @@ class TestIssue3 extends AbstractTest {
 
 	@Test
 	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		var dbSystem = transactional(session -> {
-			var loadAccess = session.byId(Holder.class);
-			var holder = loadAccess.getReference(1);
+		var dbSystem = transactional(entityManager -> {
+			var holder = entityManager.find(Holder.class, 1L);
 			var system = holder.getSystem();
 			system.setName("system1A");
 			system.setSystemNumber("1A");
@@ -74,13 +73,13 @@ class TestIssue3 extends AbstractTest {
 			var subSystem2 = system.getSubSystems().get(1);
 			subSystem2.setName("subsystem21");
 			subSystem2.setSystemNumber("1-21");
-			session.persist(subSystem1);
-			session.persist(subSystem2);
-			session.persist(system);
-			session.persist(holder);
+			entityManager.persist(subSystem1);
+			entityManager.persist(subSystem2);
+			entityManager.persist(system);
+			entityManager.persist(holder);
 
-			selectAllSystemsOrderedByNumber(session);
-			return LazyLoadingUtil.deepHydrate(session, system);
+			selectAllSystemsOrderedByNumber(entityManager);
+			return JpaLazyLoadingUtil.deepHydrate(entityManager, system);
 		});
 
 		assertEquals(1, dbSystem.getId());

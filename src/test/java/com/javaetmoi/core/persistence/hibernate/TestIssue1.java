@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class TestIssue1 extends AbstractTest {
     @Test
     void nestedListInEmbeddable() {
-        var dbFoo = getDeepHydratedEntity(Foo.class, 1);
+        var dbFoo = findDeepHydratedEntity(Foo.class, 1);
 
         assertNotNull(dbFoo.getBar());
         assertNotNull(dbFoo.getBar().getBizs());

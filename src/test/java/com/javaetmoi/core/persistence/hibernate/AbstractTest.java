@@ -2,19 +2,22 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import javax.sql.DataSource;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+
 import org.h2.jdbcx.JdbcDataSource;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.context.internal.ThreadLocalSessionContext;
 import org.junit.jupiter.api.BeforeEach;
+
+import static jakarta.persistence.Persistence.createEntityManagerFactory;
 
 public class AbstractTest {
     public static final String DATABASE_URL = "jdbc:h2:~/hibernate-hydrate";
 
     private final DataSource dataSource = dataSource();
     private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-    protected final SessionFactory sessionFactory = sessionFactory(dataSource);
+    protected final EntityManagerFactory entityManagerFactory = entityManagerFactory(dataSource);
+    protected EntityManager entityManager = entityManagerFactory.createEntityManager();
 
     /**
      * Populate entities graph and embedded database
@@ -24,18 +27,18 @@ public class AbstractTest {
         dbUnitLoader.loadDatabase(getClass());
 
         // Reset Hibernate Statistics
-        sessionFactory.getStatistics().clear();
+        entityManagerFactory.unwrap(SessionFactory.class).getStatistics().clear();
     }
 
-    protected <E> E getDeepHydratedEntity(Class<E> entityClass, long entityId) {
-        return transactional(session ->
-                LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(),
-                        session.get(entityClass, entityId)));
+    protected <E> E findDeepHydratedEntity(Class<E> entityClass, long entityId) {
+        return transactional(entityManager ->
+                JpaLazyLoadingUtil.deepHydrate(entityManager,
+                        entityManager.find(entityClass, entityId)));
     }
 
-    protected <E> E getEntity(Class<E> entityClass, long entityId) {
-        return transactional(session ->
-                session.get(entityClass, entityId));
+    protected <E> E findEntity(Class<E> entityClass, long entityId) {
+        return transactional(entityManager ->
+                entityManager.find(entityClass, entityId));
     }
 
     private static DataSource dataSource() {
@@ -48,30 +51,20 @@ public class AbstractTest {
         return new DBUnitLoader(dataSource);
     }
 
-    private static SessionFactory sessionFactory(DataSource dataSource) {
-        var config = new Configuration();
-        config.setProperty("hibernate.connection.url", DATABASE_URL);
-        config.setProperty("hibernate.archive.autodetection", "class");
-        config.setProperty("hibernate.current_session_context_class", ThreadLocalSessionContext.class.getName());
-        //config.setProperty("hibernate.format_sql", "true");
-        config.setProperty("hibernate.show_sql", "true");
-        config.setProperty("hibernate.hbm2ddl.auto", "create-drop");
-        config.setProperty("hibernate.generate_statistics", "true");
-        config.addClass(null);
-        return config.buildSessionFactory();
+    private static EntityManagerFactory entityManagerFactory(DataSource dataSource) {
+        return createEntityManagerFactory("hibernate-hydrate");
     }
 
     protected <R> R transactional(Transactional<R> action) {
-        var session = sessionFactory.openSession();
-        var tx = session.beginTransaction();
-        var result = action.doInTransaction(session);
-        tx.commit();
-        session.close();
+        var transaction = entityManager.getTransaction();
+        transaction.begin();
+        var result = action.doInTransaction(entityManager);
+        transaction.commit();
         return result;
     }
 
     @FunctionalInterface
     protected static interface Transactional<R> {
-        R doInTransaction(Session session);
+        R doInTransaction(EntityManager entityManager);
     }
 }
