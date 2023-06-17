@@ -17,9 +17,6 @@ public class AbstractTest {
     private final EntityManagerFactory entityManagerFactory =
             createEntityManagerFactory("hibernate-hydrate");
 
-    /**
-     * Populate entities graph and embedded database
-     */
     @BeforeEach
     void setUpDatabase() {
         dbUnitLoader.loadDatabase(getClass());
