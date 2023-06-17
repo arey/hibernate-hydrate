@@ -1,11 +1,11 @@
 /**
  * Copyright 2012 the original author or authors.
- * 
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -33,7 +33,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 
 /**
  * Unit test of the {@link LazyLoadingUtil} class.
- * 
+ *
  * @author Antoine Rey
  */
 class TestLazyLoadingUtil extends AbstractTest {
@@ -42,11 +42,11 @@ class TestLazyLoadingUtil extends AbstractTest {
 
     private Employee james, tom;
 
-    private Project  android, iphone;
+    private Project android, iphone;
 
-    private Address  paris, lyon, ladefense;
+    private Address paris, lyon, ladefense;
 
-    private Country  france;
+    private Country france;
 
     /**
      * Populate entities graph and embedded database
@@ -114,8 +114,7 @@ class TestLazyLoadingUtil extends AbstractTest {
 
     /**
      * Tests the method {@link LazyLoadingUtil#deepHydrate(org.hibernate.Session, Object)
-
-     **/
+     */
     @Test
     void deepResolveEmployee() {
         // Loading an entity and hydrating its graph is done in a single transaction
@@ -168,8 +167,7 @@ class TestLazyLoadingUtil extends AbstractTest {
 
     /**
      * Tests the method {@link LazyLoadingUtil#deepHydrate(org.hibernate.Session, Object)
-
-     **/
+     */
     @Test
     void deepResolveAddress() {
         // Loading an entity and hydrating its graph is done in a single transaction
