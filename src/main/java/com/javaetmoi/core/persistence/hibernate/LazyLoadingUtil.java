@@ -196,13 +196,12 @@ public class LazyLoadingUtil {
         }
 
         var propertyTypes = descriptor.getPropertyTypes();
-        // Explicitly use Iterable here to be backward compatible to Hibernate 6.1.
-        Iterable<AttributeMapping> attributeMappings = descriptor.getAttributeMappings();
-        for (var attributeMapping : attributeMappings) {
-            var propertyValue = attributeMapping.getValue(target);
+        var finalTarget = target;
+        descriptor.getAttributeMappings().forEach(attributeMapping -> {
+            var propertyValue = attributeMapping.getValue(finalTarget);
             var propertyType = propertyTypes[attributeMapping.getStateArrayPosition()];
             deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
-        }
+        });
     }
 
     private static void deepInflateComponent(
