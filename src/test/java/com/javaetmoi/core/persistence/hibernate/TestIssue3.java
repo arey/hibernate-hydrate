@@ -25,7 +25,9 @@ import static com.javaetmoi.core.persistence.hibernate.JpaLazyLoadingUtil.deepHy
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a> fix.
+ * Unit test for issue 3.
+ *
+ * @see <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a>
  */
 class TestIssue3 extends AbstractTest {
 	@Test

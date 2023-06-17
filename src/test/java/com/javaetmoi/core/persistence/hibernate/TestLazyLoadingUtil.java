@@ -34,7 +34,7 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 /**
  * Unit test of the {@link LazyLoadingUtil} class.
  * 
- * @author arey
+ * @author Antoine Rey
  */
 class TestLazyLoadingUtil extends AbstractTest {
 

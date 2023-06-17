@@ -20,7 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Unit test for the https://github.com/arey/hibernate-hydrate/issues/2 fix
+ * Unit test for issue 2.
+ *
+ * @see <a href="https://github.com/arey/hibernate-hydrate/issues/2">Issue 2</a>
  */
 class TestIssue2 extends AbstractTest {
     @Test
