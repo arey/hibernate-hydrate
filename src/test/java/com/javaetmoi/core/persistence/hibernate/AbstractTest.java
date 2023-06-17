@@ -17,7 +17,6 @@ public class AbstractTest {
     private final DataSource dataSource = dataSource();
     private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
     protected final EntityManagerFactory entityManagerFactory = entityManagerFactory(dataSource);
-    protected EntityManager entityManager = entityManagerFactory.createEntityManager();
 
     /**
      * Populate entities graph and embedded database
@@ -56,10 +55,12 @@ public class AbstractTest {
     }
 
     protected <R> R transactional(Transactional<R> action) {
+        var entityManager = entityManagerFactory.createEntityManager();
         var transaction = entityManager.getTransaction();
         transaction.begin();
         var result = action.doInTransaction(entityManager);
         transaction.commit();
+        entityManager.close();
         return result;
     }
 
