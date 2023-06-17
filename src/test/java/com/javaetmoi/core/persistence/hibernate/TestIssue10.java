@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Unit test for issue 10: Test reference back to parent does not cause infinite recursion
+ * Unit test for issue 10: Test reference back to parent does not cause infinite recursion.
  *
  * @see <a href="https://github.com/arey/hibernate-hydrate/issues/10">Issue 10</a>
  */
