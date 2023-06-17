@@ -31,6 +31,7 @@ import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.dbunit.operation.DatabaseOperation;
 import org.h2.jdbcx.JdbcDataSource;
 
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.dbunit.database.DatabaseConfig.PROPERTY_DATATYPE_FACTORY;
@@ -71,7 +72,7 @@ public class DBUnitLoader {
             throw new IllegalArgumentException("Dataset location is mandatory");
         }
 
-        var dataSets = Arrays.stream(dataSetLocations)
+        var dataSets = stream(dataSetLocations)
                 .map(this::buildDataSet)
                 .collect(toUnmodifiableList());
 
@@ -83,7 +84,7 @@ public class DBUnitLoader {
     private IDataSet buildDataSet(String dataSetLocation) {
         var url = getClass().getClassLoader().getResource(dataSetLocation);
         if (url == null) {
-            throw new IllegalArgumentException("No dataSet file located at " + dataSetLocation);
+            throw new IllegalArgumentException("No dataset file located at " + dataSetLocation);
         }
 
         try {
@@ -102,7 +103,7 @@ public class DBUnitLoader {
             config.setProperty(PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
             return connection;
         } catch (SQLException e) {
-            throw new RuntimeException("Getting JDBC data source", e);
+            throw new RuntimeException("Error while getting JDBC data source", e);
         }
     }
 
@@ -116,7 +117,9 @@ public class DBUnitLoader {
             // language=H2
             statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
         } catch (NoSuchTableException e) {
-            // throw new RuntimeException("Differences between dataset tables and hibernate configuration, check your dataset (typing error), did you override at least one of these beans : mappingResources, annotatedClasses", e);
+            // Ignore missing tables.
+            // Delete all: A not existing table needs not be dropped.
+            // Insert: When creating a table it should not exist.
         } catch (DatabaseUnitException e) {
             throw new RuntimeException("DBUnit error", e);
         } catch (SQLException e) {
