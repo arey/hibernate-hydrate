@@ -68,7 +68,7 @@ public class DBUnitLoader {
 
     public void loadDatabase(String... dataSetLocations) {
         if (isEmpty(dataSetLocations)) {
-            throw new IllegalArgumentException("Dataset location is mandatory");
+            throw new IllegalArgumentException("Dataset locations are mandatory");
         }
 
         var dataSets = stream(dataSetLocations)
