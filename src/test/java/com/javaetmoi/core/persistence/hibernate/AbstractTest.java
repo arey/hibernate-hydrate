@@ -46,13 +46,13 @@ public class AbstractTest {
     }
 
     protected <R> R transactional(Transactional<R> action) {
-        var entityManager = entityManagerFactory.createEntityManager();
-        var transaction = entityManager.getTransaction();
-        transaction.begin();
-        var result = action.doInTransaction(entityManager);
-        transaction.commit();
-        entityManager.close();
-        return result;
+        try (var entityManager = entityManagerFactory.createEntityManager()) {
+            var transaction = entityManager.getTransaction();
+            transaction.begin();
+            var result = action.doInTransaction(entityManager);
+            transaction.commit();
+            return result;
+        }
     }
 
     @FunctionalInterface
