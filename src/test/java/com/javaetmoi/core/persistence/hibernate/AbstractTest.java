@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManagerFactory;
 
 import org.h2.jdbcx.JdbcDataSource;
 import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
@@ -14,9 +15,16 @@ import static jakarta.persistence.Persistence.createEntityManagerFactory;
 public class AbstractTest {
     public static final String DATABASE_URL = "jdbc:h2:~/hibernate-hydrate";
 
-    private final DataSource dataSource = dataSource();
-    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
-    protected final EntityManagerFactory entityManagerFactory = entityManagerFactory(dataSource);
+    private final DBUnitLoader dbUnitLoader =
+            new DBUnitLoader(dataSource());
+    private final EntityManagerFactory entityManagerFactory =
+            createEntityManagerFactory("hibernate-hydrate");
+
+    private static DataSource dataSource() {
+        var dataSource = new JdbcDataSource();
+        dataSource.setURL(DATABASE_URL);
+        return dataSource;
+    }
 
     /**
      * Populate entities graph and embedded database
@@ -26,7 +34,15 @@ public class AbstractTest {
         dbUnitLoader.loadDatabase(getClass());
 
         // Reset Hibernate Statistics
-        entityManagerFactory.unwrap(SessionFactory.class).getStatistics().clear();
+        statistics().clear();
+    }
+
+    //
+    // Interface.
+    //
+
+    protected Statistics statistics() {
+        return entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
     }
 
     protected <E> E findDeepHydratedEntity(Class<E> entityClass, long entityId) {
@@ -38,20 +54,6 @@ public class AbstractTest {
     protected <E> E findEntity(Class<E> entityClass, long entityId) {
         return transactional(entityManager ->
                 entityManager.find(entityClass, entityId));
-    }
-
-    private static DataSource dataSource() {
-        var dataSource = new JdbcDataSource();
-        dataSource.setURL(DATABASE_URL);
-        return dataSource;
-    }
-
-    private static DBUnitLoader dbUnitLoader(DataSource dataSource) {
-        return new DBUnitLoader(dataSource);
-    }
-
-    private static EntityManagerFactory entityManagerFactory(DataSource dataSource) {
-        return createEntityManagerFactory("hibernate-hydrate");
     }
 
     protected <R> R transactional(Transactional<R> action) {

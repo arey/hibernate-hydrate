@@ -18,7 +18,6 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
-import org.hibernate.SessionFactory;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.junit.jupiter.api.BeforeEach;
@@ -161,10 +160,9 @@ class TestLazyLoadingUtil extends AbstractTest {
                 james, dbJames, ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Generated SQL statements number
-        var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
-        assertEquals(8, statistics.getEntityLoadCount(),
+        assertEquals(8, statistics().getEntityLoadCount(),
                 "All 8 entities are loaded: france, james, tom, android, iphone, paris, la d�fense and lyon");
-        assertEquals(6, statistics.getCollectionFetchCount(),
+        assertEquals(6, statistics().getCollectionFetchCount(),
                 "6 collections should be fetched: james' adresses, james' projects, iPhone members, tom's adresses, tom's projects, android members");
     }
 
