@@ -6,6 +6,7 @@ import org.h2.jdbcx.JdbcDataSource;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.context.internal.ThreadLocalSessionContext;
 import org.junit.jupiter.api.BeforeEach;
 
 public class AbstractTest {
@@ -51,10 +52,12 @@ public class AbstractTest {
         var config = new Configuration();
         config.setProperty("hibernate.connection.url", DATABASE_URL);
         config.setProperty("hibernate.archive.autodetection", "class");
+        config.setProperty("hibernate.current_session_context_class", ThreadLocalSessionContext.class.getName());
         //config.setProperty("hibernate.format_sql", "true");
         config.setProperty("hibernate.show_sql", "true");
         config.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         config.setProperty("hibernate.generate_statistics", "true");
+        config.addClass(null);
         return config.buildSessionFactory();
     }
 
