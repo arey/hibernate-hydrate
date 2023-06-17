@@ -15,7 +15,6 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -55,9 +54,9 @@ public class DBUnitLoader {
     }
 
     /**
-     * Generate a default location based on the name of the given class. If the class is named
-     * com.example.MyTest, DBUnitLoad loads your DBUnit dataset from
-     * "com/example/MyTest-dataset.xml".
+     * Generate a default location based on the name of the given class.
+     * If the class is named {@code com.example.MyTest},
+     * DBUnitLoad loads your DBUnit dataset from {@code com/example/MyTest-dataset.xml}.
      *
      * @param testClass
      *         Test class.
