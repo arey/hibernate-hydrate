@@ -46,13 +46,14 @@ public class AbstractTest {
     }
 
     protected <R> R transactional(Transactional<R> action) {
-        try (var entityManager = entityManagerFactory.createEntityManager()) {
-            var transaction = entityManager.getTransaction();
-            transaction.begin();
-            var result = action.doInTransaction(entityManager);
-            transaction.commit();
-            return result;
-        }
+        var entityManager = entityManagerFactory.createEntityManager();
+        var transaction = entityManager.getTransaction();
+        transaction.begin();
+        var result = action.doInTransaction(entityManager);
+        transaction.commit();
+        // For Hibernate 6.1 / JPA 3.0 compatibility we cannot use try with resources for this.
+        entityManager.close();
+        return result;
     }
 
     @FunctionalInterface
