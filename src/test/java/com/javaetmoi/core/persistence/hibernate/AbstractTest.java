@@ -22,7 +22,7 @@ public class AbstractTest {
     void setUpDatabase() {
         dbUnitLoader.loadDatabase(getClass());
 
-        // Reset Hibernate Statistics
+        // Reset Hibernate statistics.
         statistics().clear();
     }
 
