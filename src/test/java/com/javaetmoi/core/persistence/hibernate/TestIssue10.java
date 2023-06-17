@@ -1,53 +1,43 @@
 package com.javaetmoi.core.persistence.hibernate;
 
+import javax.sql.DataSource;
+
 import com.javaetmoi.core.persistence.hibernate.domain.Customer;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Test reference back to parent does not causes infinite recursion
+ * Test reference back to parent does not cause infinite recursion
  * <p>
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/10 fix
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestIssue10 {
 
-    @Autowired
-    private SessionFactory      sessionFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Autowired
-    private DBUnitLoader        dbUnitLoader;
+    private final DataSource dataSource = dataSource();
+    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
+    private final SessionFactory sessionFactory = sessionFactory(dataSource);
 
     /**
      * Populate entities graph and embedded database
      */
     @BeforeEach
-    @Transactional
     void setUp() {
         dbUnitLoader.loadDatabase(getClass());
     }
 
     @Test
-    void oneToOneBidirectionnalRelationship() {
-
-        Customer dbContainer = transactionTemplate.execute(status -> {
-            Customer customer = sessionFactory.getCurrentSession().get(Customer.class, 1);
-            LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), customer);
-            return customer;
+    void oneToOneBidirectionalRelationship() {
+        var dbContainer = transactional(sessionFactory, session -> {
+            var customer = session.get(Customer.class, 1);
+            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), customer);
         });
         assertEquals(Integer.valueOf(1), dbContainer.getId());
         assertNotNull(dbContainer.getPassport());

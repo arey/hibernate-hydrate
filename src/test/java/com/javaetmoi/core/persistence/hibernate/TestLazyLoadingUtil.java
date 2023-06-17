@@ -13,6 +13,8 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import javax.sql.DataSource;
+
 import com.javaetmoi.core.persistence.hibernate.domain.Address;
 import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
@@ -24,55 +26,44 @@ import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.unitils.reflectionassert.ReflectionAssert;
 import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import jakarta.persistence.ManyToOne;
 
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test of the {@link LazyLoadingUtil} class.
  * 
  * @author arey
- * 
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestLazyLoadingUtil {
 
-    @Autowired
-    private SessionFactory      sessionFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestLazyLoadingUtil.class);
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
+    private final DataSource dataSource = dataSource();
+    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
+    private final SessionFactory sessionFactory = sessionFactory(dataSource);
 
-    @Autowired
-    private DBUnitLoader        dbUnitLoader;
+    private Employee james, tom;
 
-    private Employee            james, tom;
+    private Project  android, iphone;
 
-    private Project             android, iphone;
+    private Address  paris, lyon, ladefense;
 
-    private Address             paris, lyon, ladefense;
-
-    private Country             france;
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(TestLazyLoadingUtil.class);
+    private Country  france;
 
     /**
      * Populate entities graph and embedded database
      */
     @BeforeEach
-    @Transactional
     void setUp() {
         dbUnitLoader.loadDatabase(getClass());
 
@@ -106,8 +97,8 @@ class TestLazyLoadingUtil {
     @Test
     void lazyInitializationExceptionOnPersistentMap() {
         // Load each entity in a transaction
-        Employee dbJames = transactionTemplate.execute(status ->
-                sessionFactory.getCurrentSession().get(Employee.class, 1));
+        var dbJames = transactional(sessionFactory, session ->
+                session.get(Employee.class, 1));
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get(0));
     }
@@ -119,8 +110,8 @@ class TestLazyLoadingUtil {
     @Test
     void lazyInitializationExceptionOnPersistentCollection() {
         // Load each entity in a transaction
-        Employee dbJames = transactionTemplate.execute(status ->
-                sessionFactory.getCurrentSession().get(Employee.class, 1));
+        var dbJames = transactional(sessionFactory, session ->
+                session.get(Employee.class, 1));
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbJames.getProjects().contains(android));
     }
@@ -132,8 +123,8 @@ class TestLazyLoadingUtil {
     @Test
     void lazyInitializationExceptionWithManyToOne() {
         // Load each entity in a transaction
-        Address dbLyon = transactionTemplate.execute(status ->
-                sessionFactory.getCurrentSession().get(Address.class, 200));
+        var dbLyon = transactional(sessionFactory, session ->
+                session.get(Address.class, 200));
         // At this step, transaction and session are closed
         assertThrows(LazyInitializationException.class, () -> dbLyon.getEmployee().getName());
     }
@@ -145,9 +136,9 @@ class TestLazyLoadingUtil {
     @Test
     void deepResolveEmployee() {
         // Loading an entity and hydrating its graph is done in a single transaction
-        Employee dbJames = transactionTemplate.execute(status -> {
-            Employee employee = sessionFactory.getCurrentSession().get(Employee.class, 1);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), employee);
+        Employee dbJames = transactional(sessionFactory, session -> {
+            var employee = session.get(Employee.class, 1);
+            return LazyLoadingUtil.deepHydrate(session, employee);
         });
 
         // Assertions
@@ -203,9 +194,9 @@ class TestLazyLoadingUtil {
     @Test
     void deepResolveAddress() {
         // Loading an entity and hydrating its graph is done in a single transaction
-        Address dbLyon = transactionTemplate.execute(status -> {
-            Address address = sessionFactory.getCurrentSession().get(Address.class, 200);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), address);
+        Address dbLyon = transactional(sessionFactory, session -> {
+            var address = session.get(Address.class, 200);
+            return LazyLoadingUtil.deepHydrate(session, address);
         });
 
         assertEquals(dbLyon.getEmployee().getName(), tom.getName(),

@@ -13,8 +13,6 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -35,9 +33,6 @@ import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.dbunit.operation.DatabaseOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.ResourceUtils;
 
 /**
  * Allows to easily insert and cleanup test data into a database.
@@ -49,13 +44,10 @@ public class DBUnitLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
 
-    private final DataSource   dataSource;
+    private final DataSource dataSource;
 
-    private final JdbcTemplate jdbcTemplate;
-
-    DBUnitLoader(JdbcTemplate jdbcTemplate) {
-        this.dataSource = jdbcTemplate.getDataSource();
-        this.jdbcTemplate = jdbcTemplate;
+    DBUnitLoader(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
@@ -74,7 +66,7 @@ public class DBUnitLoader {
     }
 
     public void loadDatabase(String... dataSetLocations) {
-        List<IDataSet> dataSets = new ArrayList<IDataSet>();
+        var dataSets = new ArrayList<IDataSet>();
 
         if ((dataSetLocations == null) || (dataSetLocations.length == 0)) {
             throw new IllegalArgumentException("Dataset location is mandatory");
@@ -87,9 +79,7 @@ public class DBUnitLoader {
             IDataSet dataSet;
             try {
                 dataSet = flatXmlDataSetBuilder.build(url.openStream());
-            } catch (DataSetException e) {
-                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
-            } catch (IOException e) {
+            } catch (DataSetException | IOException e) {
                 throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
             }
             dataSets.add(dataSet);
@@ -98,8 +88,7 @@ public class DBUnitLoader {
         try {
             dbConn = new DatabaseDataSourceConnection(dataSource);
         } catch (SQLException e) {
-            throw jdbcTemplate.getExceptionTranslator().translate("Getting JDBC data source", null,
-                    e);
+            throw new RuntimeException("Getting JDBC data source", e);
         }
         DatabaseConfig config = dbConn.getConfig();
         config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
@@ -109,8 +98,7 @@ public class DBUnitLoader {
         } catch (DatabaseUnitException e) {
             throw new RuntimeException("DBUnit error", e);
         } catch (SQLException e) {
-            throw jdbcTemplate.getExceptionTranslator().translate("Inserting DBUnit dataset", null,
-                    e);
+            throw new RuntimeException("Inserting DBUnit dataset", e);
         }
 
     }
@@ -120,8 +108,7 @@ public class DBUnitLoader {
         new AbstractDatabaseOperation() {
 
             @Override
-            protected void execute(IDataSet dataSet,
-                    @SuppressWarnings("hiding") IDatabaseConnection dbConn)
+            protected void execute(IDataSet dataSet, IDatabaseConnection dbConn)
                     throws DatabaseUnitException, SQLException {
                 DatabaseOperation.DELETE_ALL.execute(dbConn, dataSet);
             }
@@ -134,8 +121,7 @@ public class DBUnitLoader {
         new AbstractDatabaseOperation() {
 
             @Override
-            protected void execute(IDataSet dataSet,
-                    @SuppressWarnings("hiding") IDatabaseConnection dbConn)
+            protected void execute(IDataSet dataSet, IDatabaseConnection dbConn)
                     throws DatabaseUnitException, SQLException {
                 DatabaseOperation.INSERT.execute(dbConn, dataSet);
             }
@@ -144,14 +130,9 @@ public class DBUnitLoader {
     }
 
     private URL retrieveDataSetURL(String dataSetLocation) {
-        URL url;
-        try {
-            url = ResourceUtils.getURL(dataSetLocation);
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException("No dataSet file located at " + dataSetLocation, e);
-        }
-        if (!new File(url.getPath()).exists()) {
-            throw new IllegalArgumentException("No dataSet file located at " + url.getPath());
+        var url = getClass().getClassLoader().getResource(dataSetLocation);
+        if (url == null) {
+            throw new IllegalArgumentException("No dataSet file located at " + url);
         }
         return url;
     }
@@ -160,13 +141,14 @@ public class DBUnitLoader {
 
         public void execute(List<IDataSet> dataSets, IDatabaseConnection dbConn)
                 throws DatabaseUnitException, SQLException {
-            try {
-
-                jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE;");
-                for (IDataSet dataSet : dataSets) {
+            try (var connection = dataSource.getConnection(); var statement = connection.createStatement()) {
+                // language=H2
+                statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+                for (var dataSet : dataSets) {
                     execute(dataSet, dbConn);
                 }
-                jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE;");
+                // language=H2
+                statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
             } catch (NoSuchTableException e) {
                 LOG.error("Differences between dataset tables and hibernate configuration, check your dataset (typing error), did you override at least one of these beans : mappingResources, annotatedClasses");
                 throw e;
@@ -174,6 +156,6 @@ public class DBUnitLoader {
         }
 
         protected abstract void execute(IDataSet dataSet, IDatabaseConnection dbConn)
-                throws NoSuchTableException, DatabaseUnitException, SQLException;
+                throws DatabaseUnitException, SQLException;
     }
 }

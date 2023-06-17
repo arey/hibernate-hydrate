@@ -20,48 +20,39 @@ import jakarta.persistence.EntityManager;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
+import javax.sql.DataSource;
+
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/3">Issue 3</a> fix.
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestIssue3 {
 
-	@Autowired
-    private SessionFactory      sessionFactory;
-
-	@Autowired
-	private TransactionTemplate transactionTemplate;
-
-	@Autowired
-	private DBUnitLoader        dbUnitLoader;
+	private final DataSource dataSource = dataSource();
+	private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
+	private final SessionFactory sessionFactory = sessionFactory(dataSource);
 
 	/**
 	 * Populate entities graph and embedded database
 	 */
 	@BeforeEach
-	@Transactional
 	void setUp() {
 		dbUnitLoader.loadDatabase(getClass());
 	}
 
 	@Test
 	void listWithEmbeddableClass() {
-		var dbContainer = transactionTemplate.execute(status -> {
-			var entityManager = sessionFactory.getCurrentSession();
-			var plan = entityManager.get(Plan.class, 1);
-			return LazyLoadingUtil.deepHydrate(entityManager, plan);
+		var dbContainer = transactional(sessionFactory, session -> {
+			var plan = session.get(Plan.class, 1);
+			return LazyLoadingUtil.deepHydrate(session, plan);
 		});
 		assertEquals(1, dbContainer.getId());
 		assertEquals(1, dbContainer.getTransfers().size());
@@ -71,10 +62,9 @@ class TestIssue3 {
 
 	@Test
 	void listWithMappedEntity() {
-		var dbContainer = transactionTemplate.execute(status -> {
-			var entityManager = sessionFactory.getCurrentSession();
-			var holder = entityManager.get(Holder.class, 1);
-			return LazyLoadingUtil.deepHydrate(entityManager, holder);
+		var dbContainer = transactional(sessionFactory, session -> {
+			var holder = session.get(Holder.class, 1);
+			return LazyLoadingUtil.deepHydrate(session, holder);
 		});
 		assertEquals(1, dbContainer.getId());
 		assertNotNull(dbContainer.getSystem());
@@ -85,10 +75,9 @@ class TestIssue3 {
 
 	@Test
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		var dbContainer = transactionTemplate.execute(status -> {
-			var entityManager = sessionFactory.getCurrentSession();
-			var systems = selectAllSystemsOrderedByNumber(entityManager);
-			return LazyLoadingUtil.deepHydrate(entityManager, systems);
+		var dbContainer = transactional(sessionFactory, session -> {
+			var systems = selectAllSystemsOrderedByNumber(session);
+			return LazyLoadingUtil.deepHydrate(session, systems);
 		});
 		assertNotNull(dbContainer);
 		assertFalse(dbContainer.isEmpty());
@@ -100,9 +89,8 @@ class TestIssue3 {
 
 	@Test
 	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		var dbContainer = transactionTemplate.execute(status -> {
-			var entityManager = sessionFactory.getCurrentSession();
-			var loadAccess = entityManager.byId(Holder.class);
+		var dbContainer = transactional(sessionFactory, session -> {
+			var loadAccess = session.byId(Holder.class);
 			var holder = loadAccess.getReference(1);
 			var system = holder.getSystem();
 			system.setName("system1A");
@@ -113,13 +101,13 @@ class TestIssue3 {
 			var subSystem2 = system.getSubSystems().get(1);
 			subSystem2.setName("subsystem21");
 			subSystem2.setSystemNumber("1-21");
-			entityManager.persist(subSystem1);
-			entityManager.persist(subSystem2);
-			entityManager.persist(system);
-			entityManager.persist(holder);
+			session.persist(subSystem1);
+			session.persist(subSystem2);
+			session.persist(system);
+			session.persist(holder);
 
-			selectAllSystemsOrderedByNumber(entityManager);
-			return LazyLoadingUtil.deepHydrate(entityManager, system);
+			selectAllSystemsOrderedByNumber(session);
+			return LazyLoadingUtil.deepHydrate(session, system);
 		});
 		assertEquals(1, dbContainer.getId());
 		assertNotNull(dbContainer.getSubSystems());

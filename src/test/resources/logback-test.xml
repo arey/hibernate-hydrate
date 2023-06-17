@@ -8,11 +8,9 @@
   </appender>
 
   <logger name="org.hibernate" level="INFO" />
-  <logger name="org.springframework" level="INFO" />
 <!--   <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" /> -->
  
   <logger name="com.javaetmoi.core.persistence.hibernate" level="DEBUG"/>
-
 
   <root level="INFO">
     <appender-ref ref="Console" />

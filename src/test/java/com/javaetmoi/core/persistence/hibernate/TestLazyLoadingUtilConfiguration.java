@@ -1,64 +1,46 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.Properties;
-
 import javax.sql.DataSource;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.support.TransactionTemplate;
-
+import org.h2.jdbcx.JdbcDataSource;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
-@Configuration(proxyBeanMethods = false)
-@EnableTransactionManagement
 public class TestLazyLoadingUtilConfiguration {
-    @Bean
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();
-    }
-    @Bean
-    public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
-        // TODO markus 2022-04-19: Use Spring Boot to setup tests?
-        var properties = new Properties();
-        //properties.setProperty("hibernate.format_sql", "true");
-        properties.setProperty("hibernate.show_sql", "true");
-        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
-        properties.setProperty("hibernate.generate_statistics", "true");
+    public static final String DATABASE_URL = "jdbc:h2:~/hibernate-hydrate";
 
-        var factory = new LocalSessionFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setPackagesToScan("com.javaetmoi.core.persistence.hibernate.*");
-        factory.setHibernateProperties(properties);
-        return factory;
+    public static DataSource dataSource() {
+        var dataSource = new JdbcDataSource();
+        dataSource.setURL(DATABASE_URL);
+        return dataSource;
     }
 
-    @Bean
-    public PlatformTransactionManager transactionManager(SessionFactory sessionFactory) {
-        return new HibernateTransactionManager(sessionFactory);
+    public static DBUnitLoader dbUnitLoader(DataSource dataSource) {
+        return new DBUnitLoader(dataSource);
     }
 
-    @Bean
-    public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {
-        return new TransactionTemplate(transactionManager);
+    public static SessionFactory sessionFactory(DataSource dataSource) {
+        var config = new Configuration();
+        //config.setProperty("hibernate.format_sql", "true");
+        config.setProperty("hibernate.show_sql", "true");
+        config.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        config.setProperty("hibernate.generate_statistics", "true");
+        config.configure();
+        return config.buildSessionFactory();
     }
 
-    @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
+    public static <R> R transactional(SessionFactory sessionFactory, Transactional<R> action) {
+        var session = sessionFactory.openSession();
+        var tx = session.beginTransaction();
+        var result = action.doInTransaction(session);
+        tx.commit();
+        session.close();
+        return result;
     }
 
-    @Bean
-    public DBUnitLoader dbUnitLoader(JdbcTemplate jdbcTemplate) {
-        return new DBUnitLoader(jdbcTemplate);
+    @FunctionalInterface
+    public static interface Transactional<R> {
+        R doInTransaction(Session session);
     }
 }

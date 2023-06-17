@@ -93,7 +93,6 @@
     <version.junit>5.9.2</version.junit>
     <version.logback>1.4.7</version.logback>
     <version.mockito>5.3.0</version.mockito>
-    <version.spring>6.0.8</version.spring>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
@@ -129,25 +128,6 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${version.junit}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- * Spring Test and ORM -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-orm</artifactId>
-      <version>${version.spring}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${version.spring}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${version.spring}</version>
       <scope>test</scope>
     </dependency>
     <!-- * Logger -->
@@ -286,9 +266,6 @@
                 <downloadJavadocs>true</downloadJavadocs>
                 <ajdtVersion>none</ajdtVersion>
                 <useProjectReferences>true</useProjectReferences>
-                <additionalProjectnatures>
-                  <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
-                </additionalProjectnatures>
               </configuration>
             </plugin>
           </plugins>

@@ -13,50 +13,41 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import javax.sql.DataSource;
+
 import com.javaetmoi.core.persistence.hibernate.domain.Parent;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dataSource;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.dbUnitLoader;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.sessionFactory;
+import static com.javaetmoi.core.persistence.hibernate.TestLazyLoadingUtilConfiguration.transactional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Unit test for the https://github.com/arey/hibernate-hydrate/issues/2 fix
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
 class TestIssue2 {
 
-    @Autowired
-    private SessionFactory      sessionFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Autowired
-    private DBUnitLoader        dbUnitLoader;
+    private final DataSource dataSource = dataSource();
+    private final DBUnitLoader dbUnitLoader = dbUnitLoader(dataSource);
+    private final SessionFactory sessionFactory = sessionFactory(dataSource);
 
     /**
      * Populate entities graph and embedded database
      */
     @BeforeEach
-    @Transactional
     void setUp() {
         dbUnitLoader.loadDatabase(getClass());
     }
 
     @Test
     void nestedListUsingMappedSuperclass() {
-
-        Parent dbParent = transactionTemplate.execute(status -> {
-            Parent parent = sessionFactory.getCurrentSession().get(Parent.class, 1L);
+        var dbParent = transactional(sessionFactory, session -> {
+            var parent = session.get(Parent.class, 1L);
             return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), parent);
         });
         assertEquals(Long.valueOf(1), dbParent.getId());
