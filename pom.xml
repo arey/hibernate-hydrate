@@ -117,12 +117,12 @@
     </dependency>
 
     <!-- Tests -->
+    <!-- * Hibernate -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-testing</artifactId>
       <version>${version.hibernate}</version>
     </dependency>
-
     <!-- * JUnit -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
