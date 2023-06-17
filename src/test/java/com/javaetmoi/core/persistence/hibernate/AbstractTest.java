@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 
+import static com.javaetmoi.core.persistence.hibernate.JpaLazyLoadingUtil.deepHydrate;
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
 
 public class AbstractTest {
@@ -35,7 +36,7 @@ public class AbstractTest {
 
     protected <E> E findDeepHydratedEntity(Class<E> entityClass, long entityId) {
         return transactional(entityManager ->
-                JpaLazyLoadingUtil.deepHydrate(entityManager,
+                deepHydrate(entityManager,
                         entityManager.find(entityClass, entityId)));
     }
 
