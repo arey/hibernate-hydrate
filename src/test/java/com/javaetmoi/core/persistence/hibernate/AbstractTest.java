@@ -1,5 +1,7 @@
 package com.javaetmoi.core.persistence.hibernate;
 
+import java.util.function.Function;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -45,19 +47,14 @@ public class AbstractTest {
                 entityManager.find(entityClass, entityId));
     }
 
-    protected <R> R transactional(Transactional<R> action) {
+    protected <R> R transactional(Function<EntityManager, R> action) {
         var entityManager = entityManagerFactory.createEntityManager();
         var transaction = entityManager.getTransaction();
         transaction.begin();
-        var result = action.doInTransaction(entityManager);
+        var result = action.apply(entityManager);
         transaction.commit();
         // For Hibernate 6.1 / JPA 3.0 compatibility we cannot use try with resources for this.
         entityManager.close();
         return result;
-    }
-
-    @FunctionalInterface
-    protected static interface Transactional<R> {
-        R doInTransaction(EntityManager entityManager);
     }
 }
