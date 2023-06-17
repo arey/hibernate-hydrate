@@ -29,6 +29,7 @@ import org.dbunit.dataset.NoSuchTableException;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.dbunit.operation.DatabaseOperation;
+import org.h2.jdbcx.JdbcDataSource;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
@@ -46,8 +47,10 @@ public class DBUnitLoader {
 
     private final DataSource dataSource;
 
-    DBUnitLoader(DataSource dataSource) {
-        this.dataSource = dataSource;
+    DBUnitLoader(String databaseUrl) {
+        var jdbcDataSource = new JdbcDataSource();
+        jdbcDataSource.setURL(databaseUrl);
+        this.dataSource = jdbcDataSource;
     }
 
     /**

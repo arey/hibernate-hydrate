@@ -16,15 +16,9 @@ public class AbstractTest {
     public static final String DATABASE_URL = "jdbc:h2:~/hibernate-hydrate";
 
     private final DBUnitLoader dbUnitLoader =
-            new DBUnitLoader(dataSource());
+            new DBUnitLoader(DATABASE_URL);
     private final EntityManagerFactory entityManagerFactory =
             createEntityManagerFactory("hibernate-hydrate");
-
-    private static DataSource dataSource() {
-        var dataSource = new JdbcDataSource();
-        dataSource.setURL(DATABASE_URL);
-        return dataSource;
-    }
 
     /**
      * Populate entities graph and embedded database
