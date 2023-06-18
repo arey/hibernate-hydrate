@@ -14,7 +14,6 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -30,7 +29,6 @@ import org.dbunit.operation.DatabaseOperation;
 import org.h2.jdbcx.JdbcDataSource;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.dbunit.database.DatabaseConfig.PROPERTY_DATATYPE_FACTORY;
 import static org.dbunit.operation.DatabaseOperation.DELETE_ALL;
@@ -72,7 +70,7 @@ public class DBUnitLoader {
 
         var dataSets = stream(dataSetLocations)
                 .map(this::buildDataSet)
-                .collect(toUnmodifiableList());
+                .toArray(IDataSet[]::new);
 
         var connection = connection();
         executeAll(connection, DELETE_ALL, dataSets);
@@ -105,8 +103,8 @@ public class DBUnitLoader {
         }
     }
 
-    public void executeAll(IDatabaseConnection connection, DatabaseOperation operation, List<IDataSet> dataSets) {
-        try (var c = dataSource.getConnection(); var statement = c.createStatement()) {
+    public void executeAll(IDatabaseConnection connection, DatabaseOperation operation, IDataSet... dataSets) {
+        try (var jdbcConnection = dataSource.getConnection(); var statement = jdbcConnection.createStatement()) {
             // language=H2
             statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
             for (var dataSet : dataSets) {
@@ -121,7 +119,7 @@ public class DBUnitLoader {
         } catch (DatabaseUnitException e) {
             throw new RuntimeException("DBUnit error", e);
         } catch (SQLException e) {
-            throw new RuntimeException("Inserting DBUnit dataset", e);
+            throw new RuntimeException("Data set error", e);
         }
     }
 }
