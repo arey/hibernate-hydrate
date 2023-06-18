@@ -8,7 +8,7 @@
   </appender>
 
   <logger name="org.hibernate" level="INFO" />
-  <!--logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" /-->
+  <!--logger name="org.hibernate.type.descriptor.jdbc.BasicBinder" level="TRACE" /-->
  
   <logger name="com.javaetmoi.core.persistence.hibernate" level="DEBUG"/>
 
