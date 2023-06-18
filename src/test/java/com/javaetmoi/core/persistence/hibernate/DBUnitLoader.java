@@ -143,10 +143,8 @@ public class DBUnitLoader {
             // Ignore missing tables.
             // Delete all: A not existing table needs not be dropped.
             // Insert: When creating a table it should not exist.
-        } catch (DatabaseUnitException e) {
-            throw new RuntimeException("DBUnit error", e);
-        } catch (SQLException e) {
-            throw new RuntimeException("Data set error", e);
+        } catch (DatabaseUnitException | SQLException e) {
+            throw new RuntimeException("Error while applying a data set", e);
         }
     }
 }
