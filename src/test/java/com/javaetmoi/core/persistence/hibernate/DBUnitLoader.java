@@ -14,6 +14,7 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -68,10 +69,10 @@ public class DBUnitLoader {
      *
      * @param dataSetLocations
      *         Data set locations.
-     *         Absolute: {@code "/com/example/MyTest-dataset.xml"}.
+     *         Absolute: {@code "com/example/MyTest-dataset.xml"}.
      */
     public void loadDatabase(String... dataSetLocations) {
-        loadDatabase(getClass(), dataSetLocations);
+        loadDatabase(null, dataSetLocations);
     }
 
     /**
@@ -81,8 +82,8 @@ public class DBUnitLoader {
      *         Test class used as anchor.
      * @param dataSetLocations
      *         Data set locations.
-     *         Relative to the test class: {@code "MyTest-dataset.xml"}.
-     *         Absolute: {@code "/com/example/MyTest-dataset.xml"}.
+     *         If the test class is not {@code null}, relative to the test class: {@code "MyTest-dataset.xml"}.
+     *         If the test class is {@code null}, absolute: {@code "com/example/MyTest-dataset.xml"}.
      */
     public void loadDatabase(Class<?> testClass, String... dataSetLocations) {
         if (isEmpty(dataSetLocations)) {
@@ -99,7 +100,7 @@ public class DBUnitLoader {
     }
 
     private IDataSet buildDataSet(Class<?> testClass, String dataSetLocation) {
-        try (var dataSet = testClass.getResourceAsStream(dataSetLocation)) {
+        try (var dataSet = getResourceAsStream(testClass, dataSetLocation)) {
             if (dataSet == null) {
                 throw new IllegalArgumentException("No data set file located at " + dataSetLocation);
             }
@@ -110,6 +111,12 @@ public class DBUnitLoader {
         } catch (DataSetException | IOException e) {
             throw new RuntimeException("Error while reading data set " + dataSetLocation, e);
         }
+    }
+
+    private InputStream getResourceAsStream(Class<?> testClass, String dataSetLocation) {
+        return testClass != null ?
+                testClass.getResourceAsStream(dataSetLocation) :
+                getClass().getClassLoader().getResourceAsStream(dataSetLocation);
     }
 
     private IDatabaseConnection connection() {
