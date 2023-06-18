@@ -68,7 +68,7 @@ public class DBUnitLoader {
 
     public void loadDatabase(String... dataSetLocations) {
         if (isEmpty(dataSetLocations)) {
-            throw new IllegalArgumentException("Dataset locations are mandatory");
+            throw new IllegalArgumentException("Data set locations are mandatory");
         }
 
         var dataSets = stream(dataSetLocations)
@@ -81,17 +81,17 @@ public class DBUnitLoader {
     }
 
     private IDataSet buildDataSet(String dataSetLocation) {
-        var url = getClass().getClassLoader().getResource(dataSetLocation);
-        if (url == null) {
-            throw new IllegalArgumentException("No dataset file located at " + dataSetLocation);
+        var dataSet = getClass().getClassLoader().getResourceAsStream(dataSetLocation);
+        if (dataSet == null) {
+            throw new IllegalArgumentException("No data set file located at " + dataSetLocation);
         }
 
         try {
-            var flatXmlDataSetBuilder = new FlatXmlDataSetBuilder();
-            flatXmlDataSetBuilder.setColumnSensing(true);
-            return flatXmlDataSetBuilder.build(url.openStream());
-        } catch (DataSetException | IOException e) {
-            throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
+            var dataSetBuilder = new FlatXmlDataSetBuilder();
+            dataSetBuilder.setColumnSensing(true);
+            return dataSetBuilder.build(dataSet);
+        } catch (DataSetException e) {
+            throw new RuntimeException("Error while reading data set " + dataSetLocation, e);
         }
     }
 
@@ -102,7 +102,7 @@ public class DBUnitLoader {
             config.setProperty(PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
             return connection;
         } catch (SQLException e) {
-            throw new RuntimeException("Error while getting JDBC data source", e);
+            throw new RuntimeException("Error while getting the JDBC data source", e);
         }
     }
 
