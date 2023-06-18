@@ -51,25 +51,45 @@ public class DBUnitLoader {
     }
 
     /**
-     * Generate a default location based on the name of the given class.
-     * If the class is named {@code com.example.MyTest},
-     * DBUnitLoad loads your DBUnit dataset from {@code com/example/MyTest-dataset.xml}.
+     * Load the database from a data set for the given class.
+     * If the class is named {@code com.example.MyTest}, DBUnitLoad loads your DBUnit data set
+     * from the file {@code MyTest-dataset.xml} in the package {@code com.example}.
      *
      * @param testClass
      *         Test class.
      */
     public void loadDatabase(Class<?> testClass) {
-        var dataSetLocation = testClass.getName().replace(".", "/") + "-dataset.xml";
-        loadDatabase(dataSetLocation);
+        loadDatabase(testClass, testClass.getSimpleName() + "-dataset.xml");
     }
 
+    /**
+     * Load the database from the given data sets.
+     *
+     * @param dataSetLocations
+     *         Data set locations.
+     *         Absolute: {@code "/com/example/MyTest-dataset.xml"}.
+     */
     public void loadDatabase(String... dataSetLocations) {
+        loadDatabase(getClass(), dataSetLocations);
+    }
+
+    /**
+     * Load the database from the given data sets.
+     *
+     * @param testClass
+     *         Test class used as anchor.
+     * @param dataSetLocations
+     *         Data set locations.
+     *         Relative to the test class: {@code "MyTest-dataset.xml"}.
+     *         Absolute: {@code "/com/example/MyTest-dataset.xml"}.
+     */
+    public void loadDatabase(Class<?> testClass, String... dataSetLocations) {
         if (isEmpty(dataSetLocations)) {
             throw new IllegalArgumentException("Data set locations are mandatory");
         }
 
         var dataSets = stream(dataSetLocations)
-                .map(this::buildDataSet)
+                .map(dataSetLocation -> buildDataSet(testClass, dataSetLocation))
                 .toArray(IDataSet[]::new);
 
         var connection = connection();
@@ -77,8 +97,8 @@ public class DBUnitLoader {
         executeAll(connection, INSERT, dataSets);
     }
 
-    private IDataSet buildDataSet(String dataSetLocation) {
-        var dataSet = getClass().getClassLoader().getResourceAsStream(dataSetLocation);
+    private IDataSet buildDataSet(Class<?> testClass, String dataSetLocation) {
+        var dataSet = testClass.getResourceAsStream(dataSetLocation);
         if (dataSet == null) {
             throw new IllegalArgumentException("No data set file located at " + dataSetLocation);
         }
