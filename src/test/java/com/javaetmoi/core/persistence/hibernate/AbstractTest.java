@@ -2,13 +2,10 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import java.util.function.Function;
 
-import javax.sql.DataSource;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 
