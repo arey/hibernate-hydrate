@@ -13,6 +13,7 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -98,16 +99,15 @@ public class DBUnitLoader {
     }
 
     private IDataSet buildDataSet(Class<?> testClass, String dataSetLocation) {
-        var dataSet = testClass.getResourceAsStream(dataSetLocation);
-        if (dataSet == null) {
-            throw new IllegalArgumentException("No data set file located at " + dataSetLocation);
-        }
+        try (var dataSet = testClass.getResourceAsStream(dataSetLocation)) {
+            if (dataSet == null) {
+                throw new IllegalArgumentException("No data set file located at " + dataSetLocation);
+            }
 
-        try {
-            var dataSetBuilder = new FlatXmlDataSetBuilder();
-            dataSetBuilder.setColumnSensing(true);
-            return dataSetBuilder.build(dataSet);
-        } catch (DataSetException e) {
+            return new FlatXmlDataSetBuilder()
+                    .setColumnSensing(true)
+                    .build(dataSet);
+        } catch (DataSetException | IOException e) {
             throw new RuntimeException("Error while reading data set " + dataSetLocation, e);
         }
     }
