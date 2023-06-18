@@ -2,10 +2,13 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import java.util.function.Function;
 
+import javax.sql.DataSource;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.internal.SessionFactoryImpl;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -13,12 +16,11 @@ import static com.javaetmoi.core.persistence.hibernate.JpaLazyLoadingUtil.deepHy
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
 
 public class AbstractTest {
-    public static final String DATABASE_URL = "jdbc:h2:~/hibernate-hydrate";
 
-    private final DBUnitLoader dbUnitLoader =
-            new DBUnitLoader(DATABASE_URL);
     private final EntityManagerFactory entityManagerFactory =
             createEntityManagerFactory("hibernate-hydrate");
+    private final DBUnitLoader dbUnitLoader =
+            new DBUnitLoader((String) entityManagerFactory.getProperties().get("hibernate.connection.url"));
 
     @BeforeEach
     void setUpDatabase() {
