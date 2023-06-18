@@ -75,7 +75,7 @@ class TestLazyLoadingUtil extends AbstractTest {
 
     /**
      * Verify the {@link LazyInitializationException} is thrown when accessing entity relations
-     * outside a transaction, an Hibernate {@link PersistentMap} in this test.
+     * outside a transaction, a Hibernate {@link PersistentMap} in this test.
      */
     @Test
     void lazyInitializationExceptionOnPersistentMap() {
@@ -83,12 +83,12 @@ class TestLazyLoadingUtil extends AbstractTest {
         var dbJames = findEntity(Employee.class, 1);
 
         // At this step, transaction and session are closed
-        assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get(0));
+        assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get("home"));
     }
 
     /**
      * Verify the {@link LazyInitializationException} is thrown when accessing entity relations
-     * outside a transaction, an Hibernate {@link PersistentCollection} in this test.
+     * outside a transaction, a Hibernate {@link PersistentCollection} in this test.
      */
     @Test
     void lazyInitializationExceptionOnPersistentCollection() {

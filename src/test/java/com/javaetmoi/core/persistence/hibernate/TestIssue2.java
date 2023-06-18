@@ -32,7 +32,7 @@ class TestIssue2 extends AbstractTest {
         assertEquals(Long.valueOf(1), dbParent.getId());
         assertEquals("Parent 1", dbParent.getName());
         assertEquals(2, dbParent.getChildren().size());
-        assertNotNull("Child 10", dbParent.getChildren().get(0).getName());
-        assertNotNull("Parent 1", dbParent.getChildren().get(0).getParent().getName());
+        assertEquals("Child 10", dbParent.getChildren().get(0).getName());
+        assertEquals("Parent 1", dbParent.getChildren().get(0).getParent().getName());
     }
 }
