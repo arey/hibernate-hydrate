@@ -53,7 +53,7 @@ class TestIssue3 extends AbstractTest {
 
 	@Test
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
-		var dbSystems = transactional(entityManager ->
+		var dbSystems = doInJPA(entityManager ->
 				deepHydrate(entityManager,
 						selectAllSystemsOrderedByNumber(entityManager)));
 
@@ -65,7 +65,7 @@ class TestIssue3 extends AbstractTest {
 
 	@Test
 	void retrieveEntityWhenAlreadyInsSessionOnAccountOfSave() {
-		var dbSystem = transactional(entityManager -> {
+		var dbSystem = doInJPA(entityManager -> {
 			var holder = entityManager.find(Holder.class, 1L);
 			var system = holder.getSystem();
 			system.setName("system1A");

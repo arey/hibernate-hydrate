@@ -1,16 +1,16 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.function.Function;
-
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
+import org.hibernate.testing.transaction.TransactionUtil;
+import org.hibernate.testing.transaction.TransactionUtil.JPATransactionFunction;
 import org.junit.jupiter.api.BeforeEach;
 
 import static com.javaetmoi.core.persistence.hibernate.JpaLazyLoadingUtil.deepHydrate;
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
+import static org.hibernate.testing.transaction.TransactionUtil.doInJPA;
 
 public class AbstractTest {
 
@@ -36,24 +36,17 @@ public class AbstractTest {
     }
 
     protected <E> E findDeepHydratedEntity(Class<E> entityClass, long entityId) {
-        return transactional(entityManager ->
+        return doInJPA(entityManager ->
                 deepHydrate(entityManager,
                         entityManager.find(entityClass, entityId)));
     }
 
     protected <E> E findEntity(Class<E> entityClass, long entityId) {
-        return transactional(entityManager ->
+        return doInJPA(entityManager ->
                 entityManager.find(entityClass, entityId));
     }
 
-    protected <R> R transactional(Function<EntityManager, R> action) {
-        var entityManager = entityManagerFactory.createEntityManager();
-        var transaction = entityManager.getTransaction();
-        transaction.begin();
-        var result = action.apply(entityManager);
-        transaction.commit();
-        // For Hibernate 6.1 / JPA 3.0 compatibility we cannot use try with resources for this.
-        entityManager.close();
-        return result;
+    protected <R> R doInJPA(JPATransactionFunction<R> action) {
+        return TransactionUtil.doInJPA(() -> entityManagerFactory, action);
     }
 }
