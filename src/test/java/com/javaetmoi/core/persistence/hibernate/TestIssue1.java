@@ -14,55 +14,24 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.domain.Foo;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Unit test for the https://github.com/arey/hibernate-hydrate/issues/1 fix
+ * Unit test for issue 1.
+ *
+ * @see <a href="https://github.com/arey/hibernate-hydrate/issues/1">Issue 1</a>
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
-class TestIssue1 {
-
-    @Autowired
-    private SessionFactory      sessionFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Autowired
-    private DBUnitLoader        dbUnitLoader;
-
-    /**
-     * Populate entities graph and embedded database
-     */
-    @BeforeEach
-    @Transactional
-    void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-    }
-
+class TestIssue1 extends AbstractTest {
     @Test
     void nestedListInEmbeddable() {
+        var dbFoo = findDeepHydratedEntity(Foo.class, 1);
 
-        Foo dbFoo = transactionTemplate.execute(status -> {
-            Foo foo = sessionFactory.getCurrentSession().get(Foo.class, 1);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), foo);
-        });
         assertNotNull(dbFoo.getBar());
         assertNotNull(dbFoo.getBar().getBizs());
         assertEquals(2, dbFoo.getBar().getBizs().size(), "Fix the LazyInitializationException");
         assertNotNull(dbFoo.getBar().getBizs().get(0));
     }
-
 }

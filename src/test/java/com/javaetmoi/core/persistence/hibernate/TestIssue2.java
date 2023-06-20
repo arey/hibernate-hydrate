@@ -14,56 +14,25 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.domain.Parent;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Unit test for the https://github.com/arey/hibernate-hydrate/issues/2 fix
+ * Unit test for issue 2.
+ *
+ * @see <a href="https://github.com/arey/hibernate-hydrate/issues/2">Issue 2</a>
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestLazyLoadingUtilConfiguration.class)
-class TestIssue2 {
-
-    @Autowired
-    private SessionFactory      sessionFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Autowired
-    private DBUnitLoader        dbUnitLoader;
-
-    /**
-     * Populate entities graph and embedded database
-     */
-    @BeforeEach
-    @Transactional
-    void setUp() {
-        dbUnitLoader.loadDatabase(getClass());
-    }
-
+class TestIssue2 extends AbstractTest {
     @Test
     void nestedListUsingMappedSuperclass() {
+        var dbParent = findDeepHydratedEntity(Parent.class, 1);
 
-        Parent dbParent = transactionTemplate.execute(status -> {
-            Parent parent = sessionFactory.getCurrentSession().get(Parent.class, 1L);
-            return LazyLoadingUtil.deepHydrate(sessionFactory.getCurrentSession(), parent);
-        });
         assertEquals(Long.valueOf(1), dbParent.getId());
         assertEquals("Parent 1", dbParent.getName());
         assertEquals(2, dbParent.getChildren().size());
-        assertNotNull("Child 10", dbParent.getChildren().get(0).getName());
-        assertNotNull("Parent 1", dbParent.getChildren().get(0).getParent().getName());
+        assertEquals("Child 10", dbParent.getChildren().get(0).getName());
+        assertEquals("Parent 1", dbParent.getChildren().get(0).getParent().getName());
     }
-
 }

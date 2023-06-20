@@ -13,18 +13,13 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.dbunit.DatabaseUnitException;
-import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseDataSourceConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
@@ -33,147 +28,123 @@ import org.dbunit.dataset.NoSuchTableException;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.ext.h2.H2DataTypeFactory;
 import org.dbunit.operation.DatabaseOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.ResourceUtils;
+import org.h2.jdbcx.JdbcDataSource;
+
+import static java.util.Arrays.stream;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+import static org.dbunit.database.DatabaseConfig.PROPERTY_DATATYPE_FACTORY;
+import static org.dbunit.operation.DatabaseOperation.DELETE_ALL;
+import static org.dbunit.operation.DatabaseOperation.INSERT;
 
 /**
  * Allows to easily insert and cleanup test data into a database.
  * 
- * @author arey
- * 
+ * @author Antoine Rey
+ * @author Markus Heiden
  */
 public class DBUnitLoader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DBUnitLoader.class);
+    private final DataSource dataSource;
 
-    private final DataSource   dataSource;
-
-    private final JdbcTemplate jdbcTemplate;
-
-    DBUnitLoader(JdbcTemplate jdbcTemplate) {
-        this.dataSource = jdbcTemplate.getDataSource();
-        this.jdbcTemplate = jdbcTemplate;
+    DBUnitLoader(String databaseUrl) {
+        var jdbcDataSource = new JdbcDataSource();
+        jdbcDataSource.setURL(databaseUrl);
+        this.dataSource = jdbcDataSource;
     }
 
     /**
-     * Generate a default location based on the name of the given class. If the class is named
-     * com.example.MyTest, DBUnitLoad loads your DBUnit dataset from
-     * "classpath:/com/example/MyTest-dataset.xml".
-     * 
+     * Load the database from a data set for the given class.
+     * If the class is named {@code com.example.MyTest}, DBUnitLoad loads your DBUnit data set
+     * from the file {@code MyTest-dataset.xml} in the package {@code com.example}.
+     *
      * @param testClass
+     *         Test class.
      */
     public void loadDatabase(Class<?> testClass) {
-        loadDatabase(buildDefaultDataSetLocation(testClass));
+        loadDatabase(testClass, testClass.getSimpleName() + "-dataset.xml");
     }
 
-    private String buildDefaultDataSetLocation(Class<?> testClass) {
-        return "classpath:" + testClass.getName().replace(".", "/") + "-dataset.xml";
-    }
-
+    /**
+     * Load the database from the given data sets.
+     *
+     * @param dataSetLocations
+     *         Data set locations.
+     *         Absolute: {@code "com/example/MyTest-dataset.xml"}.
+     */
     public void loadDatabase(String... dataSetLocations) {
-        List<IDataSet> dataSets = new ArrayList<IDataSet>();
+        loadDatabase(null, dataSetLocations);
+    }
 
-        if ((dataSetLocations == null) || (dataSetLocations.length == 0)) {
-            throw new IllegalArgumentException("Dataset location is mandatory");
+    /**
+     * Load the database from the given data sets.
+     *
+     * @param testClass
+     *         Test class used as anchor.
+     * @param dataSetLocations
+     *         Data set locations.
+     *         If the test class is not {@code null}, relative to the test class: {@code "MyTest-dataset.xml"}.
+     *         If the test class is {@code null}, absolute: {@code "com/example/MyTest-dataset.xml"}.
+     */
+    public void loadDatabase(Class<?> testClass, String... dataSetLocations) {
+        if (isEmpty(dataSetLocations)) {
+            throw new IllegalArgumentException("Data set locations are mandatory");
         }
 
-        for (String dataSetLocation : dataSetLocations) {
-            URL url = retrieveDataSetURL(dataSetLocation);
-            FlatXmlDataSetBuilder flatXmlDataSetBuilder = new FlatXmlDataSetBuilder();
-            flatXmlDataSetBuilder.setColumnSensing(true);
-            IDataSet dataSet;
-            try {
-                dataSet = flatXmlDataSetBuilder.build(url.openStream());
-            } catch (DataSetException e) {
-                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
-            } catch (IOException e) {
-                throw new RuntimeException("Error while reading dataset " + dataSetLocation, e);
+        var dataSets = stream(dataSetLocations)
+                .map(dataSetLocation -> buildDataSet(testClass, dataSetLocation))
+                .toArray(IDataSet[]::new);
+
+        var connection = connection();
+        executeAll(connection, DELETE_ALL, dataSets);
+        executeAll(connection, INSERT, dataSets);
+    }
+
+    private IDataSet buildDataSet(Class<?> testClass, String dataSetLocation) {
+        try (var dataSet = getResourceAsStream(testClass, dataSetLocation)) {
+            if (dataSet == null) {
+                throw new IllegalArgumentException("No data set file located at " + dataSetLocation);
             }
-            dataSets.add(dataSet);
+
+            return new FlatXmlDataSetBuilder()
+                    .setColumnSensing(true)
+                    .build(dataSet);
+        } catch (DataSetException | IOException e) {
+            throw new RuntimeException("Error while reading data set " + dataSetLocation, e);
         }
-        IDatabaseConnection dbConn;
+    }
+
+    private InputStream getResourceAsStream(Class<?> testClass, String dataSetLocation) {
+        return testClass != null ?
+                testClass.getResourceAsStream(dataSetLocation) :
+                getClass().getClassLoader().getResourceAsStream(dataSetLocation);
+    }
+
+    private IDatabaseConnection connection() {
         try {
-            dbConn = new DatabaseDataSourceConnection(dataSource);
+            var connection = new DatabaseDataSourceConnection(dataSource);
+            var config = connection.getConfig();
+            config.setProperty(PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
+            return connection;
         } catch (SQLException e) {
-            throw jdbcTemplate.getExceptionTranslator().translate("Getting JDBC data source", null,
-                    e);
+            throw new RuntimeException("Error while getting the JDBC data source", e);
         }
-        DatabaseConfig config = dbConn.getConfig();
-        config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
-        try {
-            executeDeleteAll(dataSets, dbConn);
-            executeInsert(dataSets, dbConn);
-        } catch (DatabaseUnitException e) {
-            throw new RuntimeException("DBUnit error", e);
-        } catch (SQLException e) {
-            throw jdbcTemplate.getExceptionTranslator().translate("Inserting DBUnit dataset", null,
-                    e);
-        }
-
     }
 
-    private void executeDeleteAll(List<IDataSet> dataSets, IDatabaseConnection dbConn)
-            throws DatabaseUnitException, SQLException {
-        new AbstractDatabaseOperation() {
-
-            @Override
-            protected void execute(IDataSet dataSet,
-                    @SuppressWarnings("hiding") IDatabaseConnection dbConn)
-                    throws DatabaseUnitException, SQLException {
-                DatabaseOperation.DELETE_ALL.execute(dbConn, dataSet);
+    public void executeAll(IDatabaseConnection connection, DatabaseOperation operation, IDataSet... dataSets) {
+        try (var jdbcConnection = dataSource.getConnection(); var statement = jdbcConnection.createStatement()) {
+            // language=H2
+            statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            for (var dataSet : dataSets) {
+                operation.execute(connection, dataSet);
             }
-
-        }.execute(dataSets, dbConn);
-    }
-
-    private void executeInsert(List<IDataSet> dataSets, IDatabaseConnection dbConn)
-            throws DatabaseUnitException, SQLException {
-        new AbstractDatabaseOperation() {
-
-            @Override
-            protected void execute(IDataSet dataSet,
-                    @SuppressWarnings("hiding") IDatabaseConnection dbConn)
-                    throws DatabaseUnitException, SQLException {
-                DatabaseOperation.INSERT.execute(dbConn, dataSet);
-            }
-
-        }.execute(dataSets, dbConn);
-    }
-
-    private URL retrieveDataSetURL(String dataSetLocation) {
-        URL url;
-        try {
-            url = ResourceUtils.getURL(dataSetLocation);
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException("No dataSet file located at " + dataSetLocation, e);
+            // language=H2
+            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
+        } catch (NoSuchTableException e) {
+            // Ignore missing tables.
+            // Delete all: A not existing table needs not be dropped.
+            // Insert: When creating a table it should not exist.
+        } catch (DatabaseUnitException | SQLException e) {
+            throw new RuntimeException("Error while applying a data set", e);
         }
-        if (!new File(url.getPath()).exists()) {
-            throw new IllegalArgumentException("No dataSet file located at " + url.getPath());
-        }
-        return url;
-    }
-
-    abstract class AbstractDatabaseOperation {
-
-        public void execute(List<IDataSet> dataSets, IDatabaseConnection dbConn)
-                throws DatabaseUnitException, SQLException {
-            try {
-
-                jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE;");
-                for (IDataSet dataSet : dataSets) {
-                    execute(dataSet, dbConn);
-                }
-                jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE;");
-            } catch (NoSuchTableException e) {
-                LOG.error("Differences between dataset tables and hibernate configuration, check your dataset (typing error), did you override at least one of these beans : mappingResources, annotatedClasses");
-                throw e;
-            }
-        }
-
-        protected abstract void execute(IDataSet dataSet, IDatabaseConnection dbConn)
-                throws NoSuchTableException, DatabaseUnitException, SQLException;
     }
 }
