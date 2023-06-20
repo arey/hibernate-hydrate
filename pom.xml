@@ -88,12 +88,10 @@
     <!-- * For testing purpose -->
     <version.commons-lang3>3.12.0</version.commons-lang3>
     <version.dbunit>2.7.3</version.dbunit>
-    <version.ehcache>2.6.11</version.ehcache>
     <version.h2>2.1.214</version.h2>
     <version.junit>5.9.3</version.junit>
     <version.logback>1.4.8</version.logback>
     <version.mockito>5.4.0</version.mockito>
-    <version.spring>6.0.10</version.spring>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
@@ -118,6 +116,12 @@
     </dependency>
 
     <!-- Tests -->
+    <!-- * Hibernate -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-testing</artifactId>
+      <version>${version.hibernate}</version>
+    </dependency>
     <!-- * JUnit -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -129,25 +133,6 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${version.junit}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- * Spring Test and ORM -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-orm</artifactId>
-      <version>${version.spring}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${version.spring}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${version.spring}</version>
       <scope>test</scope>
     </dependency>
     <!-- * Logger -->
@@ -190,13 +175,6 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>${version.commons-lang3}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- EhCache -->
-    <dependency>
-      <groupId>net.sf.ehcache</groupId>
-      <artifactId>ehcache-core</artifactId>
-      <version>${version.ehcache}</version>
       <scope>test</scope>
     </dependency>
 
@@ -297,9 +275,6 @@
                 <downloadJavadocs>true</downloadJavadocs>
                 <ajdtVersion>none</ajdtVersion>
                 <useProjectReferences>true</useProjectReferences>
-                <additionalProjectnatures>
-                  <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
-                </additionalProjectnatures>
               </configuration>
             </plugin>
           </plugins>
