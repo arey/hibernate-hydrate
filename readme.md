@@ -71,7 +71,8 @@ Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.mav
 ## Contributing to Hibernate Hydrate ##
 
 * Github is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
-* Each major version of Hibernate has it own git branch: Hibernate 5 on the master, Hibernate 4 on the hibernate4 branch and Hibernate 3 on the hibernate3 branch
+* Each major version of Hibernate has it own git branch: Hibernate 6 on the master, Hibernate 5 on the hibernate5 branch,
+* Hibernate 4 on the hibernate4 branch and Hibernate 3 on the hibernate3 branch
 
 ### Development environment installation ###
 
@@ -83,7 +84,7 @@ Compile the code with maven:
 
 ``mvn clean install``
 
-If you're using an IDE that supports Maven-based projects (InteliJ Idea, Netbeans or m2Eclipse), you can import the project directly from its POM. 
+If you're using an IDE that supports Maven-based projects (IntelliJ Idea, Netbeans or m2Eclipse), you can import the project directly from its POM. 
 Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 ``mvn eclipse:clean eclipse:eclipse``
