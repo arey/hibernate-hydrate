@@ -18,7 +18,7 @@ There are also unit tests available to look at.
 
 The [wiki](https://github.com/arey/hibernate-hydrate/wiki) contains links to basic project information such as source code, jenkins build, javadocs, issue tracking, etc.
 
-A french article titled *Say goodbye to LazyInitializationException* : http://javaetmoi.com/2012/03/hibernate-dites-adieu-aux-lazy-initialization-exception/
+A French article titled *Say goodbye to LazyInitializationException* : http://javaetmoi.com/2012/03/hibernate-dites-adieu-aux-lazy-initialization-exception/
 
 ## Quick Start ##
 
@@ -29,7 +29,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
-  <version>6.2.2</version>
+  <version>6.3.0</version>
 </dependency> 
 
 <!-- or Hibernate 5.2 and above support -->
@@ -53,7 +53,7 @@ Download the jar though Maven:
   <version>2.2</version>
 </dependency> 
 
-<!-- Or Hibernate 3 support -->
+<!-- or Hibernate 3 support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate3-hydrate</artifactId>
@@ -70,9 +70,13 @@ Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.mav
 
 ## Contributing to Hibernate Hydrate ##
 
-* Github is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
-* Each major version of Hibernate has it own git branch: Hibernate 6 on the master, Hibernate 5 on the hibernate5 branch,
-* Hibernate 4 on the hibernate4 branch and Hibernate 3 on the hibernate3 branch
+* GitHub is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). 
+  If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
+* Each major version of Hibernate has it own git branch: 
+  * Hibernate 6.2 on the master
+  * Hibernate 5 on the hibernate5 branch
+  * Hibernate 4 on the hibernate4 branch 
+  * Hibernate 3 on the hibernate3 branch
 
 ### Development environment installation ###
 
@@ -106,4 +110,3 @@ The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/re
 ## Build Status ##
 
 GitHub Actions: [![Java CI](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml/badge.svg)](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml)
-

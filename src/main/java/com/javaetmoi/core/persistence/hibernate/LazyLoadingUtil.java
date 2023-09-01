@@ -1,11 +1,11 @@
 /*
  * Copyright 2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -19,24 +19,26 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.mapping.AttributeMapping;
-import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
+import org.hibernate.metamodel.MappingMetamodel;
+import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
+import org.hibernate.metamodel.mapping.EntityValuedModelPart;
+import org.hibernate.metamodel.mapping.ModelPart;
+import org.hibernate.metamodel.mapping.PluralAttributeMapping;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.type.*;
 
 import java.util.Collection;
 import java.util.Map;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
- * 
+ *
  * <p>
  * Provides a lazy way to resolve all Hibernate proxies.
  * </p>
- * 
+ *
  * @author Antoine Rey
  */
-public class LazyLoadingUtil {
+public final class LazyLoadingUtil {
     /**
      * No-arg constructor.
      */
@@ -46,13 +48,13 @@ public class LazyLoadingUtil {
 
     /**
      * Populate a lazy-initialized object graph by recursion.
-     * 
+     *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
-     * 
+     *
      * @param currentSession
      *            Hibernate session still open
      * @param entities
@@ -82,24 +84,22 @@ public class LazyLoadingUtil {
     public static <C extends Collection<E>, E> C deepHydrate(SessionFactory sessionFactory, C entities) {
         var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         // Reduce resizes for big collections.
-        // *2 to compensate for the load factor.
-        int capacity = Math.max(entities.size() * 2, 32);
+        int capacity = Math.max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);
-        for (var entity : entities) {
-            deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
-        }
+        entities.forEach(entity ->
+                deepInflateInitialEntity(mappingMetamodel, entity, recursiveGuard));
         return entities;
     }
 
     /**
      * Populate a lazy-initialized object graph by recursion.
-     * 
+     *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
      * May attention: this method has to be called from an open persistent context / Hibernate session.
      * </p>
-     * 
+     *
      * @param currentSession
      *            Hibernate session still open
      * @param entity
@@ -129,135 +129,128 @@ public class LazyLoadingUtil {
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
         var mappingMetamodel = sessionFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel();
         var recursiveGuard = new IdentitySet<>();
-        // TODO markus 2016-06-19: How to determine entity type?
-        deepInflateEntity(mappingMetamodel, entity, null, recursiveGuard);
+        deepInflateInitialEntity(mappingMetamodel, entity, recursiveGuard);
         return entity;
     }
 
-    private static void deepInflateProperty(
-            MappingMetamodelImplementor mappingMetamodel,
-            Object propertyValue, Type propertyType,
-            IdentitySet<Object> recursiveGuard) {
-        if (propertyValue == null) {
-            return;
-        }
-
-        if (propertyType instanceof EntityType) {
-            deepInflateEntity(mappingMetamodel, propertyValue, (EntityType) propertyType, recursiveGuard);
-        } else if (propertyType instanceof ComponentType) {
-            // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
-            deepInflateComponent(mappingMetamodel, propertyValue, (ComponentType) propertyType, recursiveGuard);
-        } else if (propertyType instanceof MapType) {
-            deepInflateMap(mappingMetamodel, (Map<?, ?>) propertyValue, (MapType) propertyType, recursiveGuard);
-        } else if (propertyType instanceof CollectionType) {
-            if (propertyValue instanceof Collection) {
-                deepInflateCollection(mappingMetamodel, (Collection<?>) propertyValue, (CollectionType) propertyType, recursiveGuard);
-            } else {
-                throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
-                      propertyType.getClass().getSimpleName(), propertyValue.getClass().getSimpleName()));
-            }
-        }
-    }
-
     /**
-     * Populate a lazy-initialized object graph by recursion.
+     * Populate a lazy-initialized object graph by recursion. Recursion entry point.
      *
      * @param mappingMetamodel
      *            The mapping metamodel.
      * @param entity
      *            The entity. May be {@code null}.
-     * @param entityType
-     *            The type of the entity. {@code null} if not known.
      * @param recursiveGuard
      *            A guard to avoid endless recursion.
      */
+    private static void deepInflateInitialEntity(
+            MappingMetamodel mappingMetamodel, Object entity, IdentitySet<Object> recursiveGuard) {
+        if (entity == null) {
+            return;
+        }
+
+        var entityType = mappingMetamodel.getEntityDescriptor(entity.getClass());
+        deepInflateEntity(entity, entityType, recursiveGuard);
+    }
+
+    private static void deepInflateProperty(
+            Object propertyValue, ModelPart propertyType, IdentitySet<Object> recursiveGuard) {
+        if (propertyValue == null) {
+            return;
+        }
+
+        if (propertyType instanceof EntityValuedModelPart) {
+            deepInflateEntity(propertyValue, (EntityValuedModelPart) propertyType, recursiveGuard);
+        } else if (propertyType instanceof EmbeddableValuedModelPart) {
+            deepInflateEmbedded(propertyValue, (EmbeddableValuedModelPart) propertyType, recursiveGuard);
+        } else if (propertyType instanceof PluralAttributeMapping) {
+            if (propertyValue instanceof Map) {
+                deepInflateMap((Map<?, ?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
+            } else if (propertyValue instanceof Collection) {
+                deepInflateCollection((Collection<?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
+            } else {
+                throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
+                        propertyValue.getClass().getSimpleName(), propertyType.getNavigableRole().getFullPath()));
+            }
+        }
+    }
+
+    /**
+     * Deep inflate an entity.
+     */
     private static void deepInflateEntity(
-            MappingMetamodelImplementor mappingMetamodel,
-            Object entity, EntityType entityType,
-            IdentitySet<Object> recursiveGuard) {
+            Object entity, EntityValuedModelPart entityType, IdentitySet<Object> recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
         Hibernate.initialize(entity);
 
-        var entityName = entityType != null ? entityType.getAssociatedEntityName() : null;
-        var target = entity;
-        if (entity instanceof HibernateProxy) {
-            var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
-            entityName = initializer.getEntityName();
-            target = initializer.getImplementation();
-        }
-
-        var descriptor = entityName != null ?
-                mappingMetamodel.getEntityDescriptor(entityName) :
-                mappingMetamodel.getEntityDescriptor(entity.getClass());
-        if (descriptor == null) {
-            return;
-        }
-
-        var propertyTypes = descriptor.getPropertyTypes();
-        var finalTarget = target;
+        var target = unwrap(entity);
+        var descriptor = entityType.getEntityMappingType();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
-            var propertyValue = attributeMapping.getValue(finalTarget);
-            var propertyType = propertyTypes[attributeMapping.getStateArrayPosition()];
-            deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
+            var propertyValue = attributeMapping.getValue(target);
+            deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
         });
     }
 
-    private static void deepInflateComponent(
-            MappingMetamodelImplementor mappingMetamodel,
-            Object component, ComponentType componentType,
-            IdentitySet<Object> recursiveGuard) {
-        if (component == null || !recursiveGuard.add(component)) {
+    /**
+     * Unwrap potentially proxied entity.
+     */
+    private static Object unwrap(Object entity) {
+        if (entity instanceof HibernateProxy) {
+            var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
+            return initializer.getImplementation();
+        }
+
+        return entity;
+    }
+
+    /**
+     * Deep inflate an embedded entity.
+     */
+    private static void deepInflateEmbedded(
+            Object embeddable, EmbeddableValuedModelPart componentType, IdentitySet<Object> recursiveGuard) {
+        if (embeddable == null || !recursiveGuard.add(embeddable)) {
             return;
         }
 
-        var propertyTypes = componentType.getSubtypes();
-        for (int i = 0; i < propertyTypes.length; i++) {
-            var propertyValue = componentType.getPropertyValue(component, i);
-            var propertyType = propertyTypes[i];
-            deepInflateProperty(mappingMetamodel, propertyValue, propertyType, recursiveGuard);
-        }
+        var descriptor = componentType.getEmbeddableTypeDescriptor();
+        descriptor.getAttributeMappings().forEach(attributeMapping -> {
+            var propertyValue = attributeMapping.getValue(embeddable);
+            deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+        });
     }
 
+    /**
+     * Deep inflate a map including its keys and values.
+     */
     private static void deepInflateMap(
-            MappingMetamodelImplementor mappingMetamodel,
-            Map<?, ?> map, MapType mapType,
-            IdentitySet<Object> recursiveGuard) {
+            Map<?, ?> map, PluralAttributeMapping mapType, IdentitySet<Object> recursiveGuard) {
         if (map == null || !recursiveGuard.add(map)) {
             return;
         }
         Hibernate.initialize(map);
 
-        if (map.isEmpty()) {
-            return;
-        }
-
-        var descriptor = mappingMetamodel.getCollectionDescriptor(mapType.getRole());
-        var indexType = descriptor.getIndexType();
-        var elementType = descriptor.getElementType();
+        var indexType = mapType.getIndexDescriptor();
+        var elementType = mapType.getElementDescriptor();
         map.forEach((index, element) -> {
-            deepInflateProperty(mappingMetamodel, index, indexType, recursiveGuard);
-            deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard);
+            deepInflateProperty(index, indexType, recursiveGuard);
+            deepInflateProperty(element, elementType, recursiveGuard);
         });
     }
 
+    /**
+     * Deep inflate a collection including its elements.
+     */
     private static void deepInflateCollection(
-            MappingMetamodelImplementor mappingMetamodel,
-            Collection<?> collection, CollectionType collectionType,
-            IdentitySet<Object> recursiveGuard) {
+            Collection<?> collection, PluralAttributeMapping collectionType, IdentitySet<Object> recursiveGuard) {
         if (collection == null || !recursiveGuard.add(collection)) {
             return;
         }
         Hibernate.initialize(collection);
 
-        if (collection.isEmpty()) {
-            return;
-        }
-
-        var descriptor = mappingMetamodel.getCollectionDescriptor(collectionType.getRole());
-        var elementType = descriptor.getElementType();
+        var elementType = collectionType.getElementDescriptor();
         collection.forEach(element ->
-                deepInflateProperty(mappingMetamodel, element, elementType, recursiveGuard));
+                deepInflateProperty(element, elementType, recursiveGuard));
     }
 }
