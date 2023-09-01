@@ -83,15 +83,15 @@
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
     <!-- * Last Hibernate supported version  -->
-    <version.hibernate>6.3.0.CR1</version.hibernate>
+    <version.hibernate>6.3.0.Final</version.hibernate>
 
     <!-- * For testing purpose -->
     <version.commons-lang3>3.13.0</version.commons-lang3>
     <version.dbunit>2.7.3</version.dbunit>
-    <version.h2>2.2.220</version.h2>
+    <version.h2>2.2.222</version.h2>
     <version.junit>5.10.0</version.junit>
     <version.logback>1.4.11</version.logback>
-    <version.mockito>5.4.0</version.mockito>
+    <version.mockito>5.5.0</version.mockito>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
