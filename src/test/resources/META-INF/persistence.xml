@@ -4,7 +4,7 @@
              version="2.2">
   <persistence-unit name="hibernate-hydrate">
     <properties>
-      <property name="hibernate.connection.url" value="jdbc:h2:~/hibernate-hydrate" />
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:hibernate-hydrate;DB_CLOSE_DELAY=-1" />
       <property name="hibernate.connection.username" value="" />
       <property name="hibernate.transaction.jta.platform" value="org.hibernate.testing.jta.TestingJtaPlatformImpl" />
       <property name="hibernate.current_session_context_class" value="org.hibernate.context.internal.ThreadLocalSessionContext" />
