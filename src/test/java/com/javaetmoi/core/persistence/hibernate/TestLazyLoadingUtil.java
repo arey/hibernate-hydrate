@@ -18,6 +18,7 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.internal.util.collections.IdentitySet;
@@ -117,18 +118,18 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepInflateInitialEntity(MappingMetamodel, Object, IdentitySet)}.
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
      */
     @Test
-    void deepInflateInitialEntity_nullEntity() {
+    void deepHydrate_nullEntity() {
         assertThat(LazyLoadingUtil.deepHydrate(sessionFactory, (Object) null)).isNull();
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepInflateInitialEntity(MappingMetamodel, Object, IdentitySet)}.
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
      */
     @Test
-    void deepInflateInitialEntity_newEntity() {
+    void deepHydrate_newEntity() {
         // Test that we handle new entities correctly. Success if no exception.
         var deepHydratedNewEntity = LazyLoadingUtil.deepHydrate(sessionFactory, android);
 
@@ -136,10 +137,10 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepInflateInitialEntity(MappingMetamodel, Object, IdentitySet)}.
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
      */
     @Test
-    void deepInflateInitialEntity_attachedEntity() {
+    void deepHydrate_attachedEntity() {
         // Test that we handle attached entities correctly. Success if no exception.
         var deepHydratedEntity = findDeepHydratedEntity(Address.class, paris.getId());
 
@@ -148,10 +149,10 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepInflateInitialEntity(MappingMetamodel, Object, IdentitySet)}.
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
      */
     @Test
-    void deepInflateInitialEntity_attachedEntityProxy() {
+    void deepHydrate_attachedEntityProxy() {
         // Test that we handle attached entity proxies correctly. Success if no exception.
         var deepHydratedEntityProxy = findDeepHydratedEntityReference(Address.class, paris.getId());
 
