@@ -21,8 +21,6 @@ import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.MappingMetamodel;
 import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -209,9 +207,9 @@ class TestLazyLoadingUtil extends AbstractTest {
 
         // - Generated SQL statements number
         assertEquals(8, statistics().getEntityLoadCount(),
-                "All 8 entities are loaded: france, james, tom, android, iphone, paris, la d�fense and lyon");
+                "All 8 entities are loaded: france, james, tom, android, iphone, paris, la defense and lyon");
         assertEquals(6, statistics().getCollectionFetchCount(),
-                "6 collections should be fetched: james' adresses, james' projects, iPhone members, tom's adresses, tom's projects, android members");
+                "6 collections should be fetched: james' addresses, james' projects, iPhone members, tom's addresses, tom's projects, android members");
     }
 
     /**
