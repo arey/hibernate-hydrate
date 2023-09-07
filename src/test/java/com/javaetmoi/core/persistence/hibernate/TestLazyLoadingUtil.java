@@ -18,8 +18,10 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import jakarta.persistence.ManyToOne;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
@@ -113,6 +116,50 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     */
+    @Test
+    void deepHydrate_nullEntity() {
+        assertThat(LazyLoadingUtil.deepHydrate(sessionFactory, (Object) null)).isNull();
+    }
+
+    /**
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     */
+    @Test
+    void deepHydrate_newEntity() {
+        // Test that we handle new entities correctly. Success if no exception.
+        var deepHydratedNewEntity = LazyLoadingUtil.deepHydrate(sessionFactory, android);
+
+        assertThat(deepHydratedNewEntity).isSameAs(android);
+    }
+
+    /**
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     */
+    @Test
+    void deepHydrate_attachedEntity() {
+        // Test that we handle attached entities correctly. Success if no exception.
+        var deepHydratedEntity = findDeepHydratedEntity(Address.class, paris.getId());
+
+        assertThat(deepHydratedEntity)
+                .isEqualTo(paris);
+    }
+
+    /**
+     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     */
+    @Test
+    void deepHydrate_attachedEntityProxy() {
+        // Test that we handle attached entity proxies correctly. Success if no exception.
+        var deepHydratedEntityProxy = findDeepHydratedEntityReference(Address.class, paris.getId());
+
+        assertThat(deepHydratedEntityProxy)
+                .isEqualTo(paris)
+                .isInstanceOf(HibernateProxy.class);
+    }
+
+    /**
      * Tests the method {@link LazyLoadingUtil#deepHydrate(org.hibernate.Session, Object)
      */
     @Test
@@ -146,23 +193,23 @@ class TestLazyLoadingUtil extends AbstractTest {
         // - Projects
         assertTrue(dbJames.getProjects().contains(android));
         assertReflectionEquals(
-                "Compare in-memory and database loaded projects with RelectionUtils",
+                "Compare in-memory and database loaded projects with ReflectionUtils",
                 james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
         assertReflectionEquals(james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Full employee
         LOGGER.debug("James toString(): {}", dbJames.toString());
         assertReflectionEquals(
-                "Compare in-memory and database loaded employees with RelectionUtils", dbJames,
+                "Compare in-memory and database loaded employees with ReflectionUtils", dbJames,
                 james, ReflectionComparatorMode.LENIENT_ORDER);
         assertReflectionEquals("Compare in-memory and database loaded employees with the equals method",
                 james, dbJames, ReflectionComparatorMode.LENIENT_ORDER);
 
         // - Generated SQL statements number
         assertEquals(8, statistics().getEntityLoadCount(),
-                "All 8 entities are loaded: france, james, tom, android, iphone, paris, la d�fense and lyon");
+                "All 8 entities are loaded: france, james, tom, android, iphone, paris, la defense and lyon");
         assertEquals(6, statistics().getCollectionFetchCount(),
-                "6 collections should be fetched: james' adresses, james' projects, iPhone members, tom's adresses, tom's projects, android members");
+                "6 collections should be fetched: james' addresses, james' projects, iPhone members, tom's addresses, tom's projects, android members");
     }
 
     /**

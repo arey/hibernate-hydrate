@@ -24,7 +24,6 @@ import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
-import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Collection;
 import java.util.Map;
@@ -149,7 +148,7 @@ public final class LazyLoadingUtil {
             return;
         }
 
-        var entityType = mappingMetamodel.getEntityDescriptor(entity.getClass());
+        var entityType = mappingMetamodel.getEntityDescriptor(Hibernate.getClass(entity));
         deepInflateEntity(entity, entityType, recursiveGuard);
     }
 
@@ -185,24 +184,12 @@ public final class LazyLoadingUtil {
         }
         Hibernate.initialize(entity);
 
-        var target = unwrap(entity);
+        var target = Hibernate.unproxy(entity);
         var descriptor = entityType.getEntityMappingType();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
             deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
         });
-    }
-
-    /**
-     * Unwrap potentially proxied entity.
-     */
-    private static Object unwrap(Object entity) {
-        if (entity instanceof HibernateProxy) {
-            var initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
-            return initializer.getImplementation();
-        }
-
-        return entity;
     }
 
     /**
