@@ -12,15 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.function.Consumer;
 
-import static com.javaetmoi.core.persistence.hibernate.JpaLazyLoadingUtil.deepHydrate;
+import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
 import static jakarta.persistence.Persistence.createEntityManagerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AbstractTest {
-
-    protected final EntityManagerFactory entityManagerFactory =
+    private final EntityManagerFactory entityManagerFactory =
             createEntityManagerFactory("hibernate-hydrate");
-    protected final SessionFactory sessionFactory =
+    protected final Hydrator hydrator = hydrator(entityManagerFactory);
+    private final SessionFactory sessionFactory =
             entityManagerFactory.unwrap(SessionFactory.class);
     private final DBUnitLoader dbUnitLoader =
             new DBUnitLoader((String) entityManagerFactory.getProperties().get("hibernate.connection.url"));
@@ -43,8 +43,7 @@ public class AbstractTest {
 
     protected <E> E findDeepHydratedEntity(Class<E> entityClass, long entityId) {
         return doInJPA(entityManager ->
-                deepHydrate(entityManager,
-                        entityManager.find(entityClass, entityId)));
+                hydrator.deepHydrate(entityManager.find(entityClass, entityId)));
     }
 
     protected <E> E findDeepHydratedEntityReference(Class<E> entityClass, long entityId) {
@@ -54,7 +53,7 @@ public class AbstractTest {
             assertThat(reference)
                     .isInstanceOf(HibernateProxy.class)
                     .extracting(Object::getClass).isNotEqualTo(entityClass);
-            return deepHydrate(entityManager, reference);
+            return hydrator.deepHydrate(reference);
         });
     }
 

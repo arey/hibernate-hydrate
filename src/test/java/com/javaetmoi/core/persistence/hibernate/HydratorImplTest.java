@@ -18,7 +18,6 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
-import org.hibernate.Session;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
@@ -35,13 +34,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
 /**
- * Unit test of the {@link LazyLoadingUtil} class.
+ * Unit test of the {@link HydratorImplTest} class.
  *
  * @author Antoine Rey
  */
-class TestLazyLoadingUtil extends AbstractTest {
+class HydratorImplTest extends AbstractTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestLazyLoadingUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HydratorImplTest.class);
 
     private Employee james, tom;
 
@@ -52,7 +51,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     private Country france;
 
     /**
-     * Populate entities graph and embedded database
+     * Populate entities graph and embedded database.
      */
     @BeforeEach
     void setUpEntities() {
@@ -116,26 +115,26 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
      */
     @Test
     void deepHydrate_nullEntity() {
-        assertThat(LazyLoadingUtil.deepHydrate(sessionFactory, (Object) null)).isNull();
+        assertThat(hydrator.deepHydrate((Object) null)).isNull();
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
      */
     @Test
     void deepHydrate_newEntity() {
         // Test that we handle new entities correctly. Success if no exception.
-        var deepHydratedNewEntity = LazyLoadingUtil.deepHydrate(sessionFactory, android);
+        var deepHydratedNewEntity = hydrator.deepHydrate(android);
 
         assertThat(deepHydratedNewEntity).isSameAs(android);
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
      */
     @Test
     void deepHydrate_attachedEntity() {
@@ -147,7 +146,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepHydrate(Session, Object)}.
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
      */
     @Test
     void deepHydrate_attachedEntityProxy() {
@@ -160,7 +159,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepHydrate(org.hibernate.Session, Object)
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)
      */
     @Test
     void deepResolveEmployee() {
@@ -213,7 +212,7 @@ class TestLazyLoadingUtil extends AbstractTest {
     }
 
     /**
-     * Tests the method {@link LazyLoadingUtil#deepHydrate(org.hibernate.Session, Object)
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)
      */
     @Test
     void deepResolveAddress() {

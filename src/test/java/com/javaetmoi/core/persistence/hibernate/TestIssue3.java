@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.javaetmoi.core.persistence.hibernate.JpaLazyLoadingUtil.deepHydrate;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -54,8 +53,7 @@ class TestIssue3 extends AbstractTest {
 	@Test
 	void listWithMappedEntityWithAdditionalSpecificCriteria() {
 		var dbSystems = doInJPA(entityManager ->
-				deepHydrate(entityManager,
-						selectAllSystemsOrderedByNumber(entityManager)));
+				hydrator.deepHydrateCollection(selectAllSystemsOrderedByNumber(entityManager)));
 
 		assertEquals(2, dbSystems.size());
 		assertEquals(1, dbSystems.get(0).getId());
@@ -82,7 +80,7 @@ class TestIssue3 extends AbstractTest {
 			entityManager.persist(holder);
 
 			selectAllSystemsOrderedByNumber(entityManager);
-			return deepHydrate(entityManager, system);
+			return hydrator.deepHydrate(system);
 		});
 
 		assertEquals(1, dbSystem.getId());
