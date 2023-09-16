@@ -24,20 +24,6 @@ class HydratorImpl implements Hydrator {
     private final MappingMetamodelImplementor mappingMetamodel;
 
     /**
-     * Convenience constructor.
-     */
-    HydratorImpl(EntityManager entityManager) {
-        this(entityManager.getEntityManagerFactory());
-    }
-
-    /**
-     * Convenience constructor.
-     */
-    HydratorImpl(EntityManagerFactory entityManagerFactory) {
-        this(entityManagerFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel());
-    }
-
-    /**
      * Base constructor.
      */
     HydratorImpl(MappingMetamodelImplementor mappingMetamodel) {

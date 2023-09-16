@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 import java.util.Collection;
 
@@ -13,17 +14,17 @@ import java.util.Collection;
  */
 public interface Hydrator {
     /**
-     * Factory for {@link EntityManagerFactory} and {@link SessionFactory}.
-     */
-    public static Hydrator hydrator(EntityManagerFactory entityManagerFactory) {
-        return new HydratorImpl(entityManagerFactory);
-    }
-
-    /**
      * Factory for {@link EntityManager} and {@link Session}.
      */
     public static Hydrator hydrator(EntityManager entityManager) {
-        return new HydratorImpl(entityManager);
+        return hydrator(entityManager.getEntityManagerFactory());
+    }
+
+    /**
+     * Factory for {@link EntityManagerFactory} and {@link SessionFactory}.
+     */
+    public static Hydrator hydrator(EntityManagerFactory entityManagerFactory) {
+        return new HydratorImpl(entityManagerFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel());
     }
 
     /**
