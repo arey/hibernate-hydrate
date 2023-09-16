@@ -18,7 +18,8 @@ import java.util.Collection;
 import jakarta.persistence.EntityManager;
 
 import org.hibernate.LazyInitializationException;
-import org.hibernate.Session;
+
+import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -54,7 +55,7 @@ public final class JpaLazyLoadingUtil {
      *         input parameter. Useful when calling this method in a return statement.
      */
     public static <C extends Collection<E>, E> C deepHydrate(EntityManager currentEntityManager, C entities) {
-        return LazyLoadingUtil.deepHydrate(currentEntityManager.unwrap(Session.class), entities);
+        return hydrator(currentEntityManager).deepHydrateCollection(entities);
     }
 
     /**
@@ -74,6 +75,6 @@ public final class JpaLazyLoadingUtil {
      *         when calling this method in a return statement.
      */
     public static <E> E deepHydrate(EntityManager currentEntityManager, E entity) {
-        return LazyLoadingUtil.deepHydrate(currentEntityManager.unwrap(Session.class), entity);
+        return hydrator(currentEntityManager).deepHydrate(entity);
     }
 }
