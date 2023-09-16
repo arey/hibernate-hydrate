@@ -17,6 +17,7 @@ import java.util.Collection;
 
 import jakarta.persistence.EntityManager;
 
+import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.LazyInitializationException;
 
 import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
@@ -28,7 +29,7 @@ import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
  * </p>
  *
  * @author Antoine Rey
- * @deprecated Use {@link LazyLoadingUtil} instead.
+ * @deprecated Use {@link Hydrator#hydrator(EntityManagerFactory)} or {@link LazyLoadingUtil} instead.
  */
 @Deprecated(forRemoval = true)
 public final class JpaLazyLoadingUtil {
@@ -67,7 +68,7 @@ public final class JpaLazyLoadingUtil {
      * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
-     * @param currentEntityManager
+     * @param entityManager
      *            Open {@link EntityManager}.
      * @param entity
      *            An attached Hibernate entity to load.
@@ -75,7 +76,7 @@ public final class JpaLazyLoadingUtil {
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
      */
-    public static <E> E deepHydrate(EntityManager currentEntityManager, E entity) {
-        return hydrator(currentEntityManager).deepHydrate(entity);
+    public static <E> E deepHydrate(EntityManager entityManager, E entity) {
+        return hydrator(entityManager).deepHydrate(entity);
     }
 }
