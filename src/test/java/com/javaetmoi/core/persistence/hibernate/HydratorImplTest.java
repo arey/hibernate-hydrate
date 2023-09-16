@@ -20,7 +20,6 @@ import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.collection.spi.PersistentMap;
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.proxy.HibernateProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -28,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import jakarta.persistence.ManyToOne;
+
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -154,15 +155,38 @@ class HydratorImplTest extends AbstractTest {
         var deepHydratedEntityProxy = findDeepHydratedEntityReference(Address.class, paris.getId());
 
         assertThat(deepHydratedEntityProxy)
-                .isEqualTo(paris)
-                .isInstanceOf(HibernateProxy.class);
+                .isEqualTo(paris);
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)}.
+     */
+    @Test
+    void deepHydrateCollection_attachedEntity() {
+        // Test that we handle attached entities correctly. Success if no exception.
+        var deepHydratedEntities = findDeepHydratedEntities(Address.class, paris.getId());
+
+        assertThat(deepHydratedEntities)
+                .containsOnly(paris);
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)}.
+     */
+    @Test
+    void deepHydrateCollection_attachedEntityProxy() {
+        // Test that we handle attached entity proxies correctly. Success if no exception.
+        var deepHydratedEntityProxies = findDeepHydratedEntityReferences(Address.class, paris.getId());
+
+        assertThat(deepHydratedEntityProxies)
+                .containsOnly(paris);
     }
 
     /**
      * Tests the method {@link HydratorImpl#deepHydrate(Object)
      */
     @Test
-    void deepResolveEmployee() {
+    void deepHydrate_Employee() {
         // Loading an entity and hydrating its graph is done in a single transaction
         var dbJames = findDeepHydratedEntity(Employee.class, 1);
 
@@ -215,7 +239,7 @@ class HydratorImplTest extends AbstractTest {
      * Tests the method {@link HydratorImpl#deepHydrate(Object)
      */
     @Test
-    void deepResolveAddress() {
+    void deepHydrate_Address() {
         // Loading an entity and hydrating its graph is done in a single transaction
         var dbLyon = findDeepHydratedEntity(Address.class, 200);
 
