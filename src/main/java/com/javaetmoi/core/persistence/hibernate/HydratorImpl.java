@@ -1,6 +1,5 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -22,6 +21,13 @@ class HydratorImpl implements Hydrator {
      * Mapping metamodel.
      */
     private final MappingMetamodelImplementor mappingMetamodel;
+
+    /**
+     * Convenience constructor.
+     */
+    HydratorImpl(EntityManagerFactory entityManagerFactory) {
+        this(entityManagerFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel());
+    }
 
     /**
      * Base constructor.
