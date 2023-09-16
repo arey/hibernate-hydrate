@@ -23,56 +23,57 @@ import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
- *
  * <p>
  * Provides a lazy way to resolve all Hibernate proxies.
  * </p>
  *
  * @author Antoine Rey
+ * @deprecated Use {@link LazyLoadingUtil} instead.
  */
+@Deprecated(forRemoval = true)
 public final class JpaLazyLoadingUtil {
     /**
-     * No-arg constructor
+     * No-arg constructor.
      */
     private JpaLazyLoadingUtil() {
         // Private visibility because utility class
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursivity.
-     *
+     * Populate a lazy-initialized object graph by recursion.
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
-     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate session.
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
+     * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
-     * @param currentEntityManager
-     *            Current JPA entity manager still open
+     * @param entityManager
+     *            Open {@link EntityManager}.
      * @param entities
-     *            A {@link Collection} of attached Hibernate entities to load
-     * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
-     *         input parameter. Useful when calling this method in a return statement.
+     *            A {@link Collection} of attached Hibernate entities to load.
+     * @return the {@link Collection} of Hibernate entities fully loaded.
+     *         Similar to the entities input parameter.
+     *         Useful when calling this method in a return statement.
      */
-    public static <C extends Collection<E>, E> C deepHydrate(EntityManager currentEntityManager, C entities) {
-        return hydrator(currentEntityManager).deepHydrateCollection(entities);
+    public static <C extends Collection<E>, E> C deepHydrate(EntityManager entityManager, C entities) {
+        return hydrator(entityManager).deepHydrateCollection(entities);
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursivity.
-     *
+     * Populate a lazy-initialized object graph by recursion.
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
-     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
-     * May attention: this method has to be called from an open persistent context / Hibernate session.
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
+     * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
      * @param currentEntityManager
-     *            Current JPA entity manager still open
+     *            Open {@link EntityManager}.
      * @param entity
-     *            A single attached Hibernate entity or a simple java class referencing entities
-     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
-     *         when calling this method in a return statement.
+     *            A single attached Hibernate entity or a simple java class referencing entities.
+     * @return the Hibernate entity fully loaded.
+     *         Similar to the entity input parameter.
+     *         Useful when calling this method in a return statement.
      */
     public static <E> E deepHydrate(EntityManager currentEntityManager, E entity) {
         return hydrator(currentEntityManager).deepHydrate(entity);
