@@ -28,31 +28,31 @@ public interface Hydrator {
 
     /**
      * Populate a lazy-initialized object graph by recursion.
-     *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
-     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
      * </p>
      *
      * @param entities
-     *            A {@link Collection} of attached Hibernate entities to load
-     * @return the {@link Collection} of Hibernate entities fully loaded. Similar to the entities
-     *         input parameter. Useful when calling this method in a return statement.
+     *            A {@link Collection} of attached Hibernate entities to load.
+     * @return the {@link Collection} of Hibernate entities fully loaded.
+     *         Similar to the entities input parameter.
+     *         Useful when calling this method in a return statement.
      */
     public <C extends Collection<E>, E> C deepHydrateCollection(C entities);
 
     /**
      * Populate a lazy-initialized object graph by recursion.
-     *
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
-     * The goal is to avoid any {@link LazyInitializationException} once entities are detached from the Hibernate session.<br>
+     * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
      * </p>
      *
      * @param entity
-     *            A single attached Hibernate entity or a simple java class referencing entities
-     * @return the Hibernate entity fully loaded. Similar to the entity input parameter. Useful
-     *         when calling this method in a return statement.
+     *            An attached Hibernate entity to load.
+     * @return the Hibernate entity fully loaded.
+     *         Similar to the entity input parameter.
+     *         Useful when calling this method in a return statement.
      */
     public <E> E deepHydrate(E entity);
 }

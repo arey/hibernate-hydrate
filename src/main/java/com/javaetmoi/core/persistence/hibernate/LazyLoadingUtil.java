@@ -90,7 +90,7 @@ public final class LazyLoadingUtil {
      * @param entityManager
      *            Open {@link EntityManager} or {@link Session}.
      * @param entity
-     *            A single attached Hibernate entity or a simple java class referencing entities.
+     *            An attached Hibernate entity to load.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
@@ -110,7 +110,7 @@ public final class LazyLoadingUtil {
      * @param entityManagerFactory
      *            {@link EntityManagerFactory} or {@link SessionFactory}.
      * @param entity
-     *            A single attached Hibernate entity or a simple java class referencing entities
+     *            An attached Hibernate entity to load.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.

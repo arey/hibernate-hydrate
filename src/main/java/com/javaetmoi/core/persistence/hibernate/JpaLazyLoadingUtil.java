@@ -70,7 +70,7 @@ public final class JpaLazyLoadingUtil {
      * @param currentEntityManager
      *            Open {@link EntityManager}.
      * @param entity
-     *            A single attached Hibernate entity or a simple java class referencing entities.
+     *            An attached Hibernate entity to load.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
