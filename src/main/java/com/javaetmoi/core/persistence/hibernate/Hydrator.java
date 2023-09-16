@@ -5,7 +5,6 @@ import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 import java.util.Collection;
 
