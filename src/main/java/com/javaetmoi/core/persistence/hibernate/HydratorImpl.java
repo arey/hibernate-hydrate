@@ -47,11 +47,11 @@ class HydratorImpl implements Hydrator {
 
     @Override
     public Hydrator withExclude(Class<?> entityClass, String attribute) {
-        var entityType = mappingMetamodel.getEntityDescriptor(entityClass);
-        var attributeMapping = entityType.findAttributeMapping(attribute);
+        var entityDescriptor = mappingMetamodel.getEntityDescriptor(entityClass);
+        var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
         if (attributeMapping == null) {
             throw new IllegalArgumentException(String.format(
-                    "The attribute %s does not exist at the entity %s.", attribute, entityType.getEntityName()));
+                    "The attribute %s does not exist at the entity %s.", attribute, entityDescriptor.getEntityName()));
         }
 
         var newExcludes = new HashSet<>(this.excludes);
