@@ -54,10 +54,9 @@ class HydratorImpl implements Hydrator {
             throw new IllegalArgumentException(String.format(
                     "The attribute %s does not exist at the entity %s.", attribute, entityName));
         }
-        var exclude = new NavigableRole(entityName).append(attributeMapping.getAttributeName());
 
         var newExcludes = new HashSet<>(this.excludes);
-        newExcludes.add(exclude);
+        newExcludes.add(attributeMapping.getNavigableRole());
 
         return new HydratorImpl(mappingMetamodel, newExcludes);
     }
