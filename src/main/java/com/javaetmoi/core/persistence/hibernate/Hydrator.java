@@ -13,14 +13,20 @@ import java.util.Collection;
  */
 public interface Hydrator {
     /**
-     * Factory for {@link EntityManager} and {@link Session}.
+     * Factory for {@link EntityManager} or {@link Session}.
+     *
+     * @param entityManager
+     *            {@link EntityManager} of an open {@link EntityManagerFactory}.
      */
     public static Hydrator hydrator(EntityManager entityManager) {
         return hydrator(entityManager.getEntityManagerFactory());
     }
 
     /**
-     * Factory for {@link EntityManagerFactory} and {@link SessionFactory}.
+     * Factory for {@link EntityManagerFactory} or {@link SessionFactory}.
+     *
+     * @param entityManagerFactory
+     *            Open {@link EntityManagerFactory}.
      */
     public static Hydrator hydrator(EntityManagerFactory entityManagerFactory) {
         return new HydratorImpl(entityManagerFactory);
@@ -31,6 +37,7 @@ public interface Hydrator {
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
+     * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
      * @param entities
@@ -46,6 +53,7 @@ public interface Hydrator {
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
+     * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
      * @param entity
