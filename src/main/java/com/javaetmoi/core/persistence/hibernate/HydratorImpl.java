@@ -8,10 +8,13 @@ import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
+import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Default implementation of {@link Hydrator}.
@@ -23,17 +26,40 @@ class HydratorImpl implements Hydrator {
     private final MappingMetamodelImplementor mappingMetamodel;
 
     /**
+     * Excludes from hydration.
+     */
+    private final Set<NavigableRole> excludes;
+
+    /**
      * Convenience constructor.
      */
     HydratorImpl(EntityManagerFactory entityManagerFactory) {
-        this(entityManagerFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel());
+        this(entityManagerFactory.unwrap(SessionFactoryImplementor.class).getMappingMetamodel(), Set.of());
     }
 
     /**
      * Base constructor.
      */
-    HydratorImpl(MappingMetamodelImplementor mappingMetamodel) {
+    HydratorImpl(MappingMetamodelImplementor mappingMetamodel, Set<NavigableRole> excludes) {
         this.mappingMetamodel = mappingMetamodel;
+        this.excludes = Set.copyOf(excludes);
+    }
+
+    @Override
+    public Hydrator withExclude(Class<?> entityClass, String attribute) {
+        var entityType = mappingMetamodel.getEntityDescriptor(entityClass);
+        var entityName = entityType.getEntityName();
+        var attributeMapping = entityType.findAttributeMapping(attribute);
+        if (attributeMapping == null) {
+            throw new IllegalArgumentException(String.format(
+                    "The attribute %s does not exist at the entity %s.", attribute, entityName));
+        }
+        var exclude = new NavigableRole(entityName).append(attributeMapping.getAttributeName());
+
+        var newExcludes = new HashSet<>(this.excludes);
+        newExcludes.add(exclude);
+
+        return new HydratorImpl(mappingMetamodel, newExcludes);
     }
 
     @Override
@@ -71,23 +97,23 @@ class HydratorImpl implements Hydrator {
     }
 
     private void deepInflateProperty(
-            Object propertyValue, ModelPart propertyType, IdentitySet<Object> recursiveGuard) {
+            Object propertyValue, ModelPart part, IdentitySet<Object> recursiveGuard) {
         if (propertyValue == null) {
             return;
         }
 
-        if (propertyType instanceof EntityValuedModelPart) {
-            deepInflateEntity(propertyValue, (EntityValuedModelPart) propertyType, recursiveGuard);
-        } else if (propertyType instanceof EmbeddableValuedModelPart) {
-            deepInflateEmbedded(propertyValue, (EmbeddableValuedModelPart) propertyType, recursiveGuard);
-        } else if (propertyType instanceof PluralAttributeMapping) {
+        if (part instanceof EntityValuedModelPart) {
+            deepInflateEntity(propertyValue, (EntityValuedModelPart) part, recursiveGuard);
+        } else if (part instanceof EmbeddableValuedModelPart) {
+            deepInflateEmbedded(propertyValue, (EmbeddableValuedModelPart) part, recursiveGuard);
+        } else if (part instanceof PluralAttributeMapping) {
             if (propertyValue instanceof Map) {
-                deepInflateMap((Map<?, ?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
+                deepInflateMap((Map<?, ?>) propertyValue, (PluralAttributeMapping) part, recursiveGuard);
             } else if (propertyValue instanceof Collection) {
-                deepInflateCollection((Collection<?>) propertyValue, (PluralAttributeMapping) propertyType, recursiveGuard);
+                deepInflateCollection((Collection<?>) propertyValue, (PluralAttributeMapping) part, recursiveGuard);
             } else {
                 throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
-                        propertyValue.getClass().getSimpleName(), propertyType.getNavigableRole().getFullPath()));
+                        propertyValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
             }
         }
     }
@@ -96,14 +122,14 @@ class HydratorImpl implements Hydrator {
      * Deep inflate an entity.
      */
     private void deepInflateEntity(
-            Object entity, EntityValuedModelPart entityType, IdentitySet<Object> recursiveGuard) {
-        if (entity == null || !recursiveGuard.add(entity)) {
+            Object entity, EntityValuedModelPart part, IdentitySet<Object> recursiveGuard) {
+        if (entity == null || !recursiveGuard.add(entity) || excludes.contains(part.getNavigableRole())) {
             return;
         }
         Hibernate.initialize(entity);
 
         var target = Hibernate.unproxy(entity);
-        var descriptor = entityType.getEntityMappingType();
+        var descriptor = part.getEntityMappingType();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
             deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
@@ -114,12 +140,12 @@ class HydratorImpl implements Hydrator {
      * Deep inflate an embedded entity.
      */
     private void deepInflateEmbedded(
-            Object embeddable, EmbeddableValuedModelPart componentType, IdentitySet<Object> recursiveGuard) {
-        if (embeddable == null || !recursiveGuard.add(embeddable)) {
+            Object embeddable, EmbeddableValuedModelPart part, IdentitySet<Object> recursiveGuard) {
+        if (embeddable == null || !recursiveGuard.add(embeddable) || excludes.contains(part.getNavigableRole())) {
             return;
         }
 
-        var descriptor = componentType.getEmbeddableTypeDescriptor();
+        var descriptor = part.getEmbeddableTypeDescriptor();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(embeddable);
             deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
@@ -130,14 +156,14 @@ class HydratorImpl implements Hydrator {
      * Deep inflate a map including its keys and values.
      */
     private void deepInflateMap(
-            Map<?, ?> map, PluralAttributeMapping mapType, IdentitySet<Object> recursiveGuard) {
-        if (map == null || !recursiveGuard.add(map)) {
+            Map<?, ?> map, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
+        if (map == null || !recursiveGuard.add(map) || excludes.contains(part.getNavigableRole())) {
             return;
         }
         Hibernate.initialize(map);
 
-        var indexType = mapType.getIndexDescriptor();
-        var elementType = mapType.getElementDescriptor();
+        var indexType = part.getIndexDescriptor();
+        var elementType = part.getElementDescriptor();
         map.forEach((index, element) -> {
             deepInflateProperty(index, indexType, recursiveGuard);
             deepInflateProperty(element, elementType, recursiveGuard);
@@ -148,13 +174,13 @@ class HydratorImpl implements Hydrator {
      * Deep inflate a collection including its elements.
      */
     private void deepInflateCollection(
-            Collection<?> collection, PluralAttributeMapping collectionType, IdentitySet<Object> recursiveGuard) {
-        if (collection == null || !recursiveGuard.add(collection)) {
+            Collection<?> collection, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
+        if (collection == null || !recursiveGuard.add(collection) || excludes.contains(part.getNavigableRole())) {
             return;
         }
         Hibernate.initialize(collection);
 
-        var elementType = collectionType.getElementDescriptor();
+        var elementType = part.getElementDescriptor();
         collection.forEach(element ->
                 deepInflateProperty(element, elementType, recursiveGuard));
     }

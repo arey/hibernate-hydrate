@@ -82,11 +82,12 @@ class HydratorImplTest extends AbstractTest {
      */
     @Test
     void lazyInitializationExceptionOnPersistentMap() {
-        // Load each entity in a transaction
+        // Load each entity in a transaction.
         var dbJames = findEntity(Employee.class, 1);
 
         // At this step, transaction and session are closed
-        assertThrows(LazyInitializationException.class, () -> dbJames.getAddresses().get("home"));
+        assertThrows(LazyInitializationException.class, () ->
+                dbJames.getAddresses().get("home"));
     }
 
     /**
@@ -95,11 +96,12 @@ class HydratorImplTest extends AbstractTest {
      */
     @Test
     void lazyInitializationExceptionOnPersistentCollection() {
-        // Load each entity in a transaction
+        // Load each entity in a transaction.
         var dbJames = findEntity(Employee.class, 1);
 
-        // At this step, transaction and session are closed
-        assertThrows(LazyInitializationException.class, () -> dbJames.getProjects().contains(android));
+        // At this step, transaction and session are closed.
+        assertThrows(LazyInitializationException.class, () ->
+                dbJames.getProjects().contains(android));
     }
 
     /**
@@ -108,11 +110,12 @@ class HydratorImplTest extends AbstractTest {
      */
     @Test
     void lazyInitializationExceptionWithManyToOne() {
-        // Load each entity in a transaction
+        // Load each entity in a transaction.
         var dbLyon = findEntity(Address.class, 200);
 
-        // At this step, transaction and session are closed
-        assertThrows(LazyInitializationException.class, () -> dbLyon.getEmployee().getName());
+        // At this step, transaction and session are closed.
+        assertThrows(LazyInitializationException.class, () ->
+                dbLyon.getEmployee().getName());
     }
 
     /**
@@ -144,6 +147,21 @@ class HydratorImplTest extends AbstractTest {
 
         assertThat(deepHydratedEntity)
                 .isEqualTo(paris);
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
+     */
+    @Test
+    void deepHydrate_attachedEntity_withExclude() {
+        // Test that we handle attached entities correctly. Success if no exception.
+        var deepHydratedEntity = doInJPA(entityManager ->
+                    hydrator.withExclude(Employee.class, "addresses")
+                            .deepHydrate(entityManager.find(Address.class, paris.getId())));
+
+        // At this step, transaction and session are closed.
+        assertThrows(LazyInitializationException.class, () ->
+                deepHydratedEntity.getEmployee().getAddresses().get("home"));
     }
 
     /**
@@ -187,7 +205,7 @@ class HydratorImplTest extends AbstractTest {
      */
     @Test
     void deepHydrate_Employee() {
-        // Loading an entity and hydrating its graph is done in a single transaction
+        // Loading an entity and hydrating its graph is done in a single transaction.
         var dbJames = findDeepHydratedEntity(Employee.class, 1);
 
         // Assertions
@@ -240,7 +258,7 @@ class HydratorImplTest extends AbstractTest {
      */
     @Test
     void deepHydrate_Address() {
-        // Loading an entity and hydrating its graph is done in a single transaction
+        // Loading an entity and hydrating its graph is done in a single transaction.
         var dbLyon = findDeepHydratedEntity(Address.class, 200);
 
         assertEquals(dbLyon.getEmployee().getName(), tom.getName(),
