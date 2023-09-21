@@ -15,6 +15,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Default implementation of {@link Hydrator}.
