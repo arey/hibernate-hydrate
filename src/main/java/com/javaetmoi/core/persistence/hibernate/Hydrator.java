@@ -1,43 +1,35 @@
-/*
- * Copyright 2012 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.javaetmoi.core.persistence.hibernate;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import java.util.Collection;
 
-import jakarta.persistence.EntityManager;
-
-import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.LazyInitializationException;
-
-import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
-
 /**
- * Set of helper methods that fetch a complete entity graph.
- * <p>
- * Provides a lazy way to resolve all Hibernate proxies.
- * </p>
- *
- * @author Antoine Rey
- * @deprecated Use {@link Hydrator#hydrator(EntityManagerFactory)} or {@link LazyLoadingUtil} instead.
+ * Hydrate Hibernate/JPA entities.
  */
-@Deprecated(forRemoval = true)
-public final class JpaLazyLoadingUtil {
+public interface Hydrator {
     /**
-     * No-arg constructor.
+     * Factory for {@link EntityManager} or {@link Session}.
+     *
+     * @param entityManager
+     *            {@link EntityManager} of an open {@link EntityManagerFactory}.
      */
-    private JpaLazyLoadingUtil() {
-        // Private visibility because utility class
+    public static Hydrator hydrator(EntityManager entityManager) {
+        return hydrator(entityManager.getEntityManagerFactory());
+    }
+
+    /**
+     * Factory for {@link EntityManagerFactory} or {@link SessionFactory}.
+     *
+     * @param entityManagerFactory
+     *            Open {@link EntityManagerFactory}.
+     */
+    public static Hydrator hydrator(EntityManagerFactory entityManagerFactory) {
+        return new HydratorImpl(entityManagerFactory);
     }
 
     /**
@@ -48,17 +40,13 @@ public final class JpaLazyLoadingUtil {
      * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
-     * @param entityManager
-     *            Open {@link EntityManager}.
      * @param entities
      *            A {@link Collection} of attached Hibernate entities to load.
      * @return the {@link Collection} of Hibernate entities fully loaded.
      *         Similar to the entities input parameter.
      *         Useful when calling this method in a return statement.
      */
-    public static <C extends Collection<E>, E> C deepHydrate(EntityManager entityManager, C entities) {
-        return hydrator(entityManager).deepHydrateCollection(entities);
-    }
+    public <C extends Collection<E>, E> C deepHydrateCollection(C entities);
 
     /**
      * Populate a lazy-initialized object graph by recursion.
@@ -68,15 +56,11 @@ public final class JpaLazyLoadingUtil {
      * Attention: This method has to be called from an open persistent context / Hibernate session.
      * </p>
      *
-     * @param entityManager
-     *            Open {@link EntityManager}.
      * @param entity
      *            An attached Hibernate entity to load.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
      */
-    public static <E> E deepHydrate(EntityManager entityManager, E entity) {
-        return hydrator(entityManager).deepHydrate(entity);
-    }
+    public <E> E deepHydrate(E entity);
 }

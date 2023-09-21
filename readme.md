@@ -22,6 +22,8 @@ A French article titled *Say goodbye to LazyInitializationException* : http://ja
 
 ## Quick Start ##
 
+### Dependency ###
+
 Download the jar though Maven:
 
 ```xml
@@ -67,6 +69,43 @@ Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.mav
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate6-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate6-hydrate)
 
+### Usage ###
+
+First get a `Hydrator` instance. There are four possible ways:
+* `Hydrator.hydrator(entityManagerFactory)`
+* `Hydrator.hydrator(entityManager)`
+* `Hydrator.hydrator(sessionFactory)`
+* `Hydrator.hydrator(session)`
+
+To this `Hydrator` instance you can pass **attached** entities that need to be fully initialized.
+Afterward you can detach these entities and access all of their transitive attributes 
+without getting problems with lazy loading. That is, there will be no `LazyInitializationException`.
+
+A simple example of a service method that returns a fully initialized entity:
+
+```java
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+import com.javaetmoi.core.persistence.hibernate.Hydrator;
+import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
+
+public class MyEntityService {
+  private final EntityManager entityManager;
+  private final Hydrator hydrator;
+
+  public MyEntityService(EntityManager entityManager) {
+    this.entityManager = entityManager;
+    this.hydrator = hydrator(entityManager);
+  }
+
+  @Transactional
+  public MyEntity myEntity(long id) {
+    var myEntity = entityManager.find(MyEntity.class, id);
+    var myHydratedEntity = hydrator.deepHydrate(myEntity);
+    return myHydrateEntity;
+  }
+}
+```
 
 ## Contributing to Hibernate Hydrate ##
 
