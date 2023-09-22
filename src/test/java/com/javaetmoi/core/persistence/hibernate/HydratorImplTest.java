@@ -174,6 +174,8 @@ class HydratorImplTest extends AbstractTest {
                         .deepHydrate(entityManager.find(Employee.class, james.getId())));
 
         // At this step, transaction and session are closed.
+        assertThat(partiallyHydratedEntity.getProjects())
+                .contains(iphone, android);
         assertThrows(LazyInitializationException.class, () ->
                 partiallyHydratedEntity.getAddresses().get("home"));
     }
