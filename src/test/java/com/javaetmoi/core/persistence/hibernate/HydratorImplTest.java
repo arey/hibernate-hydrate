@@ -170,12 +170,15 @@ class HydratorImplTest extends AbstractTest {
     void deepHydrate_withExclude() {
         // Test that we handle attached entities correctly. Success if no exception.
         var partiallyHydratedEntity = doInJPA(entityManager ->
-                hydrator.withExclude(Employee.class, "addresses")
+                hydrator.withExclude(Project.class, "members")
+                        .withExclude(Employee.class, "addresses")
                         .deepHydrate(entityManager.find(Employee.class, james.getId())));
 
         // At this step, transaction and session are closed.
         assertThat(partiallyHydratedEntity.getProjects())
                 .contains(iphone, android);
+        assertThrows(LazyInitializationException.class, () ->
+                partiallyHydratedEntity.getProjects().get(0).getMembers().size());
         assertThrows(LazyInitializationException.class, () ->
                 partiallyHydratedEntity.getAddresses().get("home"));
     }
