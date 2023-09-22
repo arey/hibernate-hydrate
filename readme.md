@@ -81,7 +81,8 @@ To this `Hydrator` instance you can pass **attached** entities that need to be f
 Afterward you can detach these entities and access all of their transitive attributes 
 without getting problems with lazy loading. That is, there will be no `LazyInitializationException`.
 
-A simple example of a service method that returns a fully initialized entity:
+A simple example of a service method that returns a fully initialized entity 
+except for its `mySubEntities` attribute:
 
 ```java
 import jakarta.persistence.EntityManager;
@@ -95,7 +96,7 @@ public class MyEntityService {
 
   public MyEntityService(EntityManager entityManager) {
     this.entityManager = entityManager;
-    this.hydrator = hydrator(entityManager);
+    this.hydrator = hydrator(entityManager).withExclude(MyEntity.class, "mySubEntities");
   }
 
   @Transactional
