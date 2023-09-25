@@ -17,6 +17,7 @@ public interface Hydrator {
      *
      * @param entityManager
      *            {@link EntityManager} of an open {@link EntityManagerFactory}.
+     * @return new instance.
      */
     public static Hydrator hydrator(EntityManager entityManager) {
         return hydrator(entityManager.getEntityManagerFactory());
@@ -27,10 +28,25 @@ public interface Hydrator {
      *
      * @param entityManagerFactory
      *            Open {@link EntityManagerFactory}.
+     * @return new instance.
      */
     public static Hydrator hydrator(EntityManagerFactory entityManagerFactory) {
         return new HydratorImpl(entityManagerFactory);
     }
+
+    /**
+     * Exclude the attribute of the entity from hydration.
+     * Just supports attributes that are JPA entities or collections.
+     * {@link jakarta.persistence.Embeddable}s are not supported.
+     *
+     * @param entityClass
+     *            Entity class.
+     * @param attribute
+     *            Attribute name.
+     * @throws IllegalArgumentException if then entity class is not a JPA entity or the attribute does not exist.
+     * @return new instance with the exclusion.
+     */
+    public Hydrator withExclude(Class<?> entityClass, String attribute);
 
     /**
      * Populate a lazy-initialized object graph by recursion.

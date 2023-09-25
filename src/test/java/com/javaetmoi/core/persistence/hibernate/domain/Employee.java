@@ -13,10 +13,7 @@
  */
 package com.javaetmoi.core.persistence.hibernate.domain;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
@@ -40,7 +37,7 @@ public class Employee {
     private String               name;
 
     @ManyToMany(cascade = CascadeType.ALL)
-    private Collection<Project>  projects  = new ArrayList<Project>();
+    private List<Project> projects  = new ArrayList<Project>();
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     @MapKey(name = "type")
@@ -75,11 +72,11 @@ public class Employee {
         this.name = name;
     }
 
-    public Collection<Project> getProjects() {
+    public List<Project> getProjects() {
         return projects;
     }
 
-    public void setProjects(Collection<Project> projects) {
+    public void setProjects(List<Project> projects) {
         this.projects = projects;
     }
 
