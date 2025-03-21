@@ -17,9 +17,9 @@ import com.javaetmoi.core.persistence.hibernate.joinInheritance.ParentReference;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test reference back to parent does not causes infinite recursion
+ * Test the lazy initialization of a collection of subclasses with a join inheritance strategy.
  * <p>
- * Unit test for the https://github.com/arey/hibernate-hydrate/issues/10 fix
+ * Unit test for the <a href="https://github.com/arey/hibernate-hydrate/issues/50">Lazyloading of a subclass with a join inheritance strategy</a> fix
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("TestLazyLoadingUtil-context.xml")
