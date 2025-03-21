@@ -13,6 +13,9 @@
  */
 package com.javaetmoi.core.persistence.hibernate;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -23,10 +26,11 @@ import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.proxy.LazyInitializer;
-import org.hibernate.type.*;
-
-import java.util.Collection;
-import java.util.Map;
+import org.hibernate.type.CollectionType;
+import org.hibernate.type.ComponentType;
+import org.hibernate.type.EntityType;
+import org.hibernate.type.MapType;
+import org.hibernate.type.Type;
 
 /**
  * Set of helper methods that fetch a complete entity graph.
@@ -87,8 +91,7 @@ public class LazyLoadingUtil {
         int capacity = Math.max(entities.size() * 2, 32);
         IdentitySet recursiveGuard = new IdentitySet(capacity);
         for (Object entity : entities) {
-            // TODO markus 2016-06-19: How to determine entity type?
-            deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
+            deepInflateEntity(sessionFactoryImplementor, entity, recursiveGuard);
         }
         return entities;
     }
@@ -131,8 +134,7 @@ public class LazyLoadingUtil {
     public static <E> E deepHydrate(SessionFactory sessionFactory, E entity) {
         SessionFactoryImplementor sessionFactoryImplementor = sessionFactory.unwrap(SessionFactoryImplementor.class);
         IdentitySet recursiveGuard = new IdentitySet();
-        // TODO markus 2016-06-19: How to determine entity type?
-        deepInflateEntity(sessionFactoryImplementor, entity, null, recursiveGuard);
+        deepInflateEntity(sessionFactoryImplementor, entity, recursiveGuard);
         return entity;
     }
 
@@ -143,7 +145,7 @@ public class LazyLoadingUtil {
         }
 
         if (propertyType instanceof EntityType) {
-            deepInflateEntity(sessionFactory, propertyValue, (EntityType) propertyType, recursiveGuard);
+            deepInflateEntity(sessionFactory, propertyValue, recursiveGuard);
         } else if (propertyType instanceof ComponentType) {
             // i.e. @Embeddable annotation (see https://github.com/arey/hibernate-hydrate/issues/1)
             deepInflateComponent(sessionFactory, propertyValue, (ComponentType) propertyType, recursiveGuard);
@@ -160,13 +162,13 @@ public class LazyLoadingUtil {
     }
 
     private static void deepInflateEntity(
-            SessionFactoryImplementor sessionFactory, Object entity, EntityType entityType, IdentitySet recursiveGuard) {
+            SessionFactoryImplementor sessionFactory, Object entity, IdentitySet recursiveGuard) {
         if (entity == null || !recursiveGuard.add(entity)) {
             return;
         }
         Hibernate.initialize(entity);
 
-        String name = entityType != null? entityType.getName() : entity.getClass().getName();
+        String name = entity.getClass().getName();
         Object target = entity;
         if (entity instanceof HibernateProxy) {
             LazyInitializer initializer = ((HibernateProxy) entity).getHibernateLazyInitializer();
