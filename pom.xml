@@ -69,7 +69,7 @@
   <!-- GitHub Software Configuration Management -->
   <scm>
     <url>https://github.com/arey/hibernate-hydrate</url>
-    <developerConnection>scm:git:https://github.com/arey/hibernate-hydrate.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:arey/hibernate-hydrate.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
