@@ -104,7 +104,7 @@
     <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
     <version.plugin.maven-resources-plugin>3.2.0</version.plugin.maven-resources-plugin>
     <version.plugin.maven-source-plugin>3.2.1</version.plugin.maven-source-plugin>
-    <version.plugin.nexus-staging-maven-plugin>1.6.8</version.plugin.nexus-staging-maven-plugin>
+    <version.plugin.nexus-staging-maven-plugin>1.7.0</version.plugin.nexus-staging-maven-plugin>
     <version.plugin.maven-surefire-plugin>3.0.0-M5</version.plugin.maven-surefire-plugin>
   </properties>
 
