@@ -14,11 +14,11 @@ jobs:
         mapper: [ last, hibernate-5.4, hibernate-5.2 ]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 1.8
+      - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
-          java-version: 1.8
+          java-version: '8'
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
