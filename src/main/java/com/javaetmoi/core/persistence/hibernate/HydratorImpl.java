@@ -1,6 +1,10 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import jakarta.persistence.EntityManagerFactory;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
@@ -11,14 +15,7 @@ import org.hibernate.metamodel.mapping.PluralAttributeMapping;
 import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
-
-import java.util.Collection;
-import java.util.Map;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * Default implementation of {@link Hydrator}.
@@ -132,10 +129,20 @@ class HydratorImpl implements Hydrator {
 
         var target = Hibernate.unproxy(entity);
         var descriptor = part.getEntityMappingType();
+        // Start with the entity itself.
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
             deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
         });
+        // Continue with subclasses.
+        if (descriptor.hasSubclasses()) {
+            descriptor.getSubMappingTypes().stream()
+                .filter(subclassDescriptor -> subclassDescriptor.getJavaType().getJavaTypeClass().isInstance(target))
+                .forEach(subclassDescriptor -> subclassDescriptor.getAttributeMappings().forEach(attributeMapping -> {
+                    var propertyValue = attributeMapping.getValue(target);
+                    deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+                }));
+        }
     }
 
     /**

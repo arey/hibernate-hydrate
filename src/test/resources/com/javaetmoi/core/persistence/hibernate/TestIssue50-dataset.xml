@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <PARENTREFERENCE ID="1" PARENT_ID="100"/>
+  <PARENTCLASS ID="100"/>
+  <SUBCLASS ID="100"/>
+  <DATA ID="200" NAME="data" DATA_ID="100"/>
+</dataset>
