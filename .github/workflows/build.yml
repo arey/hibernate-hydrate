@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapper: [ last, hibernate-6.1, hibernate-6.2 ]
+        mapper: [ last, hibernate-6.1, hibernate-6.2, hibernate-6.3, hibernate-6.4, hibernate-6.5 ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
