@@ -86,7 +86,7 @@
 
     <!-- * For testing purpose -->
     <version.assertj>3.27.3</version.assertj>
-    <version.commons-lang3>3.17.0</version.commons-lang3>
+    <version.commons-lang3>3.18.0</version.commons-lang3>
     <version.dbunit>3.0.0</version.dbunit>
     <version.h2>2.3.232</version.h2>
     <version.junit>5.11.4</version.junit>
