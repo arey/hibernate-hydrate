@@ -81,28 +81,28 @@
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
     <!-- * Last Hibernate supported version  -->
-    <version.hibernate>7.0.0.Beta5</version.hibernate>
+    <version.hibernate>7.2.0.Final</version.hibernate>
 
     <!-- * For testing purpose -->
-    <version.assertj>3.27.3</version.assertj>
-    <version.commons-lang3>3.17.0</version.commons-lang3>
+    <version.assertj>3.27.6</version.assertj>
+    <version.commons-lang3>3.20.0</version.commons-lang3>
     <version.dbunit>3.0.0</version.dbunit>
-    <version.h2>2.3.232</version.h2>
-    <version.junit>5.12.1</version.junit>
-    <version.logback>1.5.18</version.logback>
-    <version.mockito>5.16.1</version.mockito>
+    <version.h2>2.4.240</version.h2>
+    <version.junit>6.0.1</version.junit>
+    <version.logback>1.5.23</version.logback>
+    <version.mockito>5.21.0</version.mockito>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
-    <version.plugin.maven-compiler-plugin>3.14.0</version.plugin.maven-compiler-plugin>
+    <version.plugin.maven-compiler-plugin>3.14.1</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-eclipse-plugin>2.10</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
     <version.plugin.maven-central-publishing>0.7.0</version.plugin.maven-central-publishing>
-    <version.plugin.maven-javadoc-plugin>3.11.2</version.plugin.maven-javadoc-plugin>
+    <version.plugin.maven-javadoc-plugin>3.12.0</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
-    <version.plugin.maven-resources-plugin>3.3.1</version.plugin.maven-resources-plugin>
-    <version.plugin.maven-source-plugin>3.3.1</version.plugin.maven-source-plugin>
-    <version.plugin.maven-surefire-plugin>3.5.3</version.plugin.maven-surefire-plugin>
+    <version.plugin.maven-resources-plugin>3.4.0</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-source-plugin>3.4.0</version.plugin.maven-source-plugin>
+    <version.plugin.maven-surefire-plugin>3.5.4</version.plugin.maven-surefire-plugin>
   </properties>
 
   <dependencies>
@@ -323,6 +323,18 @@
     <profile>
       <id>last</id>
     </profile>
-  </profiles>
 
+    <profile>
+      <id>hibernate-7.1</id>
+      <properties>
+        <version.hibernate>7.1.14.Final</version.hibernate>
+      </properties>
+    </profile>
+    <profile>
+      <id>hibernate-7.0</id>
+      <properties>
+        <version.hibernate>7.0.10.Final</version.hibernate>
+      </properties>
+    </profile>
+  </profiles>
 </project>
