@@ -105,8 +105,19 @@
     <version.plugin.maven-surefire-plugin>3.5.4</version.plugin.maven-surefire-plugin>
   </properties>
 
-  <dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${version.junit}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
+  <dependencies>
     <!-- Hibernate -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
@@ -182,7 +193,6 @@
       <version>${version.commons-lang3}</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -328,12 +338,16 @@
       <id>hibernate-7.1</id>
       <properties>
         <version.hibernate>7.1.14.Final</version.hibernate>
+        <!-- hibernate-testing requires junit 5.11. -->
+        <version.junit>5.11.4</version.junit>
       </properties>
     </profile>
     <profile>
       <id>hibernate-7.0</id>
       <properties>
         <version.hibernate>7.0.10.Final</version.hibernate>
+        <!-- hibernate-testing requires junit 5.11. -->
+        <version.junit>5.11.4</version.junit>
       </properties>
     </profile>
   </profiles>
