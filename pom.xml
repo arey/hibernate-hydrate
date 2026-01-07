@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
-  <version>6.3.5-SNAPSHOT</version>
-  <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
+  <version>7.0.0</version>
+  <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
   <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 6.x)</description>
@@ -76,38 +76,48 @@
     <!-- Encoding of sources -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
 
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
     <!-- * Last Hibernate supported version  -->
-    <version.hibernate>6.6.12.Final</version.hibernate>
+    <version.hibernate>7.2.0.Final</version.hibernate>
 
     <!-- * For testing purpose -->
-    <version.assertj>3.27.3</version.assertj>
-    <version.commons-lang3>3.18.0</version.commons-lang3>
+    <version.assertj>3.27.6</version.assertj>
+    <version.commons-lang3>3.20.0</version.commons-lang3>
     <version.dbunit>3.0.0</version.dbunit>
-    <version.h2>2.3.232</version.h2>
-    <version.junit>5.11.4</version.junit>
-    <version.logback>1.5.18</version.logback>
-    <version.mockito>5.16.1</version.mockito>
+    <version.h2>2.4.240</version.h2>
+    <version.junit>6.0.1</version.junit>
+    <version.logback>1.5.23</version.logback>
+    <version.mockito>5.21.0</version.mockito>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
-    <version.plugin.maven-compiler-plugin>3.14.0</version.plugin.maven-compiler-plugin>
+    <version.plugin.maven-compiler-plugin>3.14.1</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-eclipse-plugin>2.10</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
     <version.plugin.maven-central-publishing>0.7.0</version.plugin.maven-central-publishing>
-    <version.plugin.maven-javadoc-plugin>3.11.2</version.plugin.maven-javadoc-plugin>
+    <version.plugin.maven-javadoc-plugin>3.12.0</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
-    <version.plugin.maven-resources-plugin>3.3.1</version.plugin.maven-resources-plugin>
-    <version.plugin.maven-source-plugin>3.3.1</version.plugin.maven-source-plugin>
-    <version.plugin.maven-surefire-plugin>3.5.3</version.plugin.maven-surefire-plugin>
+    <version.plugin.maven-resources-plugin>3.4.0</version.plugin.maven-resources-plugin>
+    <version.plugin.maven-source-plugin>3.4.0</version.plugin.maven-source-plugin>
+    <version.plugin.maven-surefire-plugin>3.5.4</version.plugin.maven-surefire-plugin>
   </properties>
 
-  <dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${version.junit}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
+  <dependencies>
     <!-- Hibernate -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
@@ -126,13 +136,11 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>${version.junit}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>${version.junit}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -183,7 +191,6 @@
       <version>${version.commons-lang3}</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -326,33 +333,19 @@
     </profile>
 
     <profile>
-      <id>hibernate-6.5</id>
+      <id>hibernate-7.1</id>
       <properties>
-        <version.hibernate>6.5.3.Final</version.hibernate>
+        <version.hibernate>7.1.14.Final</version.hibernate>
+        <!-- hibernate-testing requires junit 5.11. -->
+        <version.junit>5.11.4</version.junit>
       </properties>
     </profile>
     <profile>
-      <id>hibernate-6.4</id>
+      <id>hibernate-7.0</id>
       <properties>
-        <version.hibernate>6.4.10.Final</version.hibernate>
-      </properties>
-    </profile>
-    <profile>
-      <id>hibernate-6.3</id>
-      <properties>
-        <version.hibernate>6.3.2.Final</version.hibernate>
-      </properties>
-    </profile>
-    <profile>
-      <id>hibernate-6.2</id>
-      <properties>
-        <version.hibernate>6.2.36.Final</version.hibernate>
-      </properties>
-    </profile>
-    <profile>
-      <id>hibernate-6.1</id>
-      <properties>
-        <version.hibernate>6.1.7.Final</version.hibernate>
+        <version.hibernate>7.0.10.Final</version.hibernate>
+        <!-- hibernate-testing requires junit 5.11. -->
+        <version.junit>5.11.4</version.junit>
       </properties>
     </profile>
   </profiles>

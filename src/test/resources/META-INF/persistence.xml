@@ -1,13 +1,35 @@
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
-             version="2.2">
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
+             version="3.2">
   <persistence-unit name="hibernate-hydrate">
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Address</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Bar</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Biz</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Child</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Country</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Customer</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Employee</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Foo</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Parent</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Passport</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Person</class>
+    <class>com.javaetmoi.core.persistence.hibernate.domain.Project</class>
+    <class>com.javaetmoi.core.persistence.hibernate.joinInheritance.Data</class>
+    <class>com.javaetmoi.core.persistence.hibernate.joinInheritance.ParentClass</class>
+    <class>com.javaetmoi.core.persistence.hibernate.joinInheritance.ParentReference</class>
+    <class>com.javaetmoi.core.persistence.hibernate.joinInheritance.SubClass</class>
+    <class>com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Event</class>
+    <class>com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Plan</class>
+    <class>com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.SubPlan</class>
+    <class>com.javaetmoi.core.persistence.hibernate.listWithEmbeddable.Transfer</class>
+    <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.BaseSystem</class>
+    <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder</class>
+    <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem</class>
+    <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.System</class>
     <properties>
       <property name="hibernate.connection.url" value="jdbc:h2:mem:hibernate-hydrate;DB_CLOSE_DELAY=-1" />
       <property name="hibernate.connection.username" value="" />
-      <property name="hibernate.transaction.jta.platform" value="org.hibernate.testing.jta.TestingJtaPlatformImpl" />
-      <property name="hibernate.current_session_context_class" value="org.hibernate.context.internal.ThreadLocalSessionContext" />
       <property name="hibernate.hbm2ddl.auto" value="create-drop" />
       <property name="hibernate.generate_statistics" value="true" />
       <property name="hibernate.show_sql" value="false" />

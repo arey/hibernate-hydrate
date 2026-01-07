@@ -1,7 +1,7 @@
 # Hibernate Hydrate #
 
 [![Build Status](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml/badge.svg)](https://github.com/arey/hibernate-hydrate/actions/workflows/build.yml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate6-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate6-hydrate)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate7-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate7-hydrate)
 
 The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hydrate) project is to populate a graph of persistent entities and thus avoid the famous [LazyInitializationException](http://docs.jboss.org/hibernate/orm/3.6/javadocs/org/hibernate/LazyInitializationException.html).
 
@@ -9,7 +9,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 
 * Utility class to populate a lazy-initialized object graph by recursivity
 * Supports JPA with Hibernate as provider
-* Supports Hibernate 3.x to 6.x (with different artefactId)
+* Supports Hibernate 3.x to 7.x (with different artefactId)
 
 ## Getting Help ##
 
@@ -27,7 +27,14 @@ A French article titled *Say goodbye to LazyInitializationException* : http://ja
 Download the jar though Maven:
 
 ```xml
-<!-- Either Hibernate 6.1.6 and above support -->
+<!-- Either Hibernate 7.0.0 and above support -->
+<dependency>
+  <groupId>com.javaetmoi.core</groupId>
+  <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
+  <version>7.0.0</version>
+</dependency> 
+
+<!-- or Hibernate 6.1.6 and above support -->
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate6-hydrate</artifactId>
@@ -65,9 +72,9 @@ Download the jar though Maven:
 
 Please note that we are not able to support Hibernate versions 6.0 up to 6.1.5 due to bugs in them.
 
-Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate6-hydrate/)
+Hibernate Hydrate artefacts are available from [Maven Central](https://repo1.maven.org/maven2/com/javaetmoi/core/javaetmoi-hibernate7-hydrate/)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate6-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate6-hydrate)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate7-hydrate/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.javaetmoi.core/javaetmoi-hibernate7-hydrate)
 
 ### Usage ###
 
@@ -113,7 +120,8 @@ public class MyEntityService {
 * GitHub is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). 
   If you want to contribute code this way, please reference a GitHub ticket as well covering the specific issue you are addressing.
 * Each major version of Hibernate has it own git branch: 
-  * Hibernate 6.2 on the master
+  * Hibernate 7 on the master
+  * Hibernate 6.2 on the hibernate6 branch
   * Hibernate 5 on the hibernate5 branch
   * Hibernate 4 on the hibernate4 branch 
   * Hibernate 3 on the hibernate3 branch

@@ -1,19 +1,16 @@
 package com.javaetmoi.core.persistence.hibernate.listWithEmbeddable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 @Embeddable
 public class Transfer {
 
     private String  name;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "SUBPLAN")
-    @Cascade(CascadeType.ALL)
     private SubPlan subPlan;
 
     public SubPlan getSubPlan() {

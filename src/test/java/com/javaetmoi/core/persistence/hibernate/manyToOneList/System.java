@@ -3,21 +3,12 @@ package com.javaetmoi.core.persistence.hibernate.manyToOneList;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import jakarta.persistence.*;
 
 @Entity
 @AttributeOverrides(value = { @AttributeOverride(name = "id", column = @Column(name = "SYSTEM_KEY_PK")) })
 public class System extends BaseSystem {
-	@OneToMany(mappedBy = "parent", orphanRemoval = true)
-	@Cascade(CascadeType.ALL)
+	@OneToMany(mappedBy = "parent", orphanRemoval = true, cascade = CascadeType.ALL)
 	@OrderBy(value = "systemNumber asc")
 	private List<SubSystem> subSystems = new ArrayList<SubSystem>();
 

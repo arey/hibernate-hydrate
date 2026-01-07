@@ -10,12 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-
-
 
 @Entity
 public class Plan {
@@ -24,7 +20,6 @@ public class Plan {
 	@ElementCollection
 	@Fetch(FetchMode.SELECT)
 	@OrderColumn(name = "elementOrder")
-	@Cascade(CascadeType.ALL)
 	@CollectionTable(name = "TRANSFER", joinColumns = @JoinColumn(name = "PLAN_ID"))
 	private List<Transfer> transfers = new ArrayList<Transfer>();
 
