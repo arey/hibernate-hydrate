@@ -20,7 +20,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Parent")
-@AttributeOverrides(value = { @AttributeOverride(name = "id", column = @Column(name = "parentKey")) })
+@AttributeOverride(name = "id", column = @Column(name = "parentKey"))
 public class Parent extends Person {
 
     @OneToMany(mappedBy = "parent", orphanRemoval = true, cascade = CascadeType.ALL)
