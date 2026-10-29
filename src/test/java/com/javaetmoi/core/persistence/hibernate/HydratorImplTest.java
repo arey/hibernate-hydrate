@@ -29,7 +29,7 @@ import org.unitils.reflectionassert.ReflectionComparatorMode;
 import jakarta.persistence.ManyToOne;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -128,6 +128,14 @@ class HydratorImplTest extends AbstractTest {
     }
 
     /**
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)} with an object that is no entity.
+     */
+    @Test
+    void deepHydrate_nonEntity() {
+        assertThat(hydrator.deepHydrate("no entity")).isEqualTo("no entity");
+    }
+
+    /**
      * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
      */
     @Test
@@ -185,6 +193,16 @@ class HydratorImplTest extends AbstractTest {
     }
 
     /**
+     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)} with a set that contains no entity.
+     */
+    @Test
+    void deepHydrateCollection_nonEntity() {
+        var hydrated = hydrator.deepHydrateCollection(Set.of("no entity"));
+
+        assertThat(hydrated).containsOnly("no entity");
+    }
+
+    /**
      * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)}.
      */
     @Test
@@ -207,40 +225,6 @@ class HydratorImplTest extends AbstractTest {
 
         assertThat(hydratedEntityProxies)
                 .containsOnly(james);
-    }
-
-    /**
-     * Tests the method {@link HydratorImpl#deepHydrate(Object)} with an object that is no entity.
-     * It has to be skipped instead of causing an exception.
-     */
-    @Test
-    void deepHydrate_nonEntity() {
-        var hydrated = hydrator.deepHydrate("no entity");
-
-        assertThat(hydrated).isEqualTo("no entity");
-    }
-
-    /**
-     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)} with a {@link Map} of entities
-     * that is no persistent attribute, but hydrated via its key set and its values.
-     * The keys are no entities and have to be skipped, the values have to be hydrated.
-     */
-    @Test
-    void deepHydrateCollection_mapKeysAndValues() {
-        var hydratedMap = doInJPA(entityManager -> {
-            var map = new HashMap<String, Employee>();
-            map.put("james", entityManager.find(Employee.class, james.getId()));
-            map.put("tom", entityManager.find(Employee.class, tom.getId()));
-            hydrator.deepHydrateCollection(map.keySet());
-            hydrator.deepHydrateCollection(map.values());
-            return map;
-        });
-
-        // At this step, transaction and session are closed.
-        assertThat(hydratedMap)
-                .containsOnlyKeys("james", "tom")
-                .containsEntry("james", james)
-                .containsEntry("tom", tom);
     }
 
     /**
