@@ -17,6 +17,8 @@ import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 
 import jakarta.persistence.EntityManagerFactory;
 
+import static java.lang.Math.max;
+
 /**
  * Default implementation of {@link Hydrator}.
  */
@@ -64,7 +66,7 @@ class HydratorImpl implements Hydrator {
     @Override
     public <C extends Collection<E>, E> C deepHydrateCollection(C entities) {
         // Reduce resizes for big collections.
-        int capacity = Math.max(entities.size(), 32);
+        int capacity = max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);
         entities.forEach(entity ->
                 deepInflateInitialEntity(entity, recursiveGuard));
@@ -82,7 +84,7 @@ class HydratorImpl implements Hydrator {
      * Populate a lazy-initialized object graph by recursion. Recursion entry point.
      *
      * @param entity
-     *            The entity. May be {@code null}.
+     *            The entity. May be {@code null}. Objects that are no entities are ignored.
      * @param recursiveGuard
      *            A guard to avoid endless recursion.
      */
@@ -91,7 +93,11 @@ class HydratorImpl implements Hydrator {
             return;
         }
 
-        var entityType = mappingMetamodel.getEntityDescriptor(Hibernate.getClass(entity));
+        var entityType = mappingMetamodel.findEntityDescriptor(Hibernate.getClass(entity));
+        if (entityType == null) {
+            // No entity. Nothing to hydrate.
+            return;
+        }
         deepInflateEntity(entity, entityType, recursiveGuard);
     }
 
