@@ -17,7 +17,6 @@ import com.javaetmoi.core.persistence.hibernate.domain.Parent;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Unit test for issue 2.

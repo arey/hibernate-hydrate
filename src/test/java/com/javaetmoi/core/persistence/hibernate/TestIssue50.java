@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 class TestIssue50 extends AbstractTest {
-
     @Test
     void should_lazyload_subclass_with_join_inheritance() {
         var dbContainer = findDeepHydratedEntity(ParentReference.class, 1);

@@ -8,11 +8,9 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class SubClass extends ParentClass {
-
     @OneToMany
     @JoinColumn(name = "DATA_ID")
     List<Data> datas;
-
 
     public List<Data> getDatas() {
         return datas;

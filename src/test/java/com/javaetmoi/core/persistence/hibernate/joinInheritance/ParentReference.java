@@ -13,15 +13,15 @@ public class ParentReference {
     @OneToOne
     private ParentClass parent;
 
+    public Integer getId() {
+        return id;
+    }
+
     public ParentClass getParent() {
         return parent;
     }
 
     public void setParent(ParentClass parent) {
         this.parent = parent;
-    }
-
-    public Integer getId() {
-        return id;
     }
 }
