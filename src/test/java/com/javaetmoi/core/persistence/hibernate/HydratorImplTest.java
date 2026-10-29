@@ -197,9 +197,7 @@ class HydratorImplTest extends AbstractTest {
      */
     @Test
     void deepHydrateCollection_nonEntity() {
-        var hydrated = hydrator.deepHydrateCollection(Set.of("no entity"));
-
-        assertThat(hydrated).containsOnly("no entity");
+        assertThat(hydrator.deepHydrateCollection(Set.of("no entity"))).containsOnly("no entity");
     }
 
     /**
