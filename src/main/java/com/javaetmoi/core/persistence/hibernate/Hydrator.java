@@ -58,7 +58,7 @@ public interface Hydrator {
      *
      * @param entities
      *            A {@link Collection} of attached Hibernate entities to load.
-     *            Elements that are no entities, e.g. the keys of a map of entities, are ignored.
+     *            Elements that are no entities are ignored.
      * @return the {@link Collection} of Hibernate entities fully loaded.
      *         Similar to the entities input parameter.
      *         Useful when calling this method in a return statement.
