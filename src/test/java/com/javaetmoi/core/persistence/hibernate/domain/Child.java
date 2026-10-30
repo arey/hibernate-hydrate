@@ -15,16 +15,16 @@ package com.javaetmoi.core.persistence.hibernate.domain;
 
 import jakarta.persistence.*;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Table(name = "Child")
 public class Child extends Person {
-
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = ALL)
     @JoinColumn(name = "parentKey_FK", referencedColumnName = "parentKey")
     private Parent parent;
 
     public Parent getParent() {
         return parent;
     }
-
 }

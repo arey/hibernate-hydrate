@@ -11,17 +11,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
 
 import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+
+import static org.hibernate.annotations.FetchMode.SELECT;
 
 @Entity
 public class Plan {
 	@Id
 	private Integer id;
+
 	@ElementCollection
-	@Fetch(FetchMode.SELECT)
+	@Fetch(SELECT)
 	@OrderColumn(name = "elementOrder")
 	@CollectionTable(name = "TRANSFER", joinColumns = @JoinColumn(name = "PLAN_ID"))
-	private List<Transfer> transfers = new ArrayList<Transfer>();
+	private List<Transfer> transfers = new ArrayList<>();
 
 	public Integer getId() {
 		return id;
@@ -38,5 +40,4 @@ public class Plan {
 	public void setTransfers(List<Transfer> transfers) {
 		this.transfers = transfers;
 	}
-
 }

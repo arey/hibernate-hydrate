@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 @Entity
 public class Passport implements Serializable {
-
     @Id
     private Integer id;
 
