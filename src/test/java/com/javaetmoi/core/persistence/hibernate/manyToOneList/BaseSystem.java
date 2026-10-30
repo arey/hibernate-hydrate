@@ -1,16 +1,19 @@
 package com.javaetmoi.core.persistence.hibernate.manyToOneList;
 
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+
+import static jakarta.persistence.GenerationType.AUTO;
 
 @MappedSuperclass
 public abstract class BaseSystem {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = AUTO)
 	private Integer id;
+
 	private String systemNumber;
+
 	private String name;
 
 	public Integer getId() {
@@ -36,5 +39,4 @@ public abstract class BaseSystem {
 	public void setName(String name) {
 		this.name = name;
 	}
-
 }

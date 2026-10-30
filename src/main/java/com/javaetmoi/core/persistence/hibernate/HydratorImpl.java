@@ -53,8 +53,8 @@ class HydratorImpl implements Hydrator {
         var entityDescriptor = mappingMetamodel.getEntityDescriptor(entityClass);
         var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
         if (attributeMapping == null) {
-            throw new IllegalArgumentException(String.format(
-                    "The attribute %s does not exist at the entity %s.", attribute, entityDescriptor.getEntityName()));
+            throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
+                    attribute, entityDescriptor.getEntityName()));
         }
 
         var newExcludes = new HashSet<>(this.excludes);
@@ -66,7 +66,7 @@ class HydratorImpl implements Hydrator {
     @Override
     public <C extends Collection<E>, E> C deepHydrateCollection(C entities) {
         // Reduce resizes for big collections.
-        int capacity = max(entities.size(), 32);
+        var capacity = max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);
         entities.forEach(entity ->
                 deepInflateInitialEntity(entity, recursiveGuard));
@@ -107,17 +107,17 @@ class HydratorImpl implements Hydrator {
             return;
         }
 
-        if (part instanceof EntityValuedModelPart) {
-            deepInflateEntity(propertyValue, (EntityValuedModelPart) part, recursiveGuard);
-        } else if (part instanceof EmbeddableValuedModelPart) {
-            deepInflateEmbedded(propertyValue, (EmbeddableValuedModelPart) part, recursiveGuard);
-        } else if (part instanceof PluralAttributeMapping) {
+        if (part instanceof EntityValuedModelPart entityValuedModelPart) {
+            deepInflateEntity(propertyValue, entityValuedModelPart, recursiveGuard);
+        } else if (part instanceof EmbeddableValuedModelPart embeddableValuedModelPart) {
+            deepInflateEmbedded(propertyValue, embeddableValuedModelPart, recursiveGuard);
+        } else if (part instanceof PluralAttributeMapping pluralAttributeMapping) {
             if (propertyValue instanceof Map) {
-                deepInflateMap((Map<?, ?>) propertyValue, (PluralAttributeMapping) part, recursiveGuard);
+                deepInflateMap((Map<?, ?>) propertyValue, pluralAttributeMapping, recursiveGuard);
             } else if (propertyValue instanceof Collection) {
-                deepInflateCollection((Collection<?>) propertyValue, (PluralAttributeMapping) part, recursiveGuard);
+                deepInflateCollection((Collection<?>) propertyValue, pluralAttributeMapping, recursiveGuard);
             } else {
-                throw new UnsupportedOperationException(String.format("Unsupported collection type %s for %s.",
+                throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
                         propertyValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
             }
         }

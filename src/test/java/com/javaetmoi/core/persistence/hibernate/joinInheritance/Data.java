@@ -5,7 +5,6 @@ import jakarta.persistence.Id;
 
 @Entity
 public class Data {
-
     @Id
     private Integer id;
 

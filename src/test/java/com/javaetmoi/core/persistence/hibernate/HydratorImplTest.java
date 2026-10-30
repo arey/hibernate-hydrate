@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import jakarta.persistence.ManyToOne;
 
@@ -34,6 +33,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
+import static org.unitils.reflectionassert.ReflectionComparatorMode.LENIENT_ORDER;
 
 /**
  * Unit test of the {@link HydratorImplTest} class.
@@ -41,7 +41,6 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
  * @author Antoine Rey
  */
 class HydratorImplTest extends AbstractTest {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HydratorImplTest.class);
 
     private Employee james, tom;
@@ -247,29 +246,29 @@ class HydratorImplTest extends AbstractTest {
         LOGGER.debug("James Paris address toString(): {}", dbJamesParis.toString());
         assertReflectionEquals(
                 "Comparing James Paris address with ReflectionAssert", paris, dbJamesParis,
-                ReflectionComparatorMode.LENIENT_ORDER);
+                LENIENT_ORDER);
         assertEquals(paris, dbJamesParis, "Compare James Paris address");
         var dbJamesLaDefense = dbJames.getAddresses().get(ladefense.getType());
         LOGGER.debug("James La Defense address toString(): {}", dbJamesLaDefense.toString());
         assertReflectionEquals(
                 "Comparing James La Defense address with ReflectionAssert", ladefense,
-                dbJamesLaDefense, ReflectionComparatorMode.LENIENT_ORDER);
+                dbJamesLaDefense, LENIENT_ORDER);
         assertEquals(dbJamesLaDefense, ladefense, "Compare James La Defense address");
 
         // - Projects
         assertTrue(dbJames.getProjects().contains(android));
         assertReflectionEquals(
                 "Compare in-memory and database loaded projects with ReflectionUtils",
-                james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
-        assertReflectionEquals(james.getProjects(), dbJames.getProjects(), ReflectionComparatorMode.LENIENT_ORDER);
+                james.getProjects(), dbJames.getProjects(), LENIENT_ORDER);
+        assertReflectionEquals(james.getProjects(), dbJames.getProjects(), LENIENT_ORDER);
 
         // - Full employee
         LOGGER.debug("James toString(): {}", dbJames.toString());
         assertReflectionEquals(
                 "Compare in-memory and database loaded employees with ReflectionUtils", dbJames,
-                james, ReflectionComparatorMode.LENIENT_ORDER);
+                james, LENIENT_ORDER);
         assertReflectionEquals("Compare in-memory and database loaded employees with the equals method",
-                james, dbJames, ReflectionComparatorMode.LENIENT_ORDER);
+                james, dbJames, LENIENT_ORDER);
 
         // - Generated SQL statements number
         assertEquals(8, statistics().getEntityLoadCount(),

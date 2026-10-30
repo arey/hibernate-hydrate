@@ -16,24 +16,23 @@ package com.javaetmoi.core.persistence.hibernate.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 
 import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
+
+import static jakarta.persistence.CascadeType.ALL;
+import static org.hibernate.annotations.FetchMode.SELECT;
 
 @Embeddable
 public class Bar {
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @Fetch(FetchMode.SELECT)
+    @OneToMany(cascade = ALL)
+    @Fetch(SELECT)
     @JoinColumn(name = "FOO_ID")
-    private List<Biz> bizs = new ArrayList<Biz>();
+    private List<Biz> bizs = new ArrayList<>();
 
     public List<Biz> getBizs() {
         return bizs;
     }
-
 }

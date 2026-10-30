@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 public class Event {
 	@Id
 	private Integer id;
+
 	private String name;
 
 	public Integer getId() {
@@ -24,5 +25,4 @@ public class Event {
 	public void setName(String name) {
 		this.name = name;
 	}
-
 }

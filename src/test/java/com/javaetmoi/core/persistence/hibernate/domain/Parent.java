@@ -18,17 +18,17 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Table(name = "Parent")
 @AttributeOverride(name = "id", column = @Column(name = "parentKey"))
 public class Parent extends Person {
-
-    @OneToMany(mappedBy = "parent", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", orphanRemoval = true, cascade = ALL)
     @OrderBy(value = "number asc")
-    private List<Child> children = new ArrayList<Child>();
+    private List<Child> children = new ArrayList<>();
 
     public List<Child> getChildren() {
         return children;
     }
-
 }

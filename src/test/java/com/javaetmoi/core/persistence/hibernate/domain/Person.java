@@ -1,11 +1,11 @@
 /**
  * Copyright 2012-2026 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -14,17 +14,19 @@
 package com.javaetmoi.core.persistence.hibernate.domain;
 
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
+import static jakarta.persistence.GenerationType.AUTO;
+
 @MappedSuperclass
 public abstract class Person {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long   id;
+    @GeneratedValue(strategy = AUTO)
+    private Long id;
+
     private String number;
+
     private String name;
 
     public Long getId() {
@@ -38,5 +40,4 @@ public abstract class Person {
     public String getName() {
         return name;
     }
-
 }
