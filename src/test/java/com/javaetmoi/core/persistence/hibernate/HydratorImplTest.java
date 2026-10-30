@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.persistence.ManyToOne;
 
 import java.util.Collection;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -126,6 +127,14 @@ class HydratorImplTest extends AbstractTest {
     }
 
     /**
+     * Tests the method {@link HydratorImpl#deepHydrate(Object)} with an object that is no entity.
+     */
+    @Test
+    void deepHydrate_nonEntity() {
+        assertThat(hydrator.deepHydrate("no entity")).isEqualTo("no entity");
+    }
+
+    /**
      * Tests the method {@link HydratorImpl#deepHydrate(Object)}.
      */
     @Test
@@ -180,6 +189,14 @@ class HydratorImplTest extends AbstractTest {
                 partiallyHydratedEntity.getProjects().get(0).getMembers().size());
         assertThrows(LazyInitializationException.class, () ->
                 partiallyHydratedEntity.getAddresses().get("home"));
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)} with a set that contains no entity.
+     */
+    @Test
+    void deepHydrateCollection_nonEntity() {
+        assertThat(hydrator.deepHydrateCollection(Set.of("no entity"))).containsOnly("no entity");
     }
 
     /**
