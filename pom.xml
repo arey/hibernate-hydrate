@@ -5,7 +5,7 @@
   <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
-  <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 6.x)</description>
+  <description>Avoid Hibernate LazyInitializationException by recursively resolving proxy (support Hibernate 7.x)</description>
   <inceptionYear>2012</inceptionYear>
   <url>https://github.com/arey/hibernate-hydrate</url>
 
@@ -90,7 +90,6 @@
     <version.h2>2.4.240</version.h2>
     <version.junit>6.0.3</version.junit>
     <version.logback>1.5.32</version.logback>
-    <version.mockito>5.23.0</version.mockito>
     <version.unitils>3.4.6</version.unitils>
 
     <!-- Version of maven plugins -->
@@ -131,6 +130,7 @@
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-testing</artifactId>
       <version>${version.hibernate}</version>
+      <scope>test</scope>
     </dependency>
     <!-- * JUnit -->
     <dependency>
@@ -154,13 +154,6 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>${version.logback}</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- * Mockito -->
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>${version.mockito}</version>
       <scope>test</scope>
     </dependency>
     <!-- * H2 embedded database -->
