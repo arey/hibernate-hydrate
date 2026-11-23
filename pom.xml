@@ -231,7 +231,7 @@
         <version>${version.plugin.maven-central-publishing}</version>
         <extensions>true</extensions>
         <configuration>
-          <publishingServerId>central</publishingServerId>
+          <publishingServerId>sonatype-central</publishingServerId>
         </configuration>
       </plugin>
     </plugins>

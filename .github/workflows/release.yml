@@ -42,22 +42,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
-      - name: Set up JDK 17
+      - name: Set up JDK 17 and Apache Maven Central
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Set up Apache Maven Central
-        uses: actions/setup-java@v3
-        with: # running setup-java again overwrites the settings.xml
           java-version: '17'
           distribution: 'temurin'
-          server-id: central
+          server-id: sonatype-central
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Configure Git User
         run: |
