@@ -141,11 +141,22 @@ Otherwise, generate IDE metadata with the related IDE maven plugin:
 
 ``mvn eclipse:clean eclipse:eclipse``
 
-## Release
+## Release ##
 
-This project artefact is published to Maven Central.
-The Maven Release Plugin is used to release the project with Maven.
+This project artefact is published to Maven Central using the Maven Release Plugin.
 The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow automates the process.
+
+### Versioning scheme (`X.Y.Z`) ###
+
+* **`X` (Major)**: Supported major Hibernate version (matches the Git branch and the `javaetmoi-hibernateX-hydrate` `artifactId`).
+* **`Y` (Minor)**: Minimum required Hibernate minor version (e.g. `0` for Hibernate 7.0+, `2` for Hibernate 5.2+) or `Hydrator` API evolution. It is **not** incremented when adding support for a new backward-compatible Hibernate minor version.
+* **`Z` (Patch)**: Bug fixes, dependency updates, and support for new backward-compatible Hibernate minor versions (verified against previous minor versions via Maven profiles in CI).
+
+### Release checklist ###
+
+1. Ensure all supported Hibernate minor profiles (`hibernate-X.Y`) are declared in [pom.xml](pom.xml) and tested in [build.yml](.github/workflows/build.yml).
+2. Run the [Maven Release](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow (`workflow_dispatch`) by specifying `releaseVersion` (e.g. `7.0.1`) and `developmentVersion` (e.g. `7.0.2-SNAPSHOT`).
+3. Update the dependency version in the [Quick Start](#dependency) section of this `readme.md`.
 
 
 ## Credits ##

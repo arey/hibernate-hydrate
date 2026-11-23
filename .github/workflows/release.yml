@@ -1,5 +1,10 @@
 # This workflow does a Maven Release then publishes the artefacts into Maven Central.
 #
+# Versioning scheme (X.Y.Z):
+# - X: Supported major Hibernate version (matches javaetmoi-hibernateX-hydrate)
+# - Y: Minimum supported Hibernate minor version or Hydrator API change (do not bump for backward-compatible Hibernate minor upgrades)
+# - Z: Bug fixes, dependency updates, and new backward-compatible Hibernate minor versions
+#
 # Sources :
 # - http://bjansen.github.io/java/2021/02/03/deploying-to-maven-central-using-github-actions.html
 # - https://blog.frankel.ch/github-actions-maven-releases/
@@ -12,11 +17,11 @@ on:
   workflow_dispatch:
     inputs:
       releaseVersion:
-        description: "Default version to use when preparing a release."
+        description: "Release version X.Y.Z (X=Hibernate major, Y=min Hibernate minor/API change, Z=patch/compatible Hibernate minor bump)"
         required: true
         default: "X.Y.Z"
       developmentVersion:
-        description: "Default version to use for new local working copy."
+        description: "Next development version X.Y.Z-SNAPSHOT"
         required: true
         default: "X.Y.Z-SNAPSHOT"
 
