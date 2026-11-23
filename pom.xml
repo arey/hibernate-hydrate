@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
   <!-- Versioning X.Y.Z: X=Hibernate major, Y=min required Hibernate minor or API change, Z=patch & compatible Hibernate minor bumps -->
-  <version>7.0.1-SNAPSHOT</version>
+  <version>7.0.1</version>
   <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
@@ -70,7 +70,7 @@
   <scm>
     <url>https://github.com/arey/hibernate-hydrate</url>
     <developerConnection>scm:git:https://github.com/arey/hibernate-hydrate.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>v7.0.1</tag>
   </scm>
 
   <properties>
