@@ -128,7 +128,9 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateEntity(
             Object entity, EntityValuedModelPart part, IdentitySet<Object> recursiveGuard) {
-        if (entity == null || !recursiveGuard.add(entity) || excludes.contains(part.getNavigableRole())) {
+        // Check the excludes first: An excluded value must not be marked as visited,
+        // because it may be reachable via another path that is not excluded.
+        if (entity == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(entity)) {
             return;
         }
         Hibernate.initialize(entity);
@@ -156,7 +158,9 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateEmbedded(
             Object embeddable, EmbeddableValuedModelPart part, IdentitySet<Object> recursiveGuard) {
-        if (embeddable == null || !recursiveGuard.add(embeddable) || excludes.contains(part.getNavigableRole())) {
+        // Check the excludes first: An excluded value must not be marked as visited,
+        // because it may be reachable via another path that is not excluded.
+        if (embeddable == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(embeddable)) {
             return;
         }
 
@@ -172,7 +176,9 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateMap(
             Map<?, ?> map, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        if (map == null || !recursiveGuard.add(map) || excludes.contains(part.getNavigableRole())) {
+        // Check the excludes first: An excluded value must not be marked as visited,
+        // because it may be reachable via another path that is not excluded.
+        if (map == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(map)) {
             return;
         }
         Hibernate.initialize(map);
@@ -190,7 +196,9 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateCollection(
             Collection<?> collection, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        if (collection == null || !recursiveGuard.add(collection) || excludes.contains(part.getNavigableRole())) {
+        // Check the excludes first: An excluded value must not be marked as visited,
+        // because it may be reachable via another path that is not excluded.
+        if (collection == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(collection)) {
             return;
         }
         Hibernate.initialize(collection);

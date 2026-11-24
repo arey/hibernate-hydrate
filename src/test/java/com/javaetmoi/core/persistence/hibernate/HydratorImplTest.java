@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.persistence.ManyToOne;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -189,6 +190,29 @@ class HydratorImplTest extends AbstractTest {
                 partiallyHydratedEntity.getProjects().get(0).getMembers().size());
         assertThrows(LazyInitializationException.class, () ->
                 partiallyHydratedEntity.getAddresses().get("home"));
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)}.
+     * An entity that is reached via an excluded attribute first has to be hydrated nevertheless,
+     * if it is reachable via another path that is not excluded.
+     */
+    @Test
+    void deepHydrateCollection_withExclude_entityReachableViaOtherPath() {
+        var hydratedTom = doInJPA(entityManager -> {
+            var dbLyon = entityManager.find(Address.class, lyon.getId());
+            var dbTom = entityManager.find(Employee.class, tom.getId());
+            // Lyon first, so Tom is reached via the excluded attribute before he is reached directly.
+            hydrator.withExclude(Address.class, "employee")
+                    .deepHydrateCollection(List.of(dbLyon, dbTom));
+            return dbTom;
+        });
+
+        // At this step, transaction and session are closed.
+        assertThat(hydratedTom.getProjects())
+                .containsOnly(android);
+        assertThat(hydratedTom.getAddresses())
+                .containsOnlyKeys(lyon.getType());
     }
 
     /**
