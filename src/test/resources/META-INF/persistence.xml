@@ -3,6 +3,8 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
              version="3.2">
   <persistence-unit name="hibernate-hydrate">
+    <class>com.javaetmoi.core.persistence.hibernate.any.AnyHolder</class>
+    <class>com.javaetmoi.core.persistence.hibernate.any.AnyTarget</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Address</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Bar</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Biz</class>

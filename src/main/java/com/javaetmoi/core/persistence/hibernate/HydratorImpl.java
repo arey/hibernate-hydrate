@@ -8,6 +8,7 @@ import java.util.Set;
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
+import org.hibernate.metamodel.mapping.DiscriminatedAssociationModelPart;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
@@ -81,7 +82,8 @@ class HydratorImpl implements Hydrator {
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursion. Recursion entry point.
+     * Populate a lazy-initialized object graph by recursion.
+     * Entry point for entities whose entity type is not known from the mapping.
      *
      * @param entity
      *            The entity. May be {@code null}. Objects that are no entities are ignored.
@@ -109,6 +111,8 @@ class HydratorImpl implements Hydrator {
 
         if (part instanceof EntityValuedModelPart entityValuedModelPart) {
             deepInflateEntity(propertyValue, entityValuedModelPart, recursiveGuard);
+        } else if (part instanceof DiscriminatedAssociationModelPart discriminatedAssociationModelPart) {
+            deepInflateAny(propertyValue, discriminatedAssociationModelPart, recursiveGuard);
         } else if (part instanceof EmbeddableValuedModelPart embeddableValuedModelPart) {
             deepInflateEmbedded(propertyValue, embeddableValuedModelPart, recursiveGuard);
         } else if (part instanceof PluralAttributeMapping pluralAttributeMapping) {
@@ -151,6 +155,19 @@ class HydratorImpl implements Hydrator {
                     deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
                 }));
         }
+    }
+
+    /**
+     * Deep inflate the target of an any association ({@code @Any}, element of {@code @ManyToAny}).
+     * The mapping does not know the entity type of the target, so it is derived from the target itself.
+     */
+    private void deepInflateAny(
+            Object entity, DiscriminatedAssociationModelPart part, IdentitySet<Object> recursiveGuard) {
+        if (entity == null || excludes.contains(part.getNavigableRole())) {
+            return;
+        }
+
+        deepInflateInitialEntity(entity, recursiveGuard);
     }
 
     /**
