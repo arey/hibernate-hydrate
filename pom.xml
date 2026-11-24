@@ -232,6 +232,7 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>sonatype-central</publishingServerId>
+          <autoPublish>true</autoPublish>
         </configuration>
       </plugin>
     </plugins>

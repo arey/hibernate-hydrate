@@ -155,9 +155,8 @@ The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/re
 ### Release checklist ###
 
 1. Ensure all supported Hibernate minor profiles (`hibernate-X.Y`) are declared in [pom.xml](pom.xml) and tested in [build.yml](.github/workflows/build.yml).
-2. Run the [Maven Release](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow (`workflow_dispatch`) by specifying `releaseVersion` (e.g. `7.0.1`) and `developmentVersion` (e.g. `7.0.2-SNAPSHOT`).
-3. Once the deployment is `VALIDATED`, click **Publish** on [Sonatype Central Portal](https://central.sonatype.com/publishing/deployments).
-4. Update the dependency version in the [Quick Start](#dependency) section of this `readme.md`.
+2. Run the [Maven Release](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow (`workflow_dispatch`) by specifying `releaseVersion` (e.g. `7.0.1`) and `developmentVersion` (e.g. `7.0.2-SNAPSHOT`). The artefact is automatically published to Maven Central once validated by [Sonatype Central Portal](https://central.sonatype.com/publishing/deployments) (`autoPublish=true`).
+3. Update the dependency version in the [Quick Start](#dependency) section of this `readme.md`.
 
 
 ## Credits ##
