@@ -31,7 +31,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
-  <version>7.0.0</version>
+  <version>7.0.1</version>
 </dependency> 
 
 <!-- or Hibernate 6.1.6 and above support -->
@@ -156,7 +156,8 @@ The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/re
 
 1. Ensure all supported Hibernate minor profiles (`hibernate-X.Y`) are declared in [pom.xml](pom.xml) and tested in [build.yml](.github/workflows/build.yml).
 2. Run the [Maven Release](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow (`workflow_dispatch`) by specifying `releaseVersion` (e.g. `7.0.1`) and `developmentVersion` (e.g. `7.0.2-SNAPSHOT`).
-3. Update the dependency version in the [Quick Start](#dependency) section of this `readme.md`.
+3. Once the deployment is `VALIDATED`, click **Publish** on [Sonatype Central Portal](https://central.sonatype.com/publishing/deployments).
+4. Update the dependency version in the [Quick Start](#dependency) section of this `readme.md`.
 
 
 ## Credits ##

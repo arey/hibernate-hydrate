@@ -97,7 +97,7 @@
     <version.plugin.maven-compiler-plugin>3.14.1</version.plugin.maven-compiler-plugin>
     <version.plugin.maven-eclipse-plugin>2.10</version.plugin.maven-eclipse-plugin>
     <version.plugin.maven-gpg-plugin>1.6</version.plugin.maven-gpg-plugin>
-    <version.plugin.maven-central-publishing>0.7.0</version.plugin.maven-central-publishing>
+    <version.plugin.maven-central-publishing>0.12.0</version.plugin.maven-central-publishing>
     <version.plugin.maven-javadoc-plugin>3.12.0</version.plugin.maven-javadoc-plugin>
     <version.plugin.maven-release-plugin>2.5.3</version.plugin.maven-release-plugin>
     <version.plugin.maven-resources-plugin>3.4.0</version.plugin.maven-resources-plugin>
