@@ -5,6 +5,10 @@
   <persistence-unit name="hibernate-hydrate">
     <class>com.javaetmoi.core.persistence.hibernate.any.AnyHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.any.AnyTarget</class>
+    <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedIdLink</class>
+    <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId</class>
+    <class>com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink</class>
+    <class>com.javaetmoi.core.persistence.hibernate.compositeId.LinkTarget</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Address</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Bar</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Biz</class>

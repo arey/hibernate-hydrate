@@ -8,11 +8,15 @@ import java.util.Set;
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
+import org.hibernate.metamodel.mapping.AttributeMapping;
+import org.hibernate.metamodel.mapping.CompositeIdentifierMapping;
 import org.hibernate.metamodel.mapping.DiscriminatedAssociationModelPart;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
+import org.hibernate.metamodel.mapping.EntityMappingType;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
+import org.hibernate.metamodel.mapping.VirtualModelPart;
 import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 
@@ -52,7 +56,7 @@ class HydratorImpl implements Hydrator {
     @Override
     public Hydrator withExclude(Class<?> entityClass, String attribute) {
         var entityDescriptor = mappingMetamodel.getEntityDescriptor(entityClass);
-        var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
+        var attributeMapping = findAttributeMapping(entityDescriptor, attribute);
         if (attributeMapping == null) {
             throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
                     attribute, entityDescriptor.getEntityName()));
@@ -62,6 +66,21 @@ class HydratorImpl implements Hydrator {
         newExcludes.add(attributeMapping.getNavigableRole());
 
         return new HydratorImpl(mappingMetamodel, newExcludes);
+    }
+
+    /**
+     * Find the attribute of the entity.
+     * Considers the identifier attributes of an entity with an {@code @IdClass} too,
+     * because they are attributes of the entity, but are not part of its attribute mappings.
+     */
+    private static AttributeMapping findAttributeMapping(EntityMappingType entityDescriptor, String attribute) {
+        var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
+        if (attributeMapping == null &&
+                entityDescriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping &&
+                identifierMapping instanceof VirtualModelPart) {
+            return identifierMapping.getEmbeddableTypeDescriptor().findAttributeMapping(attribute);
+        }
+        return attributeMapping;
     }
 
     @Override
@@ -141,7 +160,9 @@ class HydratorImpl implements Hydrator {
 
         var target = Hibernate.unproxy(entity);
         var descriptor = part.getEntityMappingType();
-        // Start with the entity itself.
+        // Start with the identifier. It is not part of the attribute mappings.
+        deepInflateIdentifier(target, descriptor, recursiveGuard);
+        // Continue with the entity itself.
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
             deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
@@ -155,6 +176,30 @@ class HydratorImpl implements Hydrator {
                     deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
                 }));
         }
+    }
+
+    /**
+     * Deep inflate the associations that are part of a composite identifier of an entity.
+     */
+    private void deepInflateIdentifier(
+            Object entity, EntityMappingType descriptor, IdentitySet<Object> recursiveGuard) {
+        if (!(descriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping)) {
+            // Simple identifiers contain no associations.
+            return;
+        }
+
+        // @IdClass: The identifier attributes are attributes of the entity itself.
+        // @EmbeddedId: The identifier attributes are attributes of the identifier.
+        var container = identifierMapping instanceof VirtualModelPart ?
+                entity : identifierMapping.getIdentifier(entity);
+        if (container == null) {
+            return;
+        }
+
+        identifierMapping.getEmbeddableTypeDescriptor().getAttributeMappings().forEach(attributeMapping -> {
+            var propertyValue = attributeMapping.getValue(container);
+            deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+        });
     }
 
     /**

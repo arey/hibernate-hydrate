@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <LINKTARGET ID="10"/>
+  <LINKTARGET ID="20"/>
+  <LINK_TARGET_TAGS TARGET_ID="10" TAG="idClass"/>
+  <LINK_TARGET_TAGS TARGET_ID="20" TAG="embeddedId"/>
+  <IDCLASSLINK TARGET_ID="10" SEQ="1"/>
+  <EMBEDDEDIDLINK TARGET_ID="20" SEQ="2"/>
+</dataset>
