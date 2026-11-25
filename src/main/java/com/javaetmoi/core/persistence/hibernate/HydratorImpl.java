@@ -8,7 +8,6 @@ import java.util.Set;
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.internal.util.collections.IdentitySet;
-import org.hibernate.metamodel.mapping.AttributeMapping;
 import org.hibernate.metamodel.mapping.CompositeIdentifierMapping;
 import org.hibernate.metamodel.mapping.DiscriminatedAssociationModelPart;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
@@ -78,17 +77,46 @@ class HydratorImpl implements Hydrator {
 
     /**
      * Find the attribute of the entity.
-     * Considers the identifier attributes of an entity with an {@code @IdClass} too,
+     *
+     * @param entityDescriptor
+     *            Entity.
+     * @param attributePath
+     *            Attribute name or a path to an attribute inside of embeddables, e.g. {@code embedded.attribute}.
+     * @return the attribute or {@code null} if it does not exist.
+     */
+    private ModelPart findAttributeMapping(EntityMappingType entityDescriptor, String attributePath) {
+        var attributes = attributePath.split("\\.", -1);
+        var part = findEntityAttributeMapping(entityDescriptor, attributes[0]);
+        for (int i = 1; i < attributes.length; i++) {
+            if (!(part instanceof EmbeddableValuedModelPart embeddableValuedModelPart)) {
+                // Just embeddables have attributes that can be addressed by a path.
+                return null;
+            }
+            part = embeddableValuedModelPart.getEmbeddableTypeDescriptor().findAttributeMapping(attributes[i]);
+        }
+        return part;
+    }
+
+    /**
+     * Find the direct attribute of the entity.
+     * Considers the identifier attributes of an entity with a composite identifier too,
      * because they are attributes of the entity, but are not part of its attribute mappings.
      */
-    private AttributeMapping findAttributeMapping(EntityMappingType entityDescriptor, String attribute) {
+    private ModelPart findEntityAttributeMapping(EntityMappingType entityDescriptor, String attribute) {
         var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
-        if (attributeMapping == null &&
-                entityDescriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping &&
-                identifierMapping instanceof VirtualModelPart) {
+        if (attributeMapping != null) {
+            return attributeMapping;
+        }
+
+        if (!(entityDescriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping)) {
+            return null;
+        }
+        if (identifierMapping instanceof VirtualModelPart) {
+            // @IdClass: The identifier attributes are attributes of the entity itself.
             return identifierMapping.getEmbeddableTypeDescriptor().findAttributeMapping(attribute);
         }
-        return attributeMapping;
+        // @EmbeddedId: The identifier is an attribute of the entity.
+        return attribute.equals(identifierMapping.getAttributeName()) ? identifierMapping : null;
     }
 
     /**
@@ -217,7 +245,7 @@ class HydratorImpl implements Hydrator {
         // @EmbeddedId: The identifier attributes are attributes of the identifier.
         var container = identifierMapping instanceof VirtualModelPart ?
                 entity : identifierMapping.getIdentifier(entity);
-        if (container == null) {
+        if (guard(container, identifierMapping)) {
             return;
         }
 

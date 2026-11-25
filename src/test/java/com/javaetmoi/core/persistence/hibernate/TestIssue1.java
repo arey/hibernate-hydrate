@@ -14,9 +14,11 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.domain.Foo;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -33,5 +35,15 @@ class TestIssue1 extends AbstractTest {
         assertNotNull(dbFoo.getBar().getBizs());
         assertEquals(2, dbFoo.getBar().getBizs().size(), "Fix the LazyInitializationException");
         assertNotNull(dbFoo.getBar().getBizs().get(0));
+    }
+
+    @Test
+    void nestedListInEmbeddable_withExclude() {
+        var dbFoo = doInJPA(entityManager ->
+                hydrator.withExclude(Foo.class, "bar.bizs")
+                        .deepHydrate(entityManager.find(Foo.class, 1)));
+
+        assertNotNull(dbFoo.getBar());
+        assertFalse(Hibernate.isInitialized(dbFoo.getBar().getBizs()));
     }
 }

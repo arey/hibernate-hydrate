@@ -64,6 +64,36 @@ class TestCompositeId extends AbstractTest {
     }
 
     /**
+     * Excluded association in an {@link EmbeddedId} identifier.
+     */
+    @Test
+    void embeddedId_withExclude() {
+        var dbLink = doInJPA(entityManager -> {
+            var id = new EmbeddedLinkId(entityManager.getReference(LinkTarget.class, 20), 2);
+            return hydrator.withExclude(EmbeddedIdLink.class, "id.target")
+                    .deepHydrate(entityManager.find(EmbeddedIdLink.class, id));
+        });
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isFalse();
+    }
+
+    /**
+     * Excluded {@link EmbeddedId} identifier.
+     */
+    @Test
+    void embeddedId_withExcludedIdentifier() {
+        var dbLink = doInJPA(entityManager -> {
+            var id = new EmbeddedLinkId(entityManager.getReference(LinkTarget.class, 20), 2);
+            return hydrator.withExclude(EmbeddedIdLink.class, "id")
+                    .deepHydrate(entityManager.find(EmbeddedIdLink.class, id));
+        });
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isFalse();
+    }
+
+    /**
      * New entities without an identifier must not fail.
      */
     @Test

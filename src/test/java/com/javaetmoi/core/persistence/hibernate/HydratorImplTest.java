@@ -16,6 +16,7 @@ package com.javaetmoi.core.persistence.hibernate;
 import com.javaetmoi.core.persistence.hibernate.domain.Address;
 import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
+import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.collection.spi.PersistentMap;
@@ -211,6 +212,26 @@ class HydratorImplTest extends AbstractTest {
         assertThatThrownBy(() -> hydrator.withExclude(Employee.class, "unknown"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("unknown");
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#withExclude(Class, String)} with paths that do not exist.
+     */
+    @Test
+    void withExclude_unknownPath() {
+        // Unknown attribute of an embeddable.
+        assertThatThrownBy(() -> hydrator.withExclude(Foo.class, "bar.unknown"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("bar.unknown");
+        // Paths are just supported for embeddables.
+        assertThatThrownBy(() -> hydrator.withExclude(Employee.class, "projects.members"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("projects.members");
+        // Invalid paths.
+        assertThatThrownBy(() -> hydrator.withExclude(Foo.class, "bar."))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> hydrator.withExclude(Foo.class, ""))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     /**
