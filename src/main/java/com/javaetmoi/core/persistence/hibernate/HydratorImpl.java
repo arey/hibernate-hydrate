@@ -151,9 +151,7 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateEntity(
             Object entity, EntityValuedModelPart part, IdentitySet<Object> recursiveGuard) {
-        // Check the excludes first: An excluded value must not be marked as visited,
-        // because it may be reachable via another path that is not excluded.
-        if (entity == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(entity)) {
+        if (guard(entity, part, recursiveGuard)) {
             return;
         }
         Hibernate.initialize(entity);
@@ -220,9 +218,7 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateEmbedded(
             Object embeddable, EmbeddableValuedModelPart part, IdentitySet<Object> recursiveGuard) {
-        // Check the excludes first: An excluded value must not be marked as visited,
-        // because it may be reachable via another path that is not excluded.
-        if (embeddable == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(embeddable)) {
+        if (guard(embeddable, part, recursiveGuard)) {
             return;
         }
 
@@ -238,9 +234,7 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateMap(
             Map<?, ?> map, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        // Check the excludes first: An excluded value must not be marked as visited,
-        // because it may be reachable via another path that is not excluded.
-        if (map == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(map)) {
+        if (guard(map, part, recursiveGuard)) {
             return;
         }
         Hibernate.initialize(map);
@@ -258,9 +252,7 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateCollection(
             Collection<?> collection, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        // Check the excludes first: An excluded value must not be marked as visited,
-        // because it may be reachable via another path that is not excluded.
-        if (collection == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(collection)) {
+        if (guard(collection, part, recursiveGuard)) {
             return;
         }
         Hibernate.initialize(collection);
@@ -268,5 +260,23 @@ class HydratorImpl implements Hydrator {
         var elementType = part.getElementDescriptor();
         collection.forEach(element ->
                 deepInflateProperty(element, elementType, recursiveGuard));
+    }
+
+    /**
+     * Guard against values that must not be inflated.
+     * Marks the value as visited, if it has to be inflated.
+     *
+     * @param value
+     *            The value. May be {@code null}.
+     * @param part
+     *            The model part of the value.
+     * @param recursiveGuard
+     *            A guard to avoid endless recursion.
+     * @return {@code true} if the value is {@code null}, excluded or has already been visited.
+     */
+    private boolean guard(Object value, ModelPart part, IdentitySet<Object> recursiveGuard) {
+        // Check the excludes first: An excluded value must not be marked as visited,
+        // because it may be reachable via another path that is not excluded.
+        return value == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(value);
     }
 }
