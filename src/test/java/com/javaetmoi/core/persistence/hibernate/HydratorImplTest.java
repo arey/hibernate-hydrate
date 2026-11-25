@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 import static org.unitils.reflectionassert.ReflectionComparatorMode.LENIENT_ORDER;
@@ -190,6 +191,36 @@ class HydratorImplTest extends AbstractTest {
                 partiallyHydratedEntity.getProjects().get(0).getMembers().size());
         assertThrows(LazyInitializationException.class, () ->
                 partiallyHydratedEntity.getAddresses().get("home"));
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#withExclude(Class, String)} with a class that is no entity.
+     */
+    @Test
+    void withExclude_nonEntity() {
+        assertThatThrownBy(() -> hydrator.withExclude(String.class, "value"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(String.class.getName());
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#withExclude(Class, String)} with an attribute that does not exist.
+     */
+    @Test
+    void withExclude_unknownAttribute() {
+        assertThatThrownBy(() -> hydrator.withExclude(Employee.class, "unknown"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("unknown");
+    }
+
+    /**
+     * Tests the method {@link HydratorImpl#withExclude(Class, String)} with a basic attribute.
+     */
+    @Test
+    void withExclude_basicAttribute() {
+        assertThatThrownBy(() -> hydrator.withExclude(Employee.class, "name"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("name");
     }
 
     /**

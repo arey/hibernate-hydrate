@@ -55,10 +55,18 @@ class HydratorImpl implements Hydrator {
 
     @Override
     public Hydrator withExclude(Class<?> entityClass, String attribute) {
-        var entityDescriptor = mappingMetamodel.getEntityDescriptor(entityClass);
+        var entityDescriptor = mappingMetamodel.findEntityDescriptor(entityClass);
+        if (entityDescriptor == null) {
+            throw new IllegalArgumentException("The class %s is no entity.".formatted(
+                    entityClass.getName()));
+        }
         var attributeMapping = findAttributeMapping(entityDescriptor, attribute);
         if (attributeMapping == null) {
             throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
+                    attribute, entityDescriptor.getEntityName()));
+        }
+        if (!isHydratable(attributeMapping)) {
+            throw new IllegalArgumentException("The attribute %s of the entity %s is not hydrated, so it cannot be excluded.".formatted(
                     attribute, entityDescriptor.getEntityName()));
         }
 
@@ -73,7 +81,7 @@ class HydratorImpl implements Hydrator {
      * Considers the identifier attributes of an entity with an {@code @IdClass} too,
      * because they are attributes of the entity, but are not part of its attribute mappings.
      */
-    private static AttributeMapping findAttributeMapping(EntityMappingType entityDescriptor, String attribute) {
+    private AttributeMapping findAttributeMapping(EntityMappingType entityDescriptor, String attribute) {
         var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
         if (attributeMapping == null &&
                 entityDescriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping &&
@@ -81,6 +89,17 @@ class HydratorImpl implements Hydrator {
             return identifierMapping.getEmbeddableTypeDescriptor().findAttributeMapping(attribute);
         }
         return attributeMapping;
+    }
+
+    /**
+     * Is the part hydrated at all? Basic values are not.
+     * Has to match the parts handled by {@link #deepInflateProperty(Object, ModelPart, IdentitySet)}.
+     */
+    private boolean isHydratable(ModelPart part) {
+        return part instanceof EntityValuedModelPart ||
+                part instanceof DiscriminatedAssociationModelPart ||
+                part instanceof EmbeddableValuedModelPart ||
+                part instanceof PluralAttributeMapping;
     }
 
     @Override
