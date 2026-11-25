@@ -247,6 +247,14 @@ class HydratorImplTest extends AbstractTest {
     }
 
     /**
+     * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)}.
+     */
+    @Test
+    void deepHydrateCollection_nullCollection() {
+        assertThat(hydrator.deepHydrateCollection((Collection<Object>) null)).isNull();
+    }
+
+    /**
      * Tests the method {@link HydratorImpl#deepHydrateCollection(Collection)} with a set that contains no entity.
      */
     @Test

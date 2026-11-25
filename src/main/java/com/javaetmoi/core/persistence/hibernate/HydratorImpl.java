@@ -104,6 +104,10 @@ class HydratorImpl implements Hydrator {
 
     @Override
     public <C extends Collection<E>, E> C deepHydrateCollection(C entities) {
+        if (entities == null) {
+            return null;
+        }
+
         // Reduce resizes for big collections.
         var capacity = max(entities.size(), 32);
         var recursiveGuard = new IdentitySet<>(capacity);

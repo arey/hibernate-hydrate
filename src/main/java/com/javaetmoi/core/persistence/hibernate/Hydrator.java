@@ -61,6 +61,7 @@ public interface Hydrator {
      * @param entities
      *            A {@link Collection} of attached Hibernate entities to load.
      *            Elements that are no entities are ignored.
+     *            If it is {@code null}, {@code null} is returned.
      * @return the {@link Collection} of Hibernate entities fully loaded.
      *         Similar to the entities input parameter.
      *         Useful when calling this method in a return statement.
@@ -77,7 +78,7 @@ public interface Hydrator {
      *
      * @param entity
      *            An attached Hibernate entity to load.
-     *            If it is no entity, it is returned unchanged.
+     *            If it is no entity or {@code null}, it is returned unchanged.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
