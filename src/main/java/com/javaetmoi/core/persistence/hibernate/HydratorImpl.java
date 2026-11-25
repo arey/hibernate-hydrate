@@ -139,6 +139,10 @@ class HydratorImpl implements Hydrator {
                 deepInflateMap((Map<?, ?>) propertyValue, pluralAttributeMapping, recursiveGuard);
             } else if (propertyValue instanceof Collection) {
                 deepInflateCollection((Collection<?>) propertyValue, pluralAttributeMapping, recursiveGuard);
+            } else if (propertyValue instanceof Object[]) {
+                deepInflateArray((Object[]) propertyValue, pluralAttributeMapping, recursiveGuard);
+            } else if (propertyValue.getClass().isArray()) {
+                // Arrays of primitives are never lazy and contain nothing to hydrate.
             } else {
                 throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
                         propertyValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
@@ -206,7 +210,7 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateAny(
             Object entity, DiscriminatedAssociationModelPart part, IdentitySet<Object> recursiveGuard) {
-        if (entity == null || excludes.contains(part.getNavigableRole())) {
+        if (guard(entity, part)) {
             return;
         }
 
@@ -263,6 +267,35 @@ class HydratorImpl implements Hydrator {
     }
 
     /**
+     * Deep inflate the elements of an array.
+     * Arrays themselves are never lazy.
+     */
+    private void deepInflateArray(
+            Object[] array, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
+        if (guard(array, part, recursiveGuard)) {
+            return;
+        }
+
+        var elementType = part.getElementDescriptor();
+        for (var element : array) {
+            deepInflateProperty(element, elementType, recursiveGuard);
+        }
+    }
+
+    /**
+     * Guard against values that must not be inflated.
+     *
+     * @param value
+     *            The value. May be {@code null}.
+     * @param part
+     *            The model part of the value.
+     * @return {@code true} if the value is {@code null} or excluded.
+     */
+    private boolean guard(Object value, ModelPart part) {
+        return value == null || excludes.contains(part.getNavigableRole());
+    }
+
+    /**
      * Guard against values that must not be inflated.
      * Marks the value as visited, if it has to be inflated.
      *
@@ -277,6 +310,6 @@ class HydratorImpl implements Hydrator {
     private boolean guard(Object value, ModelPart part, IdentitySet<Object> recursiveGuard) {
         // Check the excludes first: An excluded value must not be marked as visited,
         // because it may be reachable via another path that is not excluded.
-        return value == null || excludes.contains(part.getNavigableRole()) || !recursiveGuard.add(value);
+        return guard(value, part) || !recursiveGuard.add(value);
     }
 }

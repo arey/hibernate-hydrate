@@ -5,6 +5,8 @@
   <persistence-unit name="hibernate-hydrate">
     <class>com.javaetmoi.core.persistence.hibernate.any.AnyHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.any.AnyTarget</class>
+    <class>com.javaetmoi.core.persistence.hibernate.array.ArrayElement</class>
+    <class>com.javaetmoi.core.persistence.hibernate.array.ArrayHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedIdLink</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink</class>
