@@ -341,13 +341,13 @@
     <profile>
       <id>hibernate-7.2</id>
       <properties>
-        <version.hibernate>7.2.10.Final</version.hibernate>
+        <version.hibernate>7.2.26.Final</version.hibernate>
       </properties>
     </profile>
     <profile>
       <id>hibernate-7.1</id>
       <properties>
-        <version.hibernate>7.1.22.Final</version.hibernate>
+        <version.hibernate>7.1.36.Final</version.hibernate>
         <!-- The bytecode enhancement of hibernate-testing requires the junit 5.13 it is built with. -->
         <version.junit>5.13.4</version.junit>
       </properties>
