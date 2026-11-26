@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <ANIMAL ID="1" DTYPE="Dog"/>
+  <ANIMAL_NAMES ANIMAL_ID="1" NAME="animal"/>
+  <MAMMAL_NAMES MAMMAL_ID="1" NAME="mammal"/>
+  <DOG_NAMES DOG_ID="1" NAME="dog"/>
+  <ANIMALHOLDER ID="1" ANIMAL_ID="1"/>
+</dataset>
