@@ -56,6 +56,13 @@ class HydratorImpl implements Hydrator {
 
     @Override
     public Hydrator withExclude(Class<?> entityClass, String attribute) {
+        if (entityClass == null) {
+            throw new IllegalArgumentException("The entity class is mandatory.");
+        }
+        if (attribute == null) {
+            throw new IllegalArgumentException("The attribute is mandatory.");
+        }
+
         var entityDescriptor = mappingMetamodel.findEntityDescriptor(entityClass);
         if (entityDescriptor == null) {
             throw new IllegalArgumentException("The class %s is no entity.".formatted(
@@ -157,7 +164,7 @@ class HydratorImpl implements Hydrator {
             return;
         }
 
-        var entityType = mappingMetamodel.findEntityDescriptor(Hibernate.getClass(entity));
+        var entityType = findEntityDescriptor(Hibernate.getClass(entity));
         if (entityType == null) {
             // No entity. Nothing to hydrate.
             return;
@@ -170,12 +177,18 @@ class HydratorImpl implements Hydrator {
      */
     private void deepInflateEntity(
             Object entity, EntityValuedModelPart part, Hydration hydration) {
-        if (guard(entity, part, hydration)) {
+        if (guard(entity, part)) {
             return;
         }
         Hibernate.initialize(entity);
 
+        // Mark the entity itself as visited instead of its proxy,
+        // because the entity may be reachable directly and via its proxy.
         var target = Hibernate.unproxy(entity);
+        if (!hydration.visit(target)) {
+            return;
+        }
+
         var descriptor = concreteDescriptor(target, part);
         // Start with the identifier. It is not part of the attribute mappings.
         deepInflateIdentifier(target, descriptor, hydration);
@@ -191,8 +204,24 @@ class HydratorImpl implements Hydrator {
      * which are the same mappings as those of the superclasses, so excludes of superclasses apply to them too.
      */
     private EntityMappingType concreteDescriptor(Object entity, EntityValuedModelPart part) {
-        var descriptor = mappingMetamodel.findEntityDescriptor(entity.getClass());
+        var descriptor = findEntityDescriptor(entity.getClass());
         return descriptor != null ? descriptor : part.getEntityMappingType();
+    }
+
+    /**
+     * The descriptor of the class or of its nearest superclass that is an entity.
+     * Instances of subclasses of entities that are not mapped themselves are treated like these entities.
+     *
+     * @return {@code null} if neither the class nor one of its superclasses is an entity.
+     */
+    private EntityMappingType findEntityDescriptor(Class<?> entityClass) {
+        for (var clazz = entityClass; clazz != null; clazz = clazz.getSuperclass()) {
+            var descriptor = mappingMetamodel.findEntityDescriptor(clazz);
+            if (descriptor != null) {
+                return descriptor;
+            }
+        }
+        return null;
     }
 
     /**

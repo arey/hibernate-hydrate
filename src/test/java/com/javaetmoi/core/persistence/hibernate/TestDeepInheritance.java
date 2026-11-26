@@ -60,4 +60,42 @@ class TestDeepInheritance extends AbstractTest {
         assertThat(dbDog.getMammalNames()).containsExactly("mammal");
         assertThat(dbDog.getDogNames()).containsExactly("dog");
     }
+
+    /**
+     * An instance of a subclass of an entity that is not mapped itself is hydrated like the entity.
+     */
+    @Test
+    void unmappedSubclass() {
+        var holder = doInJPA(entityManager -> {
+            var unmappedHolder = new AnimalHolder() {};
+            unmappedHolder.setAnimal(entityManager.getReference(Animal.class, 1));
+            return hydrator.deepHydrate(unmappedHolder);
+        });
+
+        // At this step, transaction and session are closed.
+        var dbDog = (Dog) Hibernate.unproxy(holder.getAnimal());
+        assertThat(dbDog.getAnimalNames()).containsExactly("animal");
+        assertThat(dbDog.getMammalNames()).containsExactly("mammal");
+        assertThat(dbDog.getDogNames()).containsExactly("dog");
+    }
+
+    /**
+     * An instance of a subclass that is not mapped itself is hydrated like its nearest entity superclass,
+     * even if the association is declared with the root type of the hierarchy.
+     */
+    @Test
+    void unmappedSubclass_association() {
+        var holder = doInJPA(entityManager -> {
+            var unmappedDog = new Dog() {};
+            // Lazy collection of a subclass in between.
+            unmappedDog.setDogNames(entityManager.find(Dog.class, 1).getDogNames());
+            var newHolder = new AnimalHolder();
+            newHolder.setAnimal(unmappedDog);
+            return hydrator.deepHydrate(newHolder);
+        });
+
+        // At this step, transaction and session are closed.
+        var dog = (Dog) holder.getAnimal();
+        assertThat(dog.getDogNames()).containsExactly("dog");
+    }
 }

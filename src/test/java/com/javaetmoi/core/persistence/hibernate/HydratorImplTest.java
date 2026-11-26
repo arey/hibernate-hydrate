@@ -205,6 +205,17 @@ class HydratorImplTest extends AbstractTest {
     }
 
     /**
+     * Tests the method {@link HydratorImpl#withExclude(Class, String)} with {@code null} arguments.
+     */
+    @Test
+    void withExclude_null() {
+        assertThatThrownBy(() -> hydrator.withExclude(null, "name"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> hydrator.withExclude(Employee.class, null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    /**
      * Tests the method {@link HydratorImpl#withExclude(Class, String)} with an attribute that does not exist.
      */
     @Test
