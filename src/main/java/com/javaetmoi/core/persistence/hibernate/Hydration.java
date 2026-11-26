@@ -1,9 +1,11 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import org.hibernate.internal.util.collections.IdentitySet;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
+import static java.util.Collections.newSetFromMap;
 
 /**
  * State of a single hydration.
@@ -12,15 +14,20 @@ final class Hydration {
     /**
      * Values that have already been visited.
      */
-    private final IdentitySet<Object> visited;
+    private final Set<Object> visited;
 
     /**
      * Inflations that still have to be done.
      */
     private final Deque<Runnable> deferred = new ArrayDeque<>();
 
+    /**
+     * Constructor.
+     *
+     * @param capacity Expected number of entities to hydrate.
+     */
     Hydration(int capacity) {
-        this.visited = new IdentitySet<>(capacity);
+        this.visited = newSetFromMap(new IdentityHashMap<>(capacity));
     }
 
     /**
