@@ -75,7 +75,8 @@ class TestCollection extends AbstractTest {
     void embeddableElements() {
         var dbHolder = findDeepHydratedEntity(CollectionHolder.class, 1);
 
-        assertThat(dbHolder.getEmbeddables()).extracting(Part::getTarget).flatExtracting(Target::getTags).containsExactly("tag40");
+        assertThat(dbHolder.getEmbeddables())
+                .extracting(Part::getTarget).flatExtracting(Target::getTags).containsExactly("tag40");
     }
 
     @Test

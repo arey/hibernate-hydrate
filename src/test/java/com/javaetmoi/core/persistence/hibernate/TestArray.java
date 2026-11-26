@@ -24,7 +24,7 @@ class TestArray extends AbstractTest {
     }
 
     /**
-     * Without hydration the elements of the array are not hydrated.
+     * Arrays are never lazy, but without hydration the tags of their elements are not initialized.
      */
     @Test
     void notHydrated() {

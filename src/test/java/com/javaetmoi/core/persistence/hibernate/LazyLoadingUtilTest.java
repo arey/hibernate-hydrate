@@ -24,7 +24,7 @@ class LazyLoadingUtilTest extends AbstractTest {
         var dbHolder = doInJPA(entityManager ->
                 LazyLoadingUtil.deepHydrate(entityManager, entityManager.find(ToOneHolder.class, 1)));
 
-        assertHydrated(List.of(dbHolder));
+        assertHydrated(dbHolder);
     }
 
     @Test
@@ -33,7 +33,7 @@ class LazyLoadingUtilTest extends AbstractTest {
                 LazyLoadingUtil.deepHydrate(
                         entityManager.getEntityManagerFactory(), entityManager.find(ToOneHolder.class, 1)));
 
-        assertHydrated(List.of(dbHolder));
+        assertHydrated(dbHolder);
     }
 
     @Test
@@ -41,7 +41,7 @@ class LazyLoadingUtilTest extends AbstractTest {
         var dbHolders = doInJPA(entityManager ->
                 LazyLoadingUtil.deepHydrate(entityManager, List.of(entityManager.find(ToOneHolder.class, 1))));
 
-        assertHydrated(dbHolders);
+        assertThat(dbHolders).singleElement().satisfies(this::assertHydrated);
     }
 
     @Test
@@ -50,11 +50,10 @@ class LazyLoadingUtilTest extends AbstractTest {
                 LazyLoadingUtil.deepHydrate(
                         entityManager.getEntityManagerFactory(), List.of(entityManager.find(ToOneHolder.class, 1))));
 
-        assertHydrated(dbHolders);
+        assertThat(dbHolders).singleElement().satisfies(this::assertHydrated);
     }
 
-    private void assertHydrated(List<ToOneHolder> dbHolders) {
-        assertThat(dbHolders)
-                .extracting(ToOneHolder::getManyToOne).flatExtracting(Target::getTags).containsExactly("tag10");
+    private void assertHydrated(ToOneHolder dbHolder) {
+        assertThat(dbHolder.getManyToOne().getTags()).containsExactly("tag10");
     }
 }

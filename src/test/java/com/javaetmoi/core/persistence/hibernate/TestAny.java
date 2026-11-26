@@ -56,9 +56,9 @@ class TestAny extends AbstractTest {
     void manyToAny() {
         var dbHolder = findDeepHydratedEntity(AnyHolder.class, 1);
 
-        assertThat(dbHolder.getTargets())
-                .extracting(Hibernate::unproxy).flatExtracting(target -> ((Target) target).getTags())
-                .containsExactly("tag20");
+        assertThat(dbHolder.getTargets()).hasSize(1);
+        var dbTarget = (Target) Hibernate.unproxy(dbHolder.getTargets().get(0));
+        assertThat(dbTarget.getTags()).containsExactly("tag20");
     }
 
     @Test

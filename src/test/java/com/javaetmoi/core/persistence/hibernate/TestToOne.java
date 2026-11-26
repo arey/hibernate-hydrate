@@ -21,7 +21,7 @@ class TestToOne extends AbstractTest {
         var holder = new ToOneHolder(1, manyToOne, oneToOne);
         persist(manyToOne, oneToOne, inverse, holder, new ToOneInverse(2, holder, inverse),
                 // Holder without any associations.
-                new ToOneHolder(3, null, null));
+                new ToOneHolder(2, null, null));
     }
 
     /**
@@ -87,7 +87,7 @@ class TestToOne extends AbstractTest {
 
     @Test
     void nullAssociations() {
-        var dbHolder = findDeepHydratedEntity(ToOneHolder.class, 3);
+        var dbHolder = findDeepHydratedEntity(ToOneHolder.class, 2);
 
         assertThat(dbHolder.getManyToOne()).isNull();
         assertThat(dbHolder.getOneToOne()).isNull();

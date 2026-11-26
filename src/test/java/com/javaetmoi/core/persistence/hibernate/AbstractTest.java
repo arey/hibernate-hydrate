@@ -117,7 +117,8 @@ public class AbstractTest {
     /**
      * Ensure that the exclude is rejected.
      */
-    protected AbstractThrowableAssert<?, ? extends Throwable> assertInvalidExclude(Class<?> entityClass, String attribute) {
+    protected AbstractThrowableAssert<?, ? extends Throwable> assertInvalidExclude(
+            Class<?> entityClass, String attribute) {
         return assertThatThrownBy(() -> hydrator.withExclude(entityClass, attribute))
                 .isInstanceOf(IllegalArgumentException.class);
     }

@@ -50,27 +50,36 @@ class HydratorImplTest extends AbstractTest {
     private Address lyon;
 
     /**
-     * Persist the graph of entities and create an equal graph of plain objects as expectation.
+     * Persist the graph of entities and keep an equal graph of plain objects as expectation.
+     * Two graphs are needed, because Hibernate replaces the collections of persisted entities by its own ones.
      */
     @BeforeEach
     void setUpEntities() {
-        persist(createGraph());
-        createGraph();
+        var persisted = createGraph();
+        persist(persisted.france(), persisted.james(), persisted.tom());
+
+        var expected = createGraph();
+        james = expected.james();
+        tom = expected.tom();
+        android = expected.android();
+        iphone = expected.iphone();
+        lyon = expected.lyon();
+    }
+
+    private record Graph(Country france, Employee james, Employee tom, Project android, Project iphone, Address lyon) {
     }
 
     /**
-     * Create the graph of entities.
-     *
-     * @return the entities to persist. They cascade to the other ones.
+     * Create the graph of entities. The employees cascade to their projects and addresses.
      */
-    private Object[] createGraph() {
+    private Graph createGraph() {
         var france = new Country(1000, "France");
-        james = new Employee(1, "James", "Developer");
-        tom = new Employee(2, "Tom", "Project Manager");
-        android = new Project(10, "Android Project");
-        iphone = new Project(20, "iPhone Project");
+        var james = new Employee(1, "James", "Developer");
+        var tom = new Employee(2, "Tom", "Project Manager");
+        var android = new Project(10, "Android Project");
+        var iphone = new Project(20, "iPhone Project");
         var paris = new Address(100, "home", "Paris", james, france);
-        lyon = new Address(200, "work", "Lyon", tom, france);
+        var lyon = new Address(200, "work", "Lyon", tom, france);
         var ladefense = new Address(300, "work", "La Defense", james, france);
 
         james.getProjects().add(android);
@@ -83,7 +92,7 @@ class HydratorImplTest extends AbstractTest {
         tom.getAddresses().put(lyon.getType(), lyon);
         iphone.getMembers().add(james);
 
-        return new Object[] {france, james, tom};
+        return new Graph(france, james, tom, android, iphone, lyon);
     }
 
     /**

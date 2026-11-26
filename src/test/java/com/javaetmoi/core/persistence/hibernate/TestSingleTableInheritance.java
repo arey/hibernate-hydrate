@@ -110,7 +110,7 @@ class TestSingleTableInheritance extends AbstractTest {
     void unmappedSubclass_association() {
         var holder = doInJPA(entityManager -> {
             var unmappedDog = new Dog() {};
-            // Lazy collection of a subclass in between.
+            // Lazy collection of the nearest entity superclass of the unmapped subclass.
             unmappedDog.setDogNames(entityManager.find(Dog.class, 1).getDogNames());
             var newHolder = new AnimalHolder();
             newHolder.setAnimal(unmappedDog);
