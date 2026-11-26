@@ -132,6 +132,19 @@ Lazy basic attributes are lazy for bytecode enhanced entities only.
 Hibernate loads all attributes of a lazy group (`@LazyGroup`) at once.
 So to keep an excluded lazy attribute unloaded, all attributes of its lazy group have to be excluded.
 
+### Performance ###
+
+Hibernate Hydrate loads each uninitialized proxy and each uninitialized collection by a query of its own.
+For big object graphs it is recommended to enable the batch fetching of Hibernate,
+so that Hibernate loads several proxies or collections of the same kind by one query.
+Either globally by the property `hibernate.default_batch_fetch_size`, e.g. in the `persistence.xml`:
+
+```xml
+<property name="hibernate.default_batch_fetch_size" value="100" />
+```
+
+Or by `@BatchSize` at single entities and collections.
+
 ## Contributing to Hibernate Hydrate ##
 
 * GitHub is for social coding platform: if you want to write code, we encourage contributions through pull requests from [forks of this repository](http://help.github.com/forking/). 
