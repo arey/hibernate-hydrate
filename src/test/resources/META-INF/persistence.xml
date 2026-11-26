@@ -7,6 +7,7 @@
     <class>com.javaetmoi.core.persistence.hibernate.any.AnyTarget</class>
     <class>com.javaetmoi.core.persistence.hibernate.array.ArrayElement</class>
     <class>com.javaetmoi.core.persistence.hibernate.array.ArrayHolder</class>
+    <class>com.javaetmoi.core.persistence.hibernate.chain.ChainNode</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedIdLink</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink</class>

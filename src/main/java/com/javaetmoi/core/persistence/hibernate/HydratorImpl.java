@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.internal.util.collections.IdentitySet;
 import org.hibernate.metamodel.mapping.CompositeIdentifierMapping;
 import org.hibernate.metamodel.mapping.DiscriminatedAssociationModelPart;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
@@ -119,17 +118,6 @@ class HydratorImpl implements Hydrator {
         return attribute.equals(identifierMapping.getAttributeName()) ? identifierMapping : null;
     }
 
-    /**
-     * Is the part hydrated at all? Basic values are not.
-     * Has to match the parts handled by {@link #deepInflateProperty(Object, ModelPart, IdentitySet)}.
-     */
-    private boolean isHydratable(ModelPart part) {
-        return part instanceof EntityValuedModelPart ||
-                part instanceof DiscriminatedAssociationModelPart ||
-                part instanceof EmbeddableValuedModelPart ||
-                part instanceof PluralAttributeMapping;
-    }
-
     @Override
     public <C extends Collection<E>, E> C deepHydrateCollection(C entities) {
         if (entities == null) {
@@ -138,29 +126,30 @@ class HydratorImpl implements Hydrator {
 
         // Reduce resizes for big collections.
         var capacity = max(entities.size(), 32);
-        var recursiveGuard = new IdentitySet<>(capacity);
-        entities.forEach(entity ->
-                deepInflateInitialEntity(entity, recursiveGuard));
+        var hydration = new Hydration(capacity);
+        entities.forEach(entity -> deepInflateInitialEntity(entity, hydration));
+        hydration.run();
         return entities;
     }
 
     @Override
     public <E> E deepHydrate(E entity) {
-        var recursiveGuard = new IdentitySet<>();
-        deepInflateInitialEntity(entity, recursiveGuard);
+        var hydration = new Hydration(32);
+        deepInflateInitialEntity(entity, hydration);
+        hydration.run();
         return entity;
     }
 
     /**
-     * Populate a lazy-initialized object graph by recursion.
+     * Populate a lazy-initialized object graph.
      * Entry point for entities whose entity type is not known from the mapping.
      *
      * @param entity
      *            The entity. May be {@code null}. Objects that are no entities are ignored.
-     * @param recursiveGuard
-     *            A guard to avoid endless recursion.
+     * @param hydration
+     *            The state of the hydration.
      */
-    private void deepInflateInitialEntity(Object entity, IdentitySet<Object> recursiveGuard) {
+    private void deepInflateInitialEntity(Object entity, Hydration hydration) {
         if (entity == null) {
             return;
         }
@@ -170,43 +159,15 @@ class HydratorImpl implements Hydrator {
             // No entity. Nothing to hydrate.
             return;
         }
-        deepInflateEntity(entity, entityType, recursiveGuard);
-    }
-
-    private void deepInflateProperty(
-            Object propertyValue, ModelPart part, IdentitySet<Object> recursiveGuard) {
-        if (propertyValue == null) {
-            return;
-        }
-
-        if (part instanceof EntityValuedModelPart entityValuedModelPart) {
-            deepInflateEntity(propertyValue, entityValuedModelPart, recursiveGuard);
-        } else if (part instanceof DiscriminatedAssociationModelPart discriminatedAssociationModelPart) {
-            deepInflateAny(propertyValue, discriminatedAssociationModelPart, recursiveGuard);
-        } else if (part instanceof EmbeddableValuedModelPart embeddableValuedModelPart) {
-            deepInflateEmbedded(propertyValue, embeddableValuedModelPart, recursiveGuard);
-        } else if (part instanceof PluralAttributeMapping pluralAttributeMapping) {
-            if (propertyValue instanceof Map) {
-                deepInflateMap((Map<?, ?>) propertyValue, pluralAttributeMapping, recursiveGuard);
-            } else if (propertyValue instanceof Collection) {
-                deepInflateCollection((Collection<?>) propertyValue, pluralAttributeMapping, recursiveGuard);
-            } else if (propertyValue instanceof Object[]) {
-                deepInflateArray((Object[]) propertyValue, pluralAttributeMapping, recursiveGuard);
-            } else if (propertyValue.getClass().isArray()) {
-                // Arrays of primitives are never lazy and contain nothing to hydrate.
-            } else {
-                throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
-                        propertyValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
-            }
-        }
+        deepInflateEntity(entity, entityType, hydration);
     }
 
     /**
      * Deep inflate an entity.
      */
     private void deepInflateEntity(
-            Object entity, EntityValuedModelPart part, IdentitySet<Object> recursiveGuard) {
-        if (guard(entity, part, recursiveGuard)) {
+            Object entity, EntityValuedModelPart part, Hydration hydration) {
+        if (guard(entity, part, hydration)) {
             return;
         }
         Hibernate.initialize(entity);
@@ -214,11 +175,11 @@ class HydratorImpl implements Hydrator {
         var target = Hibernate.unproxy(entity);
         var descriptor = part.getEntityMappingType();
         // Start with the identifier. It is not part of the attribute mappings.
-        deepInflateIdentifier(target, descriptor, recursiveGuard);
+        deepInflateIdentifier(target, descriptor, hydration);
         // Continue with the entity itself.
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
-            deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+            deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
         });
         // Continue with subclasses.
         if (descriptor.hasSubclasses()) {
@@ -226,7 +187,7 @@ class HydratorImpl implements Hydrator {
                 .filter(subclassDescriptor -> subclassDescriptor.getJavaType().getJavaTypeClass().isInstance(target))
                 .forEach(subclassDescriptor -> subclassDescriptor.getAttributeMappings().forEach(attributeMapping -> {
                     var propertyValue = attributeMapping.getValue(target);
-                    deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+                    deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
                 }));
         }
     }
@@ -235,7 +196,7 @@ class HydratorImpl implements Hydrator {
      * Deep inflate the associations that are part of a composite identifier of an entity.
      */
     private void deepInflateIdentifier(
-            Object entity, EntityMappingType descriptor, IdentitySet<Object> recursiveGuard) {
+            Object entity, EntityMappingType descriptor, Hydration hydration) {
         if (!(descriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping)) {
             // Simple identifiers contain no associations.
             return;
@@ -251,7 +212,7 @@ class HydratorImpl implements Hydrator {
 
         identifierMapping.getEmbeddableTypeDescriptor().getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(container);
-            deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+            deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
         });
     }
 
@@ -260,36 +221,34 @@ class HydratorImpl implements Hydrator {
      * The mapping does not know the entity type of the target, so it is derived from the target itself.
      */
     private void deepInflateAny(
-            Object entity, DiscriminatedAssociationModelPart part, IdentitySet<Object> recursiveGuard) {
+            Object entity, DiscriminatedAssociationModelPart part, Hydration hydration) {
         if (guard(entity, part)) {
             return;
         }
 
-        deepInflateInitialEntity(entity, recursiveGuard);
+        deepInflateInitialEntity(entity, hydration);
     }
 
     /**
      * Deep inflate an embedded entity.
      */
-    private void deepInflateEmbedded(
-            Object embeddable, EmbeddableValuedModelPart part, IdentitySet<Object> recursiveGuard) {
-        if (guard(embeddable, part, recursiveGuard)) {
+    private void deepInflateEmbedded(Object embeddable, EmbeddableValuedModelPart part, Hydration hydration) {
+        if (guard(embeddable, part, hydration)) {
             return;
         }
 
         var descriptor = part.getEmbeddableTypeDescriptor();
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(embeddable);
-            deepInflateProperty(propertyValue, attributeMapping, recursiveGuard);
+            deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
         });
     }
 
     /**
      * Deep inflate a map including its keys and values.
      */
-    private void deepInflateMap(
-            Map<?, ?> map, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        if (guard(map, part, recursiveGuard)) {
+    private void deepInflateMap(Map<?, ?> map, PluralAttributeMapping part, Hydration hydration) {
+        if (guard(map, part, hydration)) {
             return;
         }
         Hibernate.initialize(map);
@@ -297,39 +256,87 @@ class HydratorImpl implements Hydrator {
         var indexType = part.getIndexDescriptor();
         var elementType = part.getElementDescriptor();
         map.forEach((index, element) -> {
-            deepInflateProperty(index, indexType, recursiveGuard);
-            deepInflateProperty(element, elementType, recursiveGuard);
+            deepInflatePropertyQueued(index, indexType, hydration);
+            deepInflatePropertyQueued(element, elementType, hydration);
         });
     }
 
     /**
      * Deep inflate a collection including its elements.
      */
-    private void deepInflateCollection(
-            Collection<?> collection, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        if (guard(collection, part, recursiveGuard)) {
+    private void deepInflateCollection(Collection<?> collection, PluralAttributeMapping part, Hydration hydration) {
+        if (guard(collection, part, hydration)) {
             return;
         }
         Hibernate.initialize(collection);
 
         var elementType = part.getElementDescriptor();
         collection.forEach(element ->
-                deepInflateProperty(element, elementType, recursiveGuard));
+                deepInflatePropertyQueued(element, elementType, hydration));
     }
 
     /**
      * Deep inflate the elements of an array.
      * Arrays themselves are never lazy.
      */
-    private void deepInflateArray(
-            Object[] array, PluralAttributeMapping part, IdentitySet<Object> recursiveGuard) {
-        if (guard(array, part, recursiveGuard)) {
+    private void deepInflateArray(Object[] array, PluralAttributeMapping part, Hydration hydration) {
+        if (guard(array, part, hydration)) {
             return;
         }
 
         var elementType = part.getElementDescriptor();
         for (var element : array) {
-            deepInflateProperty(element, elementType, recursiveGuard);
+            deepInflatePropertyQueued(element, elementType, hydration);
+        }
+    }
+
+    /**
+     * Deep inflate a property value later on.
+     * The hydration is not done by recursion, because deep object graphs would overflow the stack.
+     */
+    private void deepInflatePropertyQueued(Object propertyValue, ModelPart part, Hydration hydration) {
+        if (propertyValue == null || !isHydratable(part)) {
+            return;
+        }
+
+        hydration.defer(() -> deepInflateProperty(propertyValue, part, hydration));
+    }
+
+    /**
+     * Is the part hydrated at all? Basic values are not.
+     * Has to match the parts handled by {@link #deepInflateProperty(Object, ModelPart, Hydration)}.
+     */
+    private boolean isHydratable(ModelPart part) {
+        return part instanceof EntityValuedModelPart ||
+                part instanceof DiscriminatedAssociationModelPart ||
+                part instanceof EmbeddableValuedModelPart ||
+                part instanceof PluralAttributeMapping;
+    }
+
+    /**
+     * Deep inflate a property value.
+     */
+    private void deepInflateProperty(
+            Object propertyValue, ModelPart part, Hydration hydration) {
+        if (part instanceof EntityValuedModelPart entityValuedModelPart) {
+            deepInflateEntity(propertyValue, entityValuedModelPart, hydration);
+        } else if (part instanceof DiscriminatedAssociationModelPart discriminatedAssociationModelPart) {
+            deepInflateAny(propertyValue, discriminatedAssociationModelPart, hydration);
+        } else if (part instanceof EmbeddableValuedModelPart embeddableValuedModelPart) {
+            deepInflateEmbedded(propertyValue, embeddableValuedModelPart, hydration);
+        } else if (part instanceof PluralAttributeMapping pluralAttributeMapping) {
+            if (propertyValue instanceof Map<?, ?> mapValue) {
+                deepInflateMap(mapValue, pluralAttributeMapping, hydration);
+            } else if (propertyValue instanceof Collection<?> collectionValue) {
+                deepInflateCollection(collectionValue, pluralAttributeMapping, hydration);
+            } else if (propertyValue instanceof Object[] arrayValue) {
+                deepInflateArray(arrayValue, pluralAttributeMapping, hydration);
+            } else if (propertyValue.getClass().isArray()) {
+                // Arrays of primitives are never lazy and contain nothing to hydrate.
+            } else {
+                throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
+                        propertyValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
+            }
         }
     }
 
@@ -348,19 +355,20 @@ class HydratorImpl implements Hydrator {
 
     /**
      * Guard against values that must not be inflated.
-     * Marks the value as visited, if it has to be inflated.
+     * Marks the value as visited, if it has to be inflated, to avoid endless loops.
      *
      * @param value
      *            The value. May be {@code null}.
      * @param part
      *            The model part of the value.
-     * @param recursiveGuard
-     *            A guard to avoid endless recursion.
+     * @param hydration
+     *            The state of the hydration.
      * @return {@code true} if the value is {@code null}, excluded or has already been visited.
      */
-    private boolean guard(Object value, ModelPart part, IdentitySet<Object> recursiveGuard) {
+    private boolean guard(Object value, ModelPart part, Hydration hydration) {
         // Check the excludes first: An excluded value must not be marked as visited,
         // because it may be reachable via another path that is not excluded.
-        return guard(value, part) || !recursiveGuard.add(value);
+        return guard(value, part) || !hydration.visit(value);
     }
+
 }
