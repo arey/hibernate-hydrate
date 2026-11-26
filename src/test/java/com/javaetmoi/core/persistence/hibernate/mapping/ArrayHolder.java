@@ -14,16 +14,16 @@ public class ArrayHolder {
     private Integer id;
 
     @ElementCollection
-    @OrderColumn(name = "POS")
+    @OrderColumn
     private String[] names;
 
     @ElementCollection
-    @OrderColumn(name = "POS")
+    @OrderColumn
     private int[] numbers;
 
     @OneToMany
     @JoinColumn(name = "ARRAY_HOLDER")
-    @OrderColumn(name = "ARRAY_POS")
+    @OrderColumn
     private Target[] elements;
 
     protected ArrayHolder() {}

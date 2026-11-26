@@ -11,7 +11,8 @@ import static jakarta.persistence.FetchType.LAZY;
 
 /**
  * Entity with attributes that are just lazy, if the entity is bytecode enhanced.
- * The attributes are in different lazy groups, because Hibernate loads all attributes of a lazy group at once.
+ * Hibernate loads all attributes of a lazy group at once, so the content and the inverse side have lazy groups
+ * of their own. The summary and the details share a lazy group to test that.
  */
 @Entity
 public class EnhancedOwner {
@@ -39,10 +40,6 @@ public class EnhancedOwner {
     public EnhancedOwner(Integer id, String content) {
         this.id = id;
         this.content = content;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public String getContent() {
