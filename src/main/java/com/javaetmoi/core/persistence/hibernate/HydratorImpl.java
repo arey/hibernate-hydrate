@@ -173,23 +173,25 @@ class HydratorImpl implements Hydrator {
         Hibernate.initialize(entity);
 
         var target = Hibernate.unproxy(entity);
-        var descriptor = part.getEntityMappingType();
+        var descriptor = concreteDescriptor(target, part);
         // Start with the identifier. It is not part of the attribute mappings.
         deepInflateIdentifier(target, descriptor, hydration);
-        // Continue with the entity itself.
+        // Continue with the attributes, including the inherited ones.
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
             deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
         });
-        // Continue with subclasses.
-        if (descriptor.hasSubclasses()) {
-            descriptor.getSubMappingTypes().stream()
-                .filter(subclassDescriptor -> subclassDescriptor.getJavaType().getJavaTypeClass().isInstance(target))
-                .forEach(subclassDescriptor -> subclassDescriptor.getAttributeMappings().forEach(attributeMapping -> {
-                    var propertyValue = attributeMapping.getValue(target);
-                    deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
-                }));
-        }
+    }
+
+    /**
+     * The descriptor of the actual class of the entity.
+     * It may be a subclass of the declared type of the association.
+     * Its attribute mappings include the inherited ones,
+     * which are the same mappings as those of the superclasses, so excludes of superclasses apply to them too.
+     */
+    private EntityMappingType concreteDescriptor(Object entity, EntityValuedModelPart part) {
+        var descriptor = mappingMetamodel.findEntityDescriptor(entity.getClass());
+        return descriptor != null ? descriptor : part.getEntityMappingType();
     }
 
     /**

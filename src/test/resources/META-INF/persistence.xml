@@ -12,6 +12,10 @@
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.LinkTarget</class>
+    <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.Animal</class>
+    <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.AnimalHolder</class>
+    <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.Dog</class>
+    <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.Mammal</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Address</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Bar</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Biz</class>
