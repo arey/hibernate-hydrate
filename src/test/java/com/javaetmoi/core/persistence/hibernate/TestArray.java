@@ -11,14 +11,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class TestArray extends AbstractTest {
     /**
-     * Arrays of basic values.
+     * Array of basic values.
      */
     @Test
-    void basicArrays() {
+    void basicArray() {
         var dbHolder = findDeepHydratedEntity(ArrayHolder.class, 1);
 
         // At this step, transaction and session are closed.
         assertThat(dbHolder.getNames()).containsExactly("first", "second");
+    }
+
+    /**
+     * Array of primitive values.
+     */
+    @Test
+    void primitiveArray() {
+        var dbHolder = findDeepHydratedEntity(ArrayHolder.class, 1);
+
+        // At this step, transaction and session are closed.
         assertThat(dbHolder.getNumbers()).containsExactly(1, 2);
     }
 
@@ -40,9 +50,8 @@ class TestArray extends AbstractTest {
      */
     @Test
     void entityArray_withExclude() {
-        var dbHolder = doInJPA(entityManager ->
-                hydrator.withExclude(ArrayHolder.class, "elements")
-                        .deepHydrate(entityManager.find(ArrayHolder.class, 1)));
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(ArrayHolder.class, "elements"), ArrayHolder.class, 1);
 
         // At this step, transaction and session are closed.
         assertThat(dbHolder.getElements()).hasSize(2);

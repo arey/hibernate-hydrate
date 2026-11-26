@@ -37,4 +37,24 @@ class TestDeepGraph extends AbstractTest {
         }
         assertThat(length).isEqualTo(LENGTH);
     }
+
+    /**
+     * A cycle of entities must not end in an endless loop.
+     */
+    @Test
+    void cycle() {
+        doInJPAVoid(entityManager -> {
+            var first = new ChainNode(1, null);
+            var second = new ChainNode(2, first);
+            first.setNext(second);
+            entityManager.persist(first);
+            entityManager.persist(second);
+        });
+
+        var dbFirst = findDeepHydratedEntity(ChainNode.class, 1);
+
+        // At this step, transaction and session are closed.
+        assertThat(dbFirst.getNext().getId()).isEqualTo(2);
+        assertThat(dbFirst.getNext().getNext()).isSameAs(dbFirst);
+    }
 }

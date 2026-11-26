@@ -39,9 +39,8 @@ class TestAny extends AbstractTest {
 
     @Test
     void any_withExclude() {
-        var dbHolder = doInJPA(entityManager ->
-                hydrator.withExclude(AnyHolder.class, "target")
-                        .deepHydrate(entityManager.find(AnyHolder.class, 1)));
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(AnyHolder.class, "target"), AnyHolder.class, 1);
 
         // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isFalse();
@@ -50,9 +49,8 @@ class TestAny extends AbstractTest {
 
     @Test
     void manyToAny_withExclude() {
-        var dbHolder = doInJPA(entityManager ->
-                hydrator.withExclude(AnyHolder.class, "targets")
-                        .deepHydrate(entityManager.find(AnyHolder.class, 1)));
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(AnyHolder.class, "targets"), AnyHolder.class, 1);
 
         // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isTrue();

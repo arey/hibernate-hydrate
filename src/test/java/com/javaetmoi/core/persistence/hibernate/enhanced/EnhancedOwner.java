@@ -25,6 +25,14 @@ public class EnhancedOwner {
     @LazyGroup("inverse")
     private EnhancedInverse inverse;
 
+    @Basic(fetch = LAZY)
+    @LazyGroup("group")
+    private String summary = "summary";
+
+    @Basic(fetch = LAZY)
+    @LazyGroup("group")
+    private String details = "details";
+
     public EnhancedOwner() {
     }
 

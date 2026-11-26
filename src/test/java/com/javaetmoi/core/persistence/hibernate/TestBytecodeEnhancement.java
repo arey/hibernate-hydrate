@@ -104,6 +104,34 @@ class TestBytecodeEnhancement {
         assertThat(dbOwner.getContent()).isEqualTo("content");
     }
 
+    /**
+     * Hibernate loads all attributes of a lazy group at once,
+     * so an excluded attribute is loaded together with the other attributes of its lazy group.
+     */
+    @Test
+    void lazyGroup_withPartialExclude() {
+        var dbOwner = findDeepHydratedOwner(hydrator ->
+                hydrator.withExclude(EnhancedOwner.class, "summary"));
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "summary")).isTrue();
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "details")).isTrue();
+    }
+
+    /**
+     * A lazy group stays unloaded, if all of its attributes are excluded.
+     */
+    @Test
+    void lazyGroup_withExclude() {
+        var dbOwner = findDeepHydratedOwner(hydrator ->
+                hydrator.withExclude(EnhancedOwner.class, "summary")
+                        .withExclude(EnhancedOwner.class, "details"));
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "summary")).isFalse();
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "details")).isFalse();
+    }
+
     private EnhancedOwner findDeepHydratedOwner(Function<Hydrator, Hydrator> excludes) {
         var hydrator = excludes.apply(hydrator(sessionFactory));
         return sessionFactory.fromTransaction(session ->

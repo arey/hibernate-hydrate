@@ -28,4 +28,8 @@ public class ChainNode {
     public ChainNode getNext() {
         return next;
     }
+
+    public void setNext(ChainNode next) {
+        this.next = next;
+    }
 }

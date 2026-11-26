@@ -30,7 +30,10 @@ public class AbstractTest {
 
     @BeforeEach
     void setUpDatabase() {
-        dbUnitLoader.loadDatabase(getClass());
+        // Tests without a data set create their entities on their own.
+        if (getClass().getResource(getClass().getSimpleName() + "-dataset.xml") != null) {
+            dbUnitLoader.loadDatabase(getClass());
+        }
 
         // Reset Hibernate statistics.
         statistics().clear();
@@ -57,6 +60,22 @@ public class AbstractTest {
     protected <E> E findDeepHydratedEntity(Class<E> entityClass, long entityId) {
         return doInJPA(entityManager ->
                 hydrator.deepHydrate(entityManager.find(entityClass, entityId)));
+    }
+
+    /**
+     * Find an entity and hydrate it with the given hydrator, e.g. one with excludes.
+     */
+    protected <E> E findDeepHydratedEntity(Hydrator hydrator, Class<E> entityClass, Object entityId) {
+        return doInJPA(entityManager ->
+                hydrator.deepHydrate(entityManager.find(entityClass, entityId)));
+    }
+
+    /**
+     * Persist the entities in a transaction of their own.
+     */
+    protected void persist(Object... entities) {
+        doInJPAVoid(entityManager ->
+                stream(entities).forEach(entityManager::persist));
     }
 
     protected <E> List<E> findDeepHydratedEntities(Class<E> entityClass, long... entityIds) {

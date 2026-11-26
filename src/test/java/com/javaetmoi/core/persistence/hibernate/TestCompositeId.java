@@ -12,6 +12,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.IdClass;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests the hydration of associations that are part of a composite identifier.
@@ -38,9 +39,8 @@ class TestCompositeId extends AbstractTest {
      */
     @Test
     void idClass_withExclude() {
-        var dbLink = doInJPA(entityManager ->
-                hydrator.withExclude(IdClassLink.class, "target")
-                        .deepHydrate(entityManager.find(IdClassLink.class, new IdClassLinkId(10, 1))));
+        var dbLink = findDeepHydratedEntity(
+                hydrator.withExclude(IdClassLink.class, "target"), IdClassLink.class, new IdClassLinkId(10, 1));
 
         // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbLink.getTarget())).isFalse();
@@ -91,6 +91,16 @@ class TestCompositeId extends AbstractTest {
 
         // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isFalse();
+    }
+
+    /**
+     * An entity with an {@link EmbeddedId} identifier has no other identifier attributes.
+     */
+    @Test
+    void embeddedId_withUnknownExclude() {
+        assertThatThrownBy(() -> hydrator.withExclude(EmbeddedIdLink.class, "target"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("target");
     }
 
     /**

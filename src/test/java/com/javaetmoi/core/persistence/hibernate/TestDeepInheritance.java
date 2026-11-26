@@ -29,18 +29,31 @@ class TestDeepInheritance extends AbstractTest {
     }
 
     /**
-     * Excludes declared at a superclass apply to instances of subclasses.
+     * Excludes declared at the root class apply to instances of subclasses.
      */
     @Test
-    void excludeOfSuperclass() {
-        var dbHolder = doInJPA(entityManager ->
-                hydrator.withExclude(Animal.class, "animalNames")
-                        .withExclude(Mammal.class, "mammalNames")
-                        .deepHydrate(entityManager.find(AnimalHolder.class, 1)));
+    void excludeOfRootClass() {
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(Animal.class, "animalNames"), AnimalHolder.class, 1);
 
         // At this step, transaction and session are closed.
         var dbDog = (Dog) Hibernate.unproxy(dbHolder.getAnimal());
         assertThat(Hibernate.isInitialized(dbDog.getAnimalNames())).isFalse();
+        assertThat(dbDog.getMammalNames()).containsExactly("mammal");
+        assertThat(dbDog.getDogNames()).containsExactly("dog");
+    }
+
+    /**
+     * Excludes declared at a superclass in between apply to instances of subclasses.
+     */
+    @Test
+    void excludeOfSuperclass() {
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(Mammal.class, "mammalNames"), AnimalHolder.class, 1);
+
+        // At this step, transaction and session are closed.
+        var dbDog = (Dog) Hibernate.unproxy(dbHolder.getAnimal());
+        assertThat(dbDog.getAnimalNames()).containsExactly("animal");
         assertThat(Hibernate.isInitialized(dbDog.getMammalNames())).isFalse();
         assertThat(dbDog.getDogNames()).containsExactly("dog");
     }
@@ -50,9 +63,8 @@ class TestDeepInheritance extends AbstractTest {
      */
     @Test
     void excludeOfInheritedAttribute() {
-        var dbHolder = doInJPA(entityManager ->
-                hydrator.withExclude(Dog.class, "animalNames")
-                        .deepHydrate(entityManager.find(AnimalHolder.class, 1)));
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(Dog.class, "animalNames"), AnimalHolder.class, 1);
 
         // At this step, transaction and session are closed.
         var dbDog = (Dog) Hibernate.unproxy(dbHolder.getAnimal());
