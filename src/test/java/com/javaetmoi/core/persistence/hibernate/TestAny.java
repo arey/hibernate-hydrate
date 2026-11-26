@@ -47,4 +47,15 @@ class TestAny extends AbstractTest {
         assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isFalse();
         assertThat(Hibernate.isInitialized(dbHolder.getTargets())).isTrue();
     }
+
+    @Test
+    void manyToAny_withExclude() {
+        var dbHolder = doInJPA(entityManager ->
+                hydrator.withExclude(AnyHolder.class, "targets")
+                        .deepHydrate(entityManager.find(AnyHolder.class, 1)));
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isTrue();
+        assertThat(Hibernate.isInitialized(dbHolder.getTargets())).isFalse();
+    }
 }
