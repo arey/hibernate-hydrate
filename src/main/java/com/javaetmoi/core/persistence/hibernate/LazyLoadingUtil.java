@@ -51,6 +51,8 @@ public final class LazyLoadingUtil {
      *            Open {@link EntityManager} or {@link Session}.
      * @param entities
      *            A {@link Collection} of attached Hibernate entities to load.
+     *            Elements that are no entities are ignored.
+     *            If it is {@code null}, {@code null} is returned.
      * @return the {@link Collection} of Hibernate entities fully loaded.
      *         Similar to the entities input parameter.
      *         Useful when calling this method in a return statement.
@@ -71,6 +73,8 @@ public final class LazyLoadingUtil {
      *            {@link EntityManagerFactory} or {@link SessionFactory}.
      * @param entities
      *            A {@link Collection} of attached Hibernate entities to load.
+     *            Elements that are no entities are ignored.
+     *            If it is {@code null}, {@code null} is returned.
      * @return the {@link Collection} of Hibernate entities fully loaded.
      *         Similar to the entities input parameter.
      *         Useful when calling this method in a return statement.
@@ -91,6 +95,7 @@ public final class LazyLoadingUtil {
      *            Open {@link EntityManager} or {@link Session}.
      * @param entity
      *            An attached Hibernate entity to load.
+     *            If it is no entity or {@code null}, it is returned unchanged.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
@@ -111,6 +116,7 @@ public final class LazyLoadingUtil {
      *            {@link EntityManagerFactory} or {@link SessionFactory}.
      * @param entity
      *            An attached Hibernate entity to load.
+     *            If it is no entity or {@code null}, it is returned unchanged.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
