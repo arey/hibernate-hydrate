@@ -204,7 +204,7 @@ class HydratorImpl implements Hydrator {
      * which are the same mappings as those of the superclasses, so excludes of superclasses apply to them too.
      */
     private EntityMappingType concreteDescriptor(Object entity, EntityValuedModelPart part) {
-        var descriptor = findEntityDescriptor(entity.getClass());
+        var descriptor = findEntityDescriptor(Hibernate.getClass(entity));
         return descriptor != null ? descriptor : part.getEntityMappingType();
     }
 
