@@ -18,7 +18,6 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
-import org.assertj.core.api.AbstractThrowableAssert;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
@@ -89,7 +89,6 @@ class HydratorImplTest extends AbstractTest {
     void lazyInitializationExceptionOnPersistentCollection() {
         var dbJames = findEntity(Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThatThrownBy(() -> dbJames.getProjects().contains(android))
                 .isInstanceOf(LazyInitializationException.class);
     }
@@ -102,7 +101,6 @@ class HydratorImplTest extends AbstractTest {
     void lazyInitializationExceptionWithManyToOne() {
         var dbLyon = findEntity(Address.class, 200);
 
-        // At this step, transaction and session are closed.
         assertThatThrownBy(() -> dbLyon.getEmployee().getName())
                 .isInstanceOf(LazyInitializationException.class);
     }
@@ -130,7 +128,6 @@ class HydratorImplTest extends AbstractTest {
     void deepHydrate_attachedEntityProxy() {
         var dbJames = findDeepHydratedEntityReference(Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThat(dbJames).isEqualTo(james);
     }
 
@@ -141,7 +138,6 @@ class HydratorImplTest extends AbstractTest {
     void deepHydrate_entireGraph() {
         var dbJames = findDeepHydratedEntity(Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertReflectionEquals(james, dbJames, LENIENT_ORDER);
     }
 
@@ -152,7 +148,6 @@ class HydratorImplTest extends AbstractTest {
     void deepHydrate_entireGraphFromAddress() {
         var dbLyon = findDeepHydratedEntity(Address.class, 200);
 
-        // At this step, transaction and session are closed.
         assertThat(dbLyon).isEqualTo(lyon);
         assertThat(dbLyon.getEmployee().getName()).isEqualTo("Tom");
         assertThat(dbLyon.getEmployee().getProjects()).containsExactly(android);
@@ -181,7 +176,6 @@ class HydratorImplTest extends AbstractTest {
         var dbJames = doInJPA(entityManager ->
                 hydrator(entityManager).deepHydrate(entityManager.find(Employee.class, 1)));
 
-        // At this step, transaction and session are closed.
         assertThat(dbJames).isEqualTo(james);
     }
 
@@ -195,6 +189,22 @@ class HydratorImplTest extends AbstractTest {
     }
 
     @Test
+    void deepHydrateCollection_emptyCollection() {
+        assertThat(hydrator.deepHydrateCollection(List.of())).isEmpty();
+    }
+
+    /**
+     * Elements that are {@code null} are ignored.
+     */
+    @Test
+    void deepHydrateCollection_nullElement() {
+        var dbEmployees = doInJPA(entityManager ->
+                hydrator.deepHydrateCollection(asList(entityManager.find(Employee.class, 1), null)));
+
+        assertThat(dbEmployees).containsExactly(james, null);
+    }
+
+    @Test
     void deepHydrateCollection_nonEntity() {
         assertThat(hydrator.deepHydrateCollection(Set.of("no entity"))).containsOnly("no entity");
     }
@@ -203,7 +213,6 @@ class HydratorImplTest extends AbstractTest {
     void deepHydrateCollection_attachedEntity() {
         var dbEmployees = findDeepHydratedEntities(Employee.class, 1, 2);
 
-        // At this step, transaction and session are closed.
         assertThat(dbEmployees).containsExactly(james, tom);
     }
 
@@ -211,7 +220,6 @@ class HydratorImplTest extends AbstractTest {
     void deepHydrateCollection_attachedEntityProxy() {
         var dbEmployees = findDeepHydratedEntityReferences(Employee.class, 1, 2);
 
-        // At this step, transaction and session are closed.
         assertThat(dbEmployees).containsExactly(james, tom);
     }
 
@@ -227,7 +235,6 @@ class HydratorImplTest extends AbstractTest {
         var dbJames = findDeepHydratedEntity(
                 hydrator.withExclude(Employee.class, "addresses"), Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThat(dbJames.getProjects()).containsExactly(android, iphone);
         assertThatThrownBy(() -> dbJames.getAddresses().get("home"))
                 .isInstanceOf(LazyInitializationException.class);
@@ -241,7 +248,6 @@ class HydratorImplTest extends AbstractTest {
         var dbJames = findDeepHydratedEntity(
                 hydrator.withExclude(Project.class, "members"), Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThat(dbJames.getAddresses()).containsOnlyKeys("home", "work");
         assertThatThrownBy(() -> dbJames.getProjects().get(0).getMembers().size())
                 .isInstanceOf(LazyInitializationException.class);
@@ -253,7 +259,6 @@ class HydratorImplTest extends AbstractTest {
                 hydrator.withExclude(Project.class, "members").withExclude(Employee.class, "addresses"),
                 Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThatThrownBy(() -> dbJames.getProjects().get(0).getMembers().size())
                 .isInstanceOf(LazyInitializationException.class);
         assertThatThrownBy(() -> dbJames.getAddresses().get("home"))
@@ -269,7 +274,6 @@ class HydratorImplTest extends AbstractTest {
 
         var dbJames = findDeepHydratedEntity(Employee.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThat(dbJames).isEqualTo(james);
     }
 
@@ -288,7 +292,6 @@ class HydratorImplTest extends AbstractTest {
             return tom;
         });
 
-        // At this step, transaction and session are closed.
         assertThat(dbTom.getProjects()).containsExactly(android);
         assertThat(dbTom.getAddresses()).containsOnlyKeys("work");
     }
@@ -347,10 +350,5 @@ class HydratorImplTest extends AbstractTest {
     void withExclude_pathIntoCollection() {
         assertInvalidExclude(Employee.class, "projects.members")
                 .hasMessageContaining("projects.members");
-    }
-
-    private AbstractThrowableAssert<?, ? extends Throwable> assertInvalidExclude(Class<?> entityClass, String attribute) {
-        return assertThatThrownBy(() -> hydrator.withExclude(entityClass, attribute))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 }

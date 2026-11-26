@@ -31,16 +31,20 @@ public class MapHolder {
     @ElementCollection
     private Map<String, Part> embeddables;
 
+    @ElementCollection
+    private Map<Part, String> embeddableKeys;
+
     protected MapHolder() {}
 
     public MapHolder(
             Integer id, Map<Target, Target> entities, Map<Integer, Target> byId,
-            Map<String, String> basics, Map<String, Part> embeddables) {
+            Map<String, String> basics, Map<String, Part> embeddables, Map<Part, String> embeddableKeys) {
         this.id = id;
         this.entities = entities;
         this.byId = byId;
         this.basics = basics;
         this.embeddables = embeddables;
+        this.embeddableKeys = embeddableKeys;
     }
 
     public Map<Target, Target> getEntities() {
@@ -57,5 +61,9 @@ public class MapHolder {
 
     public Map<String, Part> getEmbeddables() {
         return embeddables;
+    }
+
+    public Map<Part, String> getEmbeddableKeys() {
+        return embeddableKeys;
     }
 }

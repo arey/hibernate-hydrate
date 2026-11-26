@@ -22,19 +22,14 @@ public class Animal {
     @Column(name = "NAME")
     private List<String> animalNames;
 
-    public Integer getId() {
-        return id;
-    }
+    protected Animal() {}
 
-    public void setId(Integer id) {
+    protected Animal(Integer id, List<String> animalNames) {
         this.id = id;
+        this.animalNames = animalNames;
     }
 
     public List<String> getAnimalNames() {
         return animalNames;
-    }
-
-    public void setAnimalNames(List<String> animalNames) {
-        this.animalNames = animalNames;
     }
 }

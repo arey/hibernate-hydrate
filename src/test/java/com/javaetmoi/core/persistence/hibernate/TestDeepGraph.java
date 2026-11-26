@@ -29,7 +29,6 @@ class TestDeepGraph extends AbstractTest {
 
         var dbFirst = findDeepHydratedEntity(ChainNode.class, 1);
 
-        // At this step, transaction and session are closed.
         var length = 0;
         for (var dbNode = dbFirst; dbNode != null; dbNode = dbNode.getNext()) {
             length++;
@@ -43,17 +42,13 @@ class TestDeepGraph extends AbstractTest {
      */
     @Test
     void cycle() {
-        doInJPAVoid(entityManager -> {
-            var first = new ChainNode(1, null);
-            var second = new ChainNode(2, first);
-            first.setNext(second);
-            entityManager.persist(first);
-            entityManager.persist(second);
-        });
+        var first = new ChainNode(1, null);
+        var second = new ChainNode(2, first);
+        first.setNext(second);
+        persist(first, second);
 
         var dbFirst = findDeepHydratedEntity(ChainNode.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThat(dbFirst.getNext().getId()).isEqualTo(2);
         assertThat(dbFirst.getNext().getNext()).isSameAs(dbFirst);
     }

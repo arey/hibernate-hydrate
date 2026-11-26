@@ -1,8 +1,5 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.List;
-import java.util.function.Function;
-
 import com.javaetmoi.core.persistence.hibernate.enhanced.EnhancedInverse;
 import com.javaetmoi.core.persistence.hibernate.enhanced.EnhancedOwner;
 import org.hibernate.Hibernate;
@@ -14,6 +11,9 @@ import org.hibernate.testing.bytecode.enhancement.extension.BytecodeEnhanced;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.function.Function;
 
 import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,7 +61,6 @@ class TestBytecodeEnhancement {
 
         var dbOwner = sessionFactory.fromTransaction(session -> session.find(EnhancedOwner.class, 1));
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "content")).isFalse();
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "inverse")).isFalse();
     }
@@ -70,7 +69,6 @@ class TestBytecodeEnhancement {
     void lazyBasic() {
         var dbOwner = findDeepHydratedOwner(Function.identity());
 
-        // At this step, transaction and session are closed.
         assertThat(dbOwner.getContent()).isEqualTo("content");
     }
 
@@ -79,7 +77,6 @@ class TestBytecodeEnhancement {
         var dbOwner = findDeepHydratedOwner(hydrator ->
                 hydrator.withExclude(EnhancedOwner.class, "content"));
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "content")).isFalse();
         assertThat(dbOwner.getInverse().getTags()).containsExactly("inverse");
     }
@@ -88,7 +85,6 @@ class TestBytecodeEnhancement {
     void inverseOneToOne() {
         var dbOwner = findDeepHydratedOwner(Function.identity());
 
-        // At this step, transaction and session are closed.
         assertThat(dbOwner.getInverse().getId()).isEqualTo(10);
         assertThat(dbOwner.getInverse().getOwner()).isSameAs(dbOwner);
         assertThat(dbOwner.getInverse().getTags()).containsExactly("inverse");
@@ -99,7 +95,6 @@ class TestBytecodeEnhancement {
         var dbOwner = findDeepHydratedOwner(hydrator ->
                 hydrator.withExclude(EnhancedOwner.class, "inverse"));
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "inverse")).isFalse();
         assertThat(dbOwner.getContent()).isEqualTo("content");
     }
@@ -113,7 +108,6 @@ class TestBytecodeEnhancement {
         var dbOwner = findDeepHydratedOwner(hydrator ->
                 hydrator.withExclude(EnhancedOwner.class, "summary"));
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "summary")).isTrue();
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "details")).isTrue();
     }
@@ -127,7 +121,6 @@ class TestBytecodeEnhancement {
                 hydrator.withExclude(EnhancedOwner.class, "summary")
                         .withExclude(EnhancedOwner.class, "details"));
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "summary")).isFalse();
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "details")).isFalse();
     }

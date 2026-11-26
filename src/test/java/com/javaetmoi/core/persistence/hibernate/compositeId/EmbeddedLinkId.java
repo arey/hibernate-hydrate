@@ -1,5 +1,7 @@
 package com.javaetmoi.core.persistence.hibernate.compositeId;
 
+import com.javaetmoi.core.persistence.hibernate.mapping.Target;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -13,18 +15,18 @@ import static jakarta.persistence.FetchType.LAZY;
 public class EmbeddedLinkId implements Serializable {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "TARGET_ID")
-    private LinkTarget target;
+    private Target target;
 
     private int seq;
 
     public EmbeddedLinkId() {}
 
-    public EmbeddedLinkId(LinkTarget target, int seq) {
+    public EmbeddedLinkId(Target target, int seq) {
         this.target = target;
         this.seq = seq;
     }
 
-    public LinkTarget getTarget() {
+    public Target getTarget() {
         return target;
     }
 

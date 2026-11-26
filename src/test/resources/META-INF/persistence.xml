@@ -4,14 +4,11 @@
              version="3.2">
   <persistence-unit name="hibernate-hydrate">
     <class>com.javaetmoi.core.persistence.hibernate.any.AnyHolder</class>
-    <class>com.javaetmoi.core.persistence.hibernate.any.AnyTarget</class>
-    <class>com.javaetmoi.core.persistence.hibernate.array.ArrayElement</class>
     <class>com.javaetmoi.core.persistence.hibernate.array.ArrayHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.chain.ChainNode</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedIdLink</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink</class>
-    <class>com.javaetmoi.core.persistence.hibernate.compositeId.LinkTarget</class>
     <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.Animal</class>
     <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.AnimalHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.deepInheritance.Dog</class>
@@ -31,6 +28,7 @@
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.InheritanceHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.JoinedBase</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.JoinedSub</class>
+    <class>com.javaetmoi.core.persistence.hibernate.inheritance.MappedBase</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.MappedSub</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.TablePerClassBase</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.TablePerClassSub</class>

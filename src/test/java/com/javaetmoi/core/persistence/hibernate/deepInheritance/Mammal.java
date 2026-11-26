@@ -15,11 +15,14 @@ public class Mammal extends Animal {
     @Column(name = "NAME")
     private List<String> mammalNames;
 
-    public List<String> getMammalNames() {
-        return mammalNames;
+    protected Mammal() {}
+
+    protected Mammal(Integer id, List<String> animalNames, List<String> mammalNames) {
+        super(id, animalNames);
+        this.mammalNames = mammalNames;
     }
 
-    public void setMammalNames(List<String> mammalNames) {
-        this.mammalNames = mammalNames;
+    public List<String> getMammalNames() {
+        return mammalNames;
     }
 }

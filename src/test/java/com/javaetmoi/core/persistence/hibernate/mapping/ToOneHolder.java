@@ -29,10 +29,6 @@ public class ToOneHolder {
         this.oneToOne = oneToOne;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
     public Target getManyToOne() {
         return manyToOne;
     }

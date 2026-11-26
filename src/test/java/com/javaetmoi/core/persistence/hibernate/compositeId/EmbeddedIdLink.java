@@ -8,11 +8,13 @@ public class EmbeddedIdLink {
     @EmbeddedId
     private EmbeddedLinkId id;
 
-    public EmbeddedLinkId getId() {
-        return id;
+    public EmbeddedIdLink() {}
+
+    public EmbeddedIdLink(EmbeddedLinkId id) {
+        this.id = id;
     }
 
-    public void setId(EmbeddedLinkId id) {
-        this.id = id;
+    public EmbeddedLinkId getId() {
+        return id;
     }
 }

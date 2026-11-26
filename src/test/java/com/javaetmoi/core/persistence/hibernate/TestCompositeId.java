@@ -4,45 +4,60 @@ import com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedIdLink;
 import com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId;
 import com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink;
 import com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLinkId;
-import com.javaetmoi.core.persistence.hibernate.compositeId.LinkTarget;
+import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.Hibernate;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.IdClass;
 
+import java.util.function.UnaryOperator;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests the hydration of associations that are part of a composite identifier.
  */
 class TestCompositeId extends AbstractTest {
+    private static final IdClassLinkId ID_CLASS_LINK_ID = new IdClassLinkId(10, 1);
+
+    @BeforeEach
+    void setUpEntities() {
+        var idClass = new Target(10);
+        var embeddedId = new Target(20);
+        persist(idClass, embeddedId,
+                new IdClassLink(idClass, 1),
+                new EmbeddedIdLink(new EmbeddedLinkId(embeddedId, 2)));
+    }
+
+    /**
+     * Without hydration the associations are not initialized.
+     */
+    @Test
+    void notHydrated() {
+        var dbIdClassLink = findEntity(IdClassLink.class, ID_CLASS_LINK_ID);
+        var dbEmbeddedIdLink = findEmbeddedIdLink(link -> link);
+
+        assertThat(Hibernate.isInitialized(dbIdClassLink.getTarget())).isFalse();
+        assertThat(Hibernate.isInitialized(dbEmbeddedIdLink.getId().getTarget())).isFalse();
+    }
+
     /**
      * Association in an {@link IdClass} identifier.
      */
     @Test
     void idClass() {
-        var dbLink = doInJPA(entityManager -> {
-            var link = entityManager.find(IdClassLink.class, new IdClassLinkId(10, 1));
-            assertThat(Hibernate.isInitialized(link.getTarget())).isFalse();
-            return hydrator.deepHydrate(link);
-        });
+        var dbLink = findDeepHydratedEntity(IdClassLink.class, ID_CLASS_LINK_ID);
 
-        // At this step, transaction and session are closed.
-        assertThat(Hibernate.isInitialized(dbLink.getTarget())).isTrue();
-        assertThat(dbLink.getTarget().getTags()).containsExactly("idClass");
+        assertThat(dbLink.getTarget().getTags()).containsExactly("tag10");
     }
 
-    /**
-     * Excluded association in an {@link IdClass} identifier.
-     */
     @Test
     void idClass_withExclude() {
         var dbLink = findDeepHydratedEntity(
-                hydrator.withExclude(IdClassLink.class, "target"), IdClassLink.class, new IdClassLinkId(10, 1));
+                hydrator.withExclude(IdClassLink.class, "target"), IdClassLink.class, ID_CLASS_LINK_ID);
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbLink.getTarget())).isFalse();
     }
 
@@ -51,55 +66,34 @@ class TestCompositeId extends AbstractTest {
      */
     @Test
     void embeddedId() {
-        var dbLink = doInJPA(entityManager -> {
-            var id = new EmbeddedLinkId(entityManager.getReference(LinkTarget.class, 20), 2);
-            var link = entityManager.find(EmbeddedIdLink.class, id);
-            assertThat(Hibernate.isInitialized(link.getId().getTarget())).isFalse();
-            return hydrator.deepHydrate(link);
-        });
+        var dbLink = findEmbeddedIdLink(hydrator::deepHydrate);
 
-        // At this step, transaction and session are closed.
-        assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isTrue();
-        assertThat(dbLink.getId().getTarget().getTags()).containsExactly("embeddedId");
+        assertThat(dbLink.getId().getTarget().getTags()).containsExactly("tag20");
     }
 
-    /**
-     * Excluded association in an {@link EmbeddedId} identifier.
-     */
     @Test
     void embeddedId_withExclude() {
-        var dbLink = doInJPA(entityManager -> {
-            var id = new EmbeddedLinkId(entityManager.getReference(LinkTarget.class, 20), 2);
-            return hydrator.withExclude(EmbeddedIdLink.class, "id.target")
-                    .deepHydrate(entityManager.find(EmbeddedIdLink.class, id));
-        });
+        var dbLink = findEmbeddedIdLink(hydrator.withExclude(EmbeddedIdLink.class, "id.target")::deepHydrate);
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isFalse();
     }
 
     /**
-     * Excluded {@link EmbeddedId} identifier.
+     * Excluding the {@link EmbeddedId} identifier excludes all of its attributes.
      */
     @Test
-    void embeddedId_withExcludedIdentifier() {
-        var dbLink = doInJPA(entityManager -> {
-            var id = new EmbeddedLinkId(entityManager.getReference(LinkTarget.class, 20), 2);
-            return hydrator.withExclude(EmbeddedIdLink.class, "id")
-                    .deepHydrate(entityManager.find(EmbeddedIdLink.class, id));
-        });
+    void embeddedId_withExcludeOfIdentifier() {
+        var dbLink = findEmbeddedIdLink(hydrator.withExclude(EmbeddedIdLink.class, "id")::deepHydrate);
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isFalse();
     }
 
     /**
-     * An entity with an {@link EmbeddedId} identifier has no other identifier attributes.
+     * The attributes of an {@link EmbeddedId} identifier are no attributes of the entity.
      */
     @Test
     void embeddedId_withUnknownExclude() {
-        assertThatThrownBy(() -> hydrator.withExclude(EmbeddedIdLink.class, "target"))
-                .isInstanceOf(IllegalArgumentException.class)
+        assertInvalidExclude(EmbeddedIdLink.class, "target")
                 .hasMessageContaining("target");
     }
 
@@ -111,5 +105,16 @@ class TestCompositeId extends AbstractTest {
         var link = new EmbeddedIdLink();
 
         assertThat(hydrator.deepHydrate(link)).isSameAs(link);
+    }
+
+    /**
+     * Find the entity with the {@link EmbeddedId} identifier and apply the action to it.
+     * The identifier needs a reference to its target of the same session.
+     */
+    private EmbeddedIdLink findEmbeddedIdLink(UnaryOperator<EmbeddedIdLink> action) {
+        return doInJPA(entityManager -> {
+            var id = new EmbeddedLinkId(entityManager.getReference(Target.class, 20), 2);
+            return action.apply(entityManager.find(EmbeddedIdLink.class, id));
+        });
     }
 }

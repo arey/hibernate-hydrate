@@ -2,6 +2,7 @@ package com.javaetmoi.core.persistence.hibernate.any;
 
 import java.util.List;
 
+import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.annotations.Any;
 import org.hibernate.annotations.AnyDiscriminatorValue;
 import org.hibernate.annotations.AnyKeyJavaClass;
@@ -22,14 +23,14 @@ public class AnyHolder {
 
     @Any(fetch = LAZY)
     @AnyKeyJavaClass(Integer.class)
-    @AnyDiscriminatorValue(discriminator = "T", entity = AnyTarget.class)
+    @AnyDiscriminatorValue(discriminator = "T", entity = Target.class)
     @Column(name = "TARGET_TYPE")
     @JoinColumn(name = "TARGET_ID")
     private Object target;
 
     @ManyToAny(fetch = LAZY)
     @AnyKeyJavaClass(Integer.class)
-    @AnyDiscriminatorValue(discriminator = "T", entity = AnyTarget.class)
+    @AnyDiscriminatorValue(discriminator = "T", entity = Target.class)
     @Column(name = "TARGET_TYPE")
     @JoinTable(
             name = "ANY_HOLDER_TARGETS",
@@ -37,27 +38,19 @@ public class AnyHolder {
             inverseJoinColumns = @JoinColumn(name = "TARGET_ID"))
     private List<Object> targets;
 
-    public Integer getId() {
-        return id;
-    }
+    protected AnyHolder() {}
 
-    public void setId(Integer id) {
+    public AnyHolder(Integer id, Object target, List<Object> targets) {
         this.id = id;
+        this.target = target;
+        this.targets = targets;
     }
 
     public Object getTarget() {
         return target;
     }
 
-    public void setTarget(Object target) {
-        this.target = target;
-    }
-
     public List<Object> getTargets() {
         return targets;
-    }
-
-    public void setTargets(List<Object> targets) {
-        this.targets = targets;
     }
 }

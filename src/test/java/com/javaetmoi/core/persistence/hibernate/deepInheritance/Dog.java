@@ -15,6 +15,13 @@ public class Dog extends Mammal {
     @Column(name = "NAME")
     private List<String> dogNames;
 
+    public Dog() {}
+
+    public Dog(Integer id, List<String> animalNames, List<String> mammalNames, List<String> dogNames) {
+        super(id, animalNames, mammalNames);
+        this.dogNames = dogNames;
+    }
+
     public List<String> getDogNames() {
         return dogNames;
     }

@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<dataset>
-  <ANYHOLDER ID="1" TARGET_TYPE="T" TARGET_ID="10"/>
-  <ANYTARGET ID="10"/>
-  <ANYTARGET ID="20"/>
-  <ANY_TARGET_TAGS TARGET_ID="10" TAG="any"/>
-  <ANY_TARGET_TAGS TARGET_ID="20" TAG="manyToAny"/>
-  <ANY_HOLDER_TARGETS HOLDER_ID="1" TARGET_TYPE="T" TARGET_ID="20"/>
-</dataset>

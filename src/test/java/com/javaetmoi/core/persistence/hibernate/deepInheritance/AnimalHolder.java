@@ -19,12 +19,11 @@ public class AnimalHolder {
     @JoinColumn(name = "ANIMAL_ID")
     private Animal animal;
 
-    public Integer getId() {
-        return id;
-    }
+    public AnimalHolder() {}
 
-    public void setId(Integer id) {
+    public AnimalHolder(Integer id, Animal animal) {
         this.id = id;
+        this.animal = animal;
     }
 
     public Animal getAnimal() {

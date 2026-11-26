@@ -2,6 +2,7 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.inheritance.InheritanceHolder;
 import com.javaetmoi.core.persistence.hibernate.inheritance.JoinedSub;
+import com.javaetmoi.core.persistence.hibernate.inheritance.MappedBase;
 import com.javaetmoi.core.persistence.hibernate.inheritance.MappedSub;
 import com.javaetmoi.core.persistence.hibernate.inheritance.TablePerClassSub;
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
@@ -49,12 +50,36 @@ class TestInheritanceStrategy extends AbstractTest {
         assertThat(dbSub.getTarget().getTags()).containsExactly("tag10");
     }
 
+    /**
+     * Attributes of a subclass are excluded via the subclass.
+     */
+    @Test
+    void joined_withExclude() {
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(JoinedSub.class, "target"), InheritanceHolder.class, 1);
+
+        var dbSub = (JoinedSub) Hibernate.unproxy(dbHolder.getJoined());
+        assertThat(Hibernate.isInitialized(dbSub.getTarget())).isFalse();
+    }
+
     @Test
     void tablePerClass() {
         var dbHolder = findDeepHydratedEntity(InheritanceHolder.class, 1);
 
         var dbSub = (TablePerClassSub) Hibernate.unproxy(dbHolder.getTablePerClass());
         assertThat(dbSub.getTarget().getTags()).containsExactly("tag20");
+    }
+
+    /**
+     * Attributes of a subclass are excluded via the subclass.
+     */
+    @Test
+    void tablePerClass_withExclude() {
+        var dbHolder = findDeepHydratedEntity(
+                hydrator.withExclude(TablePerClassSub.class, "target"), InheritanceHolder.class, 1);
+
+        var dbSub = (TablePerClassSub) Hibernate.unproxy(dbHolder.getTablePerClass());
+        assertThat(Hibernate.isInitialized(dbSub.getTarget())).isFalse();
     }
 
     @Test
@@ -73,5 +98,14 @@ class TestInheritanceStrategy extends AbstractTest {
                 hydrator.withExclude(MappedSub.class, "target"), MappedSub.class, 1);
 
         assertThat(Hibernate.isInitialized(dbSub.getTarget())).isFalse();
+    }
+
+    /**
+     * A mapped superclass is no entity, so its attributes cannot be excluded via it.
+     */
+    @Test
+    void mappedSuperclass_withExcludeOfSuperclass() {
+        assertInvalidExclude(MappedBase.class, "target")
+                .hasMessageContaining(MappedBase.class.getName());
     }
 }

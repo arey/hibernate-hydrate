@@ -1,5 +1,7 @@
 package com.javaetmoi.core.persistence.hibernate.compositeId;
 
+import com.javaetmoi.core.persistence.hibernate.mapping.Target;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -14,24 +16,19 @@ public class IdClassLink {
     @Id
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "TARGET_ID")
-    private LinkTarget target;
+    private Target target;
 
     @Id
     private int seq;
 
-    public LinkTarget getTarget() {
-        return target;
-    }
+    protected IdClassLink() {}
 
-    public void setTarget(LinkTarget target) {
+    public IdClassLink(Target target, int seq) {
         this.target = target;
-    }
-
-    public int getSeq() {
-        return seq;
-    }
-
-    public void setSeq(int seq) {
         this.seq = seq;
+    }
+
+    public Target getTarget() {
+        return target;
     }
 }

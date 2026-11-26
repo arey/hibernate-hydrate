@@ -1,11 +1,11 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.List;
-
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import com.javaetmoi.core.persistence.hibernate.mapping.ToOneHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +24,6 @@ class LazyLoadingUtilTest extends AbstractTest {
         var dbHolder = doInJPA(entityManager ->
                 LazyLoadingUtil.deepHydrate(entityManager, entityManager.find(ToOneHolder.class, 1)));
 
-        // At this step, transaction and session are closed.
         assertThat(dbHolder.getManyToOne().getTags()).containsExactly("tag10");
     }
 
@@ -34,7 +33,6 @@ class LazyLoadingUtilTest extends AbstractTest {
                 LazyLoadingUtil.deepHydrate(
                         entityManager.getEntityManagerFactory(), entityManager.find(ToOneHolder.class, 1)));
 
-        // At this step, transaction and session are closed.
         assertThat(dbHolder.getManyToOne().getTags()).containsExactly("tag10");
     }
 
@@ -43,7 +41,6 @@ class LazyLoadingUtilTest extends AbstractTest {
         var dbHolders = doInJPA(entityManager ->
                 LazyLoadingUtil.deepHydrate(entityManager, List.of(entityManager.find(ToOneHolder.class, 1))));
 
-        // At this step, transaction and session are closed.
         assertThat(dbHolders).hasSize(1);
         assertThat(dbHolders.get(0).getManyToOne().getTags()).containsExactly("tag10");
     }
@@ -54,7 +51,6 @@ class LazyLoadingUtilTest extends AbstractTest {
                 LazyLoadingUtil.deepHydrate(
                         entityManager.getEntityManagerFactory(), List.of(entityManager.find(ToOneHolder.class, 1))));
 
-        // At this step, transaction and session are closed.
         assertThat(dbHolders).hasSize(1);
         assertThat(dbHolders.get(0).getManyToOne().getTags()).containsExactly("tag10");
     }

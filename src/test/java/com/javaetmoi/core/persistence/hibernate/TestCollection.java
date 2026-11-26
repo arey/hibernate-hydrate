@@ -1,14 +1,14 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import java.util.List;
-import java.util.Set;
-
 import com.javaetmoi.core.persistence.hibernate.mapping.CollectionHolder;
 import com.javaetmoi.core.persistence.hibernate.mapping.Part;
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

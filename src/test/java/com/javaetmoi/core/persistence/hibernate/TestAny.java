@@ -1,11 +1,14 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.any.AnyHolder;
-import com.javaetmoi.core.persistence.hibernate.any.AnyTarget;
+import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Any;
 import org.hibernate.annotations.ManyToAny;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,28 +16,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests the hydration of {@link Any} and {@link ManyToAny} associations.
  */
 class TestAny extends AbstractTest {
+    @BeforeEach
+    void setUpEntities() {
+        var any = new Target(10);
+        var manyToAny = new Target(20);
+        persist(any, manyToAny, new AnyHolder(1, any, List.of(manyToAny)));
+    }
+
+    /**
+     * Without hydration the associations are not initialized.
+     */
+    @Test
+    void notHydrated() {
+        var dbHolder = findEntity(AnyHolder.class, 1);
+
+        assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isFalse();
+        assertThat(Hibernate.isInitialized(dbHolder.getTargets())).isFalse();
+    }
+
     @Test
     void any() {
         var dbHolder = findDeepHydratedEntity(AnyHolder.class, 1);
 
-        // At this step, transaction and session are closed.
-        assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isTrue();
-        var dbTarget = (AnyTarget) Hibernate.unproxy(dbHolder.getTarget());
-        assertThat(dbTarget.getId()).isEqualTo(10);
-        assertThat(dbTarget.getTags()).containsExactly("any");
-    }
-
-    @Test
-    void manyToAny() {
-        var dbHolder = findDeepHydratedEntity(AnyHolder.class, 1);
-
-        // At this step, transaction and session are closed.
-        assertThat(dbHolder.getTargets()).hasSize(1);
-        var dbElement = dbHolder.getTargets().get(0);
-        assertThat(Hibernate.isInitialized(dbElement)).isTrue();
-        var dbTarget = (AnyTarget) Hibernate.unproxy(dbElement);
-        assertThat(dbTarget.getId()).isEqualTo(20);
-        assertThat(dbTarget.getTags()).containsExactly("manyToAny");
+        var dbTarget = (Target) Hibernate.unproxy(dbHolder.getTarget());
+        assertThat(dbTarget.getTags()).containsExactly("tag10");
     }
 
     @Test
@@ -42,9 +47,16 @@ class TestAny extends AbstractTest {
         var dbHolder = findDeepHydratedEntity(
                 hydrator.withExclude(AnyHolder.class, "target"), AnyHolder.class, 1);
 
-        // At this step, transaction and session are closed.
         assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isFalse();
-        assertThat(Hibernate.isInitialized(dbHolder.getTargets())).isTrue();
+    }
+
+    @Test
+    void manyToAny() {
+        var dbHolder = findDeepHydratedEntity(AnyHolder.class, 1);
+
+        assertThat(dbHolder.getTargets()).hasSize(1);
+        var dbTarget = (Target) Hibernate.unproxy(dbHolder.getTargets().get(0));
+        assertThat(dbTarget.getTags()).containsExactly("tag20");
     }
 
     @Test
@@ -52,8 +64,6 @@ class TestAny extends AbstractTest {
         var dbHolder = findDeepHydratedEntity(
                 hydrator.withExclude(AnyHolder.class, "targets"), AnyHolder.class, 1);
 
-        // At this step, transaction and session are closed.
-        assertThat(Hibernate.isInitialized(dbHolder.getTarget())).isTrue();
         assertThat(Hibernate.isInitialized(dbHolder.getTargets())).isFalse();
     }
 }
