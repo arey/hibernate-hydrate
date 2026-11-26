@@ -1,6 +1,7 @@
 package com.javaetmoi.core.persistence.hibernate.inheritance;
 
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;

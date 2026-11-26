@@ -1,10 +1,10 @@
 package com.javaetmoi.core.persistence.hibernate.mapping;
 
-import java.util.List;
-
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+
+import java.util.List;
 
 /**
  * Target of the associations under test.

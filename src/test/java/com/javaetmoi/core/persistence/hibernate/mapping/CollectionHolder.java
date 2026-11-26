@@ -1,14 +1,14 @@
 package com.javaetmoi.core.persistence.hibernate.mapping;
 
-import java.util.List;
-import java.util.Set;
-
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+
+import java.util.List;
+import java.util.Set;
 
 @Entity
 public class CollectionHolder {

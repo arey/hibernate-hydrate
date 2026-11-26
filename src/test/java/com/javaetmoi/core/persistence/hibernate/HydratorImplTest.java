@@ -16,7 +16,6 @@ package com.javaetmoi.core.persistence.hibernate;
 import com.javaetmoi.core.persistence.hibernate.domain.Address;
 import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
-import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
@@ -332,17 +331,6 @@ class HydratorImplTest extends AbstractTest {
     void withExclude_basicAttribute() {
         assertInvalidExclude(Employee.class, "name")
                 .hasMessageContaining("name");
-    }
-
-    @Test
-    void withExclude_unknownAttributeOfEmbeddable() {
-        assertInvalidExclude(Foo.class, "bar.unknown")
-                .hasMessageContaining("bar.unknown");
-    }
-
-    @Test
-    void withExclude_incompletePath() {
-        assertInvalidExclude(Foo.class, "bar.");
     }
 
     /**

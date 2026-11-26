@@ -47,24 +47,21 @@ class TestCollection extends AbstractTest {
     void list() {
         var dbHolder = findDeepHydratedEntity(CollectionHolder.class, 1);
 
-        assertThat(dbHolder.getList()).hasSize(1);
-        assertThat(dbHolder.getList().get(0).getTags()).containsExactly("tag10");
+        assertThat(dbHolder.getList()).flatExtracting(Target::getTags).containsExactly("tag10");
     }
 
     @Test
     void set() {
         var dbHolder = findDeepHydratedEntity(CollectionHolder.class, 1);
 
-        assertThat(dbHolder.getSet()).hasSize(1);
-        assertThat(dbHolder.getSet().iterator().next().getTags()).containsExactly("tag20");
+        assertThat(dbHolder.getSet()).flatExtracting(Target::getTags).containsExactly("tag20");
     }
 
     @Test
     void manyToMany() {
         var dbHolder = findDeepHydratedEntity(CollectionHolder.class, 1);
 
-        assertThat(dbHolder.getManyToMany()).hasSize(1);
-        assertThat(dbHolder.getManyToMany().get(0).getTags()).containsExactly("tag30");
+        assertThat(dbHolder.getManyToMany()).flatExtracting(Target::getTags).containsExactly("tag30");
     }
 
     @Test
@@ -78,8 +75,7 @@ class TestCollection extends AbstractTest {
     void embeddableElements() {
         var dbHolder = findDeepHydratedEntity(CollectionHolder.class, 1);
 
-        assertThat(dbHolder.getEmbeddables()).hasSize(1);
-        assertThat(dbHolder.getEmbeddables().get(0).getTarget().getTags()).containsExactly("tag40");
+        assertThat(dbHolder.getEmbeddables()).extracting(Part::getTarget).flatExtracting(Target::getTags).containsExactly("tag40");
     }
 
     @Test

@@ -48,16 +48,14 @@ class TestMap extends AbstractTest {
     void entityKeys() {
         var dbHolder = findDeepHydratedEntity(MapHolder.class, 1);
 
-        assertThat(dbHolder.getEntities()).hasSize(1);
-        assertThat(dbHolder.getEntities().keySet().iterator().next().getTags()).containsExactly("tag10");
+        assertThat(dbHolder.getEntities().keySet()).flatExtracting(Target::getTags).containsExactly("tag10");
     }
 
     @Test
     void entityValues() {
         var dbHolder = findDeepHydratedEntity(MapHolder.class, 1);
 
-        assertThat(dbHolder.getEntities()).hasSize(1);
-        assertThat(dbHolder.getEntities().values().iterator().next().getTags()).containsExactly("tag20");
+        assertThat(dbHolder.getEntities().values()).flatExtracting(Target::getTags).containsExactly("tag20");
     }
 
     /**
@@ -88,9 +86,8 @@ class TestMap extends AbstractTest {
     void embeddableKeys() {
         var dbHolder = findDeepHydratedEntity(MapHolder.class, 1);
 
-        assertThat(dbHolder.getEmbeddableKeys()).hasSize(1);
-        assertThat(dbHolder.getEmbeddableKeys().keySet().iterator().next().getTarget().getTags())
-                .containsExactly("tag50");
+        assertThat(dbHolder.getEmbeddableKeys().keySet())
+                .extracting(Part::getTarget).flatExtracting(Target::getTags).containsExactly("tag50");
     }
 
     @Test

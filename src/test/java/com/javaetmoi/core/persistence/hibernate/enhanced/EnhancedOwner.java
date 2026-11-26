@@ -1,10 +1,11 @@
 package com.javaetmoi.core.persistence.hibernate.enhanced;
 
+import org.hibernate.annotations.LazyGroup;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
-import org.hibernate.annotations.LazyGroup;
 
 import static jakarta.persistence.FetchType.LAZY;
 

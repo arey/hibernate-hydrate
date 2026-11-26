@@ -1,9 +1,9 @@
 package com.javaetmoi.core.persistence.hibernate.inheritance;
 
-import java.util.List;
-
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+
+import java.util.List;
 
 @Entity
 public class Dog extends Mammal {

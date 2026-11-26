@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests the hydration of entities of a single table inheritance hierarchy with three levels.
  * The entity is reached by an association declared with the root type of the hierarchy.
  */
-class TestDeepInheritance extends AbstractTest {
+class TestSingleTableInheritance extends AbstractTest {
     @BeforeEach
     void setUpEntities() {
         var dog = new Dog(1, List.of("animal"), List.of("mammal"), List.of("dog"));

@@ -3,7 +3,6 @@
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
              version="3.2">
   <persistence-unit name="hibernate-hydrate">
-    <class>com.javaetmoi.core.persistence.hibernate.chain.ChainNode</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedIdLink</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.EmbeddedLinkId</class>
     <class>com.javaetmoi.core.persistence.hibernate.compositeId.IdClassLink</class>
@@ -44,6 +43,7 @@
     <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.System</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.AnyHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.ArrayHolder</class>
+    <class>com.javaetmoi.core.persistence.hibernate.mapping.ChainNode</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.CollectionHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.EmbeddedHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.MapHolder</class>

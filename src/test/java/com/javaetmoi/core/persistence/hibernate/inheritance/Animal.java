@@ -1,10 +1,10 @@
 package com.javaetmoi.core.persistence.hibernate.inheritance;
 
-import java.util.List;
-
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+
+import java.util.List;
 
 /**
  * Root of a three level hierarchy: {@link Animal} ← {@link Mammal} ← {@link Dog}.

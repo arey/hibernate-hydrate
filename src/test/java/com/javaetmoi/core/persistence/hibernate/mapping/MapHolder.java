@@ -1,7 +1,5 @@
 package com.javaetmoi.core.persistence.hibernate.mapping;
 
-import java.util.Map;
-
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,6 +8,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.MapKey;
 import jakarta.persistence.MapKeyJoinColumn;
 import jakarta.persistence.OneToMany;
+
+import java.util.Map;
 
 @Entity
 public class MapHolder {

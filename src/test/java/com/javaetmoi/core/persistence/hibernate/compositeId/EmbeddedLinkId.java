@@ -2,11 +2,11 @@ package com.javaetmoi.core.persistence.hibernate.compositeId;
 
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 
-import java.io.Serializable;
-import java.util.Objects;
-
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.ManyToOne;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 import static jakarta.persistence.FetchType.LAZY;
 

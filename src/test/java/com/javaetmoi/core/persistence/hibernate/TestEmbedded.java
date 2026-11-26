@@ -78,8 +78,7 @@ class TestEmbedded extends AbstractTest {
     void collection() {
         var dbOuter = findDeepHydratedOuter(hydrator);
 
-        assertThat(dbOuter.getTargets()).hasSize(1);
-        assertThat(dbOuter.getTargets().get(0).getTags()).containsExactly("tag20");
+        assertThat(dbOuter.getTargets()).flatExtracting(Target::getTags).containsExactly("tag20");
     }
 
     @Test
@@ -129,6 +128,17 @@ class TestEmbedded extends AbstractTest {
         assertThat(Hibernate.isInitialized(dbOuter.getTargets())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getMap())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getPart().getTarget())).isFalse();
+    }
+
+    @Test
+    void withExclude_unknownAttribute() {
+        assertInvalidExclude(EmbeddedHolder.class, "outer.unknown")
+                .hasMessageContaining("outer.unknown");
+    }
+
+    @Test
+    void withExclude_incompletePath() {
+        assertInvalidExclude(EmbeddedHolder.class, "outer.");
     }
 
     @Test

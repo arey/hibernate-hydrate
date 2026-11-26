@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the hydration of the attributes of subclasses and superclasses for the inheritance strategies.
- * The single table strategy is tested by {@link TestDeepInheritance}.
+ * The single table strategy is tested by {@link TestSingleTableInheritance}.
  */
 class TestInheritanceStrategy extends AbstractTest {
     @BeforeEach

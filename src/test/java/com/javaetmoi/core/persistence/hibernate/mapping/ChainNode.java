@@ -1,4 +1,4 @@
-package com.javaetmoi.core.persistence.hibernate.chain;
+package com.javaetmoi.core.persistence.hibernate.mapping;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

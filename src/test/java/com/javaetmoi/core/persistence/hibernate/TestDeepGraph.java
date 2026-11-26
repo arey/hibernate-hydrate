@@ -1,6 +1,6 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import com.javaetmoi.core.persistence.hibernate.chain.ChainNode;
+import com.javaetmoi.core.persistence.hibernate.mapping.ChainNode;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 

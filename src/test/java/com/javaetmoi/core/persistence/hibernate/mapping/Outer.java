@@ -1,8 +1,5 @@
 package com.javaetmoi.core.persistence.hibernate.mapping;
 
-import java.util.List;
-import java.util.Map;
-
 import org.hibernate.annotations.Any;
 import org.hibernate.annotations.AnyDiscriminatorValue;
 import org.hibernate.annotations.AnyKeyJavaClass;
@@ -14,6 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
+
+import java.util.List;
+import java.util.Map;
 
 import static jakarta.persistence.FetchType.LAZY;
 
