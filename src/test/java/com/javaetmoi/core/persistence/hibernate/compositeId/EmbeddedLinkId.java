@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -14,7 +13,6 @@ import static jakarta.persistence.FetchType.LAZY;
 @Embeddable
 public class EmbeddedLinkId implements Serializable {
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "TARGET_ID")
     private Target target;
 
     private int seq;

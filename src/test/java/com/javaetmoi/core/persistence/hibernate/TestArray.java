@@ -1,6 +1,6 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import com.javaetmoi.core.persistence.hibernate.array.ArrayHolder;
+import com.javaetmoi.core.persistence.hibernate.mapping.ArrayHolder;
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,9 @@ class TestArray extends AbstractTest {
         var first = new Target(10);
         var second = new Target(20);
         persist(first, second,
-                new ArrayHolder(1, new String[] {"first", "second"}, new int[] {1, 2}, new Target[] {first, second}));
+                new ArrayHolder(1, new String[] {"first", "second"}, new int[] {1, 2}, new Target[] {first, second}),
+                // Holder with empty arrays.
+                new ArrayHolder(2, new String[0], new int[0], new Target[0]));
     }
 
     /**
@@ -62,5 +64,14 @@ class TestArray extends AbstractTest {
 
         assertThat(dbHolder.getElements()).hasSize(2);
         assertThat(Hibernate.isInitialized(dbHolder.getElements()[0].getTags())).isFalse();
+    }
+
+    @Test
+    void emptyArrays() {
+        var dbHolder = findDeepHydratedEntity(ArrayHolder.class, 2);
+
+        assertThat(dbHolder.getNames()).isEmpty();
+        assertThat(dbHolder.getNumbers()).isEmpty();
+        assertThat(dbHolder.getElements()).isEmpty();
     }
 }

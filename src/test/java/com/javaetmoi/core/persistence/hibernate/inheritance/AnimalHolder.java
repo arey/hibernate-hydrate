@@ -1,8 +1,7 @@
-package com.javaetmoi.core.persistence.hibernate.deepInheritance;
+package com.javaetmoi.core.persistence.hibernate.inheritance;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -16,7 +15,6 @@ public class AnimalHolder {
     private Integer id;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "ANIMAL_ID")
     private Animal animal;
 
     public AnimalHolder() {}

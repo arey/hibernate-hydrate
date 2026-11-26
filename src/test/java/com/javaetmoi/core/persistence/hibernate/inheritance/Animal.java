@@ -1,13 +1,10 @@
-package com.javaetmoi.core.persistence.hibernate.deepInheritance;
+package com.javaetmoi.core.persistence.hibernate.inheritance;
 
 import java.util.List;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 
 /**
  * Root of a three level hierarchy: {@link Animal} ← {@link Mammal} ← {@link Dog}.
@@ -18,8 +15,6 @@ public class Animal {
     private Integer id;
 
     @ElementCollection
-    @CollectionTable(name = "ANIMAL_NAMES", joinColumns = @JoinColumn(name = "ANIMAL_ID"))
-    @Column(name = "NAME")
     private List<String> animalNames;
 
     protected Animal() {}

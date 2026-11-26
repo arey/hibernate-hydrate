@@ -5,7 +5,6 @@ import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -15,7 +14,6 @@ import static jakarta.persistence.FetchType.LAZY;
 public class IdClassLink {
     @Id
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "TARGET_ID")
     private Target target;
 
     @Id

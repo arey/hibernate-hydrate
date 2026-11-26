@@ -1,9 +1,6 @@
-package com.javaetmoi.core.persistence.hibernate.array;
+package com.javaetmoi.core.persistence.hibernate.mapping;
 
-import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -17,15 +14,11 @@ public class ArrayHolder {
     private Integer id;
 
     @ElementCollection
-    @CollectionTable(name = "ARRAY_HOLDER_NAMES", joinColumns = @JoinColumn(name = "HOLDER_ID"))
     @OrderColumn(name = "POS")
-    @Column(name = "NAME")
     private String[] names;
 
     @ElementCollection
-    @CollectionTable(name = "ARRAY_HOLDER_NUMBERS", joinColumns = @JoinColumn(name = "HOLDER_ID"))
     @OrderColumn(name = "POS")
-    @Column(name = "NUMBER")
     private int[] numbers;
 
     @OneToMany

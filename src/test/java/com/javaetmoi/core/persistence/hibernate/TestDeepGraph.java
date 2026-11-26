@@ -1,6 +1,7 @@
 package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.chain.ChainNode;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,6 +14,19 @@ class TestDeepGraph extends AbstractTest {
      * Length of the chain. Long enough to overflow the stack, if the hydration is done by recursion.
      */
     private static final int LENGTH = 10_000;
+
+    /**
+     * Without hydration the next node is not initialized.
+     */
+    @Test
+    void notHydrated() {
+        var second = new ChainNode(2, null);
+        persist(second, new ChainNode(1, second));
+
+        var dbFirst = findEntity(ChainNode.class, 1);
+
+        assertThat(Hibernate.isInitialized(dbFirst.getNext())).isFalse();
+    }
 
     /**
      * A long chain of entities must not overflow the stack.

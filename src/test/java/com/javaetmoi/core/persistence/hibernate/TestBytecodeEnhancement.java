@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.function.Function;
 
 import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TestBytecodeEnhancement {
     private SessionFactory sessionFactory;
 
+    private Hydrator hydrator;
+
     @BeforeEach
     void setUpDatabase() {
         // The entities have to be loaded by the class loader of the test, because that one enhances them.
@@ -39,6 +40,7 @@ class TestBytecodeEnhancement {
                 .setProperty("hibernate.connection.url", "jdbc:h2:mem:hibernate-hydrate-enhanced;DB_CLOSE_DELAY=-1")
                 .setProperty("hibernate.hbm2ddl.auto", "create-drop")
                 .buildSessionFactory();
+        hydrator = hydrator(sessionFactory);
 
         sessionFactory.inTransaction(session -> {
             var owner = new EnhancedOwner(1, "content");
@@ -67,14 +69,14 @@ class TestBytecodeEnhancement {
 
     @Test
     void lazyBasic() {
-        var dbOwner = findDeepHydratedOwner(Function.identity());
+        var dbOwner = findDeepHydratedOwner(hydrator);
 
         assertThat(dbOwner.getContent()).isEqualTo("content");
     }
 
     @Test
     void lazyBasic_withExclude() {
-        var dbOwner = findDeepHydratedOwner(hydrator ->
+        var dbOwner = findDeepHydratedOwner(
                 hydrator.withExclude(EnhancedOwner.class, "content"));
 
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "content")).isFalse();
@@ -83,7 +85,7 @@ class TestBytecodeEnhancement {
 
     @Test
     void inverseOneToOne() {
-        var dbOwner = findDeepHydratedOwner(Function.identity());
+        var dbOwner = findDeepHydratedOwner(hydrator);
 
         assertThat(dbOwner.getInverse().getId()).isEqualTo(10);
         assertThat(dbOwner.getInverse().getOwner()).isSameAs(dbOwner);
@@ -92,7 +94,7 @@ class TestBytecodeEnhancement {
 
     @Test
     void inverseOneToOne_withExclude() {
-        var dbOwner = findDeepHydratedOwner(hydrator ->
+        var dbOwner = findDeepHydratedOwner(
                 hydrator.withExclude(EnhancedOwner.class, "inverse"));
 
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "inverse")).isFalse();
@@ -105,7 +107,7 @@ class TestBytecodeEnhancement {
      */
     @Test
     void lazyGroup_withPartialExclude() {
-        var dbOwner = findDeepHydratedOwner(hydrator ->
+        var dbOwner = findDeepHydratedOwner(
                 hydrator.withExclude(EnhancedOwner.class, "summary"));
 
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "summary")).isTrue();
@@ -117,7 +119,7 @@ class TestBytecodeEnhancement {
      */
     @Test
     void lazyGroup_withExclude() {
-        var dbOwner = findDeepHydratedOwner(hydrator ->
+        var dbOwner = findDeepHydratedOwner(
                 hydrator.withExclude(EnhancedOwner.class, "summary")
                         .withExclude(EnhancedOwner.class, "details"));
 
@@ -125,8 +127,7 @@ class TestBytecodeEnhancement {
         assertThat(Hibernate.isPropertyInitialized(dbOwner, "details")).isFalse();
     }
 
-    private EnhancedOwner findDeepHydratedOwner(Function<Hydrator, Hydrator> excludes) {
-        var hydrator = excludes.apply(hydrator(sessionFactory));
+    private EnhancedOwner findDeepHydratedOwner(Hydrator hydrator) {
         return sessionFactory.fromTransaction(session ->
                 hydrator.deepHydrate(session.find(EnhancedOwner.class, 1)));
     }

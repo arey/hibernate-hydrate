@@ -33,8 +33,7 @@ public class EnhancedOwner {
     @LazyGroup("group")
     private String details = "details";
 
-    public EnhancedOwner() {
-    }
+    protected EnhancedOwner() {}
 
     public EnhancedOwner(Integer id, String content) {
         this.id = id;

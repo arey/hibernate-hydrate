@@ -1,6 +1,6 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import com.javaetmoi.core.persistence.hibernate.any.AnyHolder;
+import com.javaetmoi.core.persistence.hibernate.mapping.AnyHolder;
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.Any;
@@ -20,7 +20,9 @@ class TestAny extends AbstractTest {
     void setUpEntities() {
         var any = new Target(10);
         var manyToAny = new Target(20);
-        persist(any, manyToAny, new AnyHolder(1, any, List.of(manyToAny)));
+        persist(any, manyToAny, new AnyHolder(1, any, List.of(manyToAny)),
+                // Holder without any associations.
+                new AnyHolder(2, null, List.of()));
     }
 
     /**
@@ -65,5 +67,13 @@ class TestAny extends AbstractTest {
                 hydrator.withExclude(AnyHolder.class, "targets"), AnyHolder.class, 1);
 
         assertThat(Hibernate.isInitialized(dbHolder.getTargets())).isFalse();
+    }
+
+    @Test
+    void emptyAssociations() {
+        var dbHolder = findDeepHydratedEntity(AnyHolder.class, 2);
+
+        assertThat(dbHolder.getTarget()).isNull();
+        assertThat(dbHolder.getTargets()).isEmpty();
     }
 }

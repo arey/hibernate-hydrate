@@ -23,8 +23,7 @@ public class EnhancedInverse {
     @ElementCollection
     private List<String> tags;
 
-    public EnhancedInverse() {
-    }
+    protected EnhancedInverse() {}
 
     public EnhancedInverse(Integer id, EnhancedOwner owner, List<String> tags) {
         this.id = id;

@@ -14,7 +14,7 @@ public class ChainNode {
     @ManyToOne(fetch = LAZY)
     private ChainNode next;
 
-    public ChainNode() {}
+    protected ChainNode() {}
 
     public ChainNode(Integer id, ChainNode next) {
         this.id = id;

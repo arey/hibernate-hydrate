@@ -1,9 +1,9 @@
 package com.javaetmoi.core.persistence.hibernate;
 
-import com.javaetmoi.core.persistence.hibernate.deepInheritance.Animal;
-import com.javaetmoi.core.persistence.hibernate.deepInheritance.AnimalHolder;
-import com.javaetmoi.core.persistence.hibernate.deepInheritance.Dog;
-import com.javaetmoi.core.persistence.hibernate.deepInheritance.Mammal;
+import com.javaetmoi.core.persistence.hibernate.inheritance.Animal;
+import com.javaetmoi.core.persistence.hibernate.inheritance.AnimalHolder;
+import com.javaetmoi.core.persistence.hibernate.inheritance.Dog;
+import com.javaetmoi.core.persistence.hibernate.inheritance.Mammal;
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

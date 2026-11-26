@@ -44,9 +44,8 @@ class TestInheritanceStrategy extends AbstractTest {
 
     @Test
     void joined() {
-        var dbHolder = findDeepHydratedEntity(InheritanceHolder.class, 1);
+        var dbSub = findDeepHydratedJoinedSub(hydrator);
 
-        var dbSub = (JoinedSub) Hibernate.unproxy(dbHolder.getJoined());
         assertThat(dbSub.getTarget().getTags()).containsExactly("tag10");
     }
 
@@ -55,18 +54,15 @@ class TestInheritanceStrategy extends AbstractTest {
      */
     @Test
     void joined_withExclude() {
-        var dbHolder = findDeepHydratedEntity(
-                hydrator.withExclude(JoinedSub.class, "target"), InheritanceHolder.class, 1);
+        var dbSub = findDeepHydratedJoinedSub(hydrator.withExclude(JoinedSub.class, "target"));
 
-        var dbSub = (JoinedSub) Hibernate.unproxy(dbHolder.getJoined());
         assertThat(Hibernate.isInitialized(dbSub.getTarget())).isFalse();
     }
 
     @Test
     void tablePerClass() {
-        var dbHolder = findDeepHydratedEntity(InheritanceHolder.class, 1);
+        var dbSub = findDeepHydratedTablePerClassSub(hydrator);
 
-        var dbSub = (TablePerClassSub) Hibernate.unproxy(dbHolder.getTablePerClass());
         assertThat(dbSub.getTarget().getTags()).containsExactly("tag20");
     }
 
@@ -75,10 +71,8 @@ class TestInheritanceStrategy extends AbstractTest {
      */
     @Test
     void tablePerClass_withExclude() {
-        var dbHolder = findDeepHydratedEntity(
-                hydrator.withExclude(TablePerClassSub.class, "target"), InheritanceHolder.class, 1);
+        var dbSub = findDeepHydratedTablePerClassSub(hydrator.withExclude(TablePerClassSub.class, "target"));
 
-        var dbSub = (TablePerClassSub) Hibernate.unproxy(dbHolder.getTablePerClass());
         assertThat(Hibernate.isInitialized(dbSub.getTarget())).isFalse();
     }
 
@@ -107,5 +101,15 @@ class TestInheritanceStrategy extends AbstractTest {
     void mappedSuperclass_withExcludeOfSuperclass() {
         assertInvalidExclude(MappedBase.class, "target")
                 .hasMessageContaining(MappedBase.class.getName());
+    }
+
+    private JoinedSub findDeepHydratedJoinedSub(Hydrator hydrator) {
+        var dbHolder = findDeepHydratedEntity(hydrator, InheritanceHolder.class, 1);
+        return (JoinedSub) Hibernate.unproxy(dbHolder.getJoined());
+    }
+
+    private TablePerClassSub findDeepHydratedTablePerClassSub(Hydrator hydrator) {
+        var dbHolder = findDeepHydratedEntity(hydrator, InheritanceHolder.class, 1);
+        return (TablePerClassSub) Hibernate.unproxy(dbHolder.getTablePerClass());
     }
 }

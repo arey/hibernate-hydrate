@@ -47,22 +47,21 @@ class TestEmbedded extends AbstractTest {
 
     @Test
     void association() {
-        var dbOuter = findDeepHydratedEntity(EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator);
 
         assertThat(dbOuter.getTarget().getTags()).containsExactly("tag10");
     }
 
     @Test
     void association_withExclude() {
-        var dbOuter = findDeepHydratedEntity(
-                hydrator.withExclude(EmbeddedHolder.class, "outer.target"), EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer.target"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getTarget())).isFalse();
     }
 
     @Test
     void any() {
-        var dbOuter = findDeepHydratedEntity(EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator);
 
         var dbTarget = (Target) Hibernate.unproxy(dbOuter.getAny());
         assertThat(dbTarget.getTags()).containsExactly("tag40");
@@ -70,15 +69,14 @@ class TestEmbedded extends AbstractTest {
 
     @Test
     void any_withExclude() {
-        var dbOuter = findDeepHydratedEntity(
-                hydrator.withExclude(EmbeddedHolder.class, "outer.any"), EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer.any"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getAny())).isFalse();
     }
 
     @Test
     void collection() {
-        var dbOuter = findDeepHydratedEntity(EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator);
 
         assertThat(dbOuter.getTargets()).hasSize(1);
         assertThat(dbOuter.getTargets().get(0).getTags()).containsExactly("tag20");
@@ -86,38 +84,35 @@ class TestEmbedded extends AbstractTest {
 
     @Test
     void collection_withExclude() {
-        var dbOuter = findDeepHydratedEntity(
-                hydrator.withExclude(EmbeddedHolder.class, "outer.targets"), EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer.targets"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getTargets())).isFalse();
     }
 
     @Test
     void map() {
-        var dbOuter = findDeepHydratedEntity(EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator);
 
         assertThat(dbOuter.getMap().get("key").getTags()).containsExactly("tag50");
     }
 
     @Test
     void map_withExclude() {
-        var dbOuter = findDeepHydratedEntity(
-                hydrator.withExclude(EmbeddedHolder.class, "outer.map"), EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer.map"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getMap())).isFalse();
     }
 
     @Test
     void nestedEmbeddable() {
-        var dbOuter = findDeepHydratedEntity(EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator);
 
         assertThat(dbOuter.getPart().getTarget().getTags()).containsExactly("tag30");
     }
 
     @Test
     void nestedEmbeddable_withExclude() {
-        var dbOuter = findDeepHydratedEntity(
-                hydrator.withExclude(EmbeddedHolder.class, "outer.part.target"), EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer.part.target"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getPart().getTarget())).isFalse();
     }
@@ -127,8 +122,7 @@ class TestEmbedded extends AbstractTest {
      */
     @Test
     void withExclude() {
-        var dbOuter = findDeepHydratedEntity(
-                hydrator.withExclude(EmbeddedHolder.class, "outer"), EmbeddedHolder.class, 1).getOuter();
+        var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getTarget())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getAny())).isFalse();
@@ -146,5 +140,9 @@ class TestEmbedded extends AbstractTest {
         assertThat(dbOuter.getTargets()).isEmpty();
         assertThat(dbOuter.getMap()).isEmpty();
         assertThat(dbOuter.getPart()).isNull();
+    }
+
+    private Outer findDeepHydratedOuter(Hydrator hydrator) {
+        return findDeepHydratedEntity(hydrator, EmbeddedHolder.class, 1).getOuter();
     }
 }

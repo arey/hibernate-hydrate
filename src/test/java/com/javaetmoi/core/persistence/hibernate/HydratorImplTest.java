@@ -18,12 +18,10 @@ import com.javaetmoi.core.persistence.hibernate.domain.Country;
 import com.javaetmoi.core.persistence.hibernate.domain.Employee;
 import com.javaetmoi.core.persistence.hibernate.domain.Foo;
 import com.javaetmoi.core.persistence.hibernate.domain.Project;
+import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
-import org.hibernate.collection.spi.PersistentCollection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import jakarta.persistence.ManyToOne;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,10 +51,20 @@ class HydratorImplTest extends AbstractTest {
     private Address lyon;
 
     /**
-     * Populate entities graph. It matches the data set of the embedded database.
+     * Persist the graph of entities and create an equal graph of plain objects as expectation.
      */
     @BeforeEach
     void setUpEntities() {
+        persist(createGraph());
+        createGraph();
+    }
+
+    /**
+     * Create the graph of entities.
+     *
+     * @return the entities to persist. They cascade to the other ones.
+     */
+    private Object[] createGraph() {
         var france = new Country(1000, "France");
         james = new Employee(1, "James", "Developer");
         tom = new Employee(2, "Tom", "Project Manager");
@@ -75,34 +83,21 @@ class HydratorImplTest extends AbstractTest {
         tom.getProjects().add(android);
         tom.getAddresses().put(lyon.getType(), lyon);
         iphone.getMembers().add(james);
+
+        return new Object[] {france, james, tom};
     }
 
-    //
-    // Without hydration.
-    //
-
     /**
-     * Verify the {@link LazyInitializationException} is thrown when accessing entity relations
-     * outside a transaction, a Hibernate {@link PersistentCollection} in this test.
+     * Without hydration the associations are not initialized.
      */
     @Test
-    void lazyInitializationExceptionOnPersistentCollection() {
+    void notHydrated() {
         var dbJames = findEntity(Employee.class, 1);
-
-        assertThatThrownBy(() -> dbJames.getProjects().contains(android))
-                .isInstanceOf(LazyInitializationException.class);
-    }
-
-    /**
-     * Verify the {@link LazyInitializationException} is thrown when accessing entity relations
-     * outside a transaction, a {@link ManyToOne} relationship in this test.
-     */
-    @Test
-    void lazyInitializationExceptionWithManyToOne() {
         var dbLyon = findEntity(Address.class, 200);
 
-        assertThatThrownBy(() -> dbLyon.getEmployee().getName())
-                .isInstanceOf(LazyInitializationException.class);
+        assertThat(Hibernate.isInitialized(dbJames.getProjects())).isFalse();
+        assertThat(Hibernate.isInitialized(dbJames.getAddresses())).isFalse();
+        assertThat(Hibernate.isInitialized(dbLyon.getEmployee())).isFalse();
     }
 
     //
@@ -122,6 +117,17 @@ class HydratorImplTest extends AbstractTest {
     @Test
     void deepHydrate_newEntity() {
         assertThat(hydrator.deepHydrate(james)).isSameAs(james);
+    }
+
+    /**
+     * The hydration needs an open session: A detached entity cannot be hydrated.
+     */
+    @Test
+    void deepHydrate_detachedEntity() {
+        var dbJames = findEntity(Employee.class, 1);
+
+        assertThatThrownBy(() -> hydrator.deepHydrate(dbJames))
+                .isInstanceOf(LazyInitializationException.class);
     }
 
     @Test
@@ -236,8 +242,7 @@ class HydratorImplTest extends AbstractTest {
                 hydrator.withExclude(Employee.class, "addresses"), Employee.class, 1);
 
         assertThat(dbJames.getProjects()).containsExactly(android, iphone);
-        assertThatThrownBy(() -> dbJames.getAddresses().get("home"))
-                .isInstanceOf(LazyInitializationException.class);
+        assertThat(Hibernate.isInitialized(dbJames.getAddresses())).isFalse();
     }
 
     /**
@@ -249,8 +254,7 @@ class HydratorImplTest extends AbstractTest {
                 hydrator.withExclude(Project.class, "members"), Employee.class, 1);
 
         assertThat(dbJames.getAddresses()).containsOnlyKeys("home", "work");
-        assertThatThrownBy(() -> dbJames.getProjects().get(0).getMembers().size())
-                .isInstanceOf(LazyInitializationException.class);
+        assertThat(Hibernate.isInitialized(dbJames.getProjects().get(0).getMembers())).isFalse();
     }
 
     @Test
@@ -259,10 +263,8 @@ class HydratorImplTest extends AbstractTest {
                 hydrator.withExclude(Project.class, "members").withExclude(Employee.class, "addresses"),
                 Employee.class, 1);
 
-        assertThatThrownBy(() -> dbJames.getProjects().get(0).getMembers().size())
-                .isInstanceOf(LazyInitializationException.class);
-        assertThatThrownBy(() -> dbJames.getAddresses().get("home"))
-                .isInstanceOf(LazyInitializationException.class);
+        assertThat(Hibernate.isInitialized(dbJames.getProjects().get(0).getMembers())).isFalse();
+        assertThat(Hibernate.isInitialized(dbJames.getAddresses())).isFalse();
     }
 
     /**

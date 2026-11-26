@@ -1,8 +1,7 @@
-package com.javaetmoi.core.persistence.hibernate.any;
+package com.javaetmoi.core.persistence.hibernate.mapping;
 
 import java.util.List;
 
-import com.javaetmoi.core.persistence.hibernate.mapping.Target;
 import org.hibernate.annotations.Any;
 import org.hibernate.annotations.AnyDiscriminatorValue;
 import org.hibernate.annotations.AnyKeyJavaClass;
