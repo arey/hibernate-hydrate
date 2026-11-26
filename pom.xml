@@ -82,7 +82,7 @@
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
     <!-- * Last Hibernate supported version  -->
-    <version.hibernate>7.3.0.Final</version.hibernate>
+    <version.hibernate>7.4.17.Final</version.hibernate>
 
     <!-- * For testing purpose -->
     <version.assertj>3.27.7</version.assertj>
@@ -332,6 +332,12 @@
       <id>last</id>
     </profile>
 
+    <profile>
+      <id>hibernate-7.3</id>
+      <properties>
+        <version.hibernate>7.3.13.Final</version.hibernate>
+      </properties>
+    </profile>
     <profile>
       <id>hibernate-7.2</id>
       <properties>
