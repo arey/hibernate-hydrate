@@ -1,0 +1,112 @@
+package com.javaetmoi.core.persistence.hibernate;
+
+import java.util.List;
+import java.util.function.Function;
+
+import com.javaetmoi.core.persistence.hibernate.enhanced.EnhancedInverse;
+import com.javaetmoi.core.persistence.hibernate.enhanced.EnhancedOwner;
+import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.engine.spi.PersistentAttributeInterceptable;
+import org.hibernate.testing.bytecode.enhancement.extension.BytecodeEnhanced;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static com.javaetmoi.core.persistence.hibernate.Hydrator.hydrator;
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Tests the hydration of bytecode enhanced entities.
+ * Their lazy basic attributes and the inverse sides of their lazy one-to-one associations are loaded on access,
+ * instead of being loaded together with the entity.
+ */
+@BytecodeEnhanced
+class TestBytecodeEnhancement {
+    private SessionFactory sessionFactory;
+
+    @BeforeEach
+    void setUpDatabase() {
+        // The entities have to be loaded by the class loader of the test, because that one enhances them.
+        var bootstrapRegistry = new BootstrapServiceRegistryBuilder()
+                .applyClassLoader(getClass().getClassLoader())
+                .build();
+        sessionFactory = new Configuration(bootstrapRegistry)
+                .addAnnotatedClass(EnhancedOwner.class)
+                .addAnnotatedClass(EnhancedInverse.class)
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:hibernate-hydrate-enhanced;DB_CLOSE_DELAY=-1")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .buildSessionFactory();
+
+        sessionFactory.inTransaction(session -> {
+            var owner = new EnhancedOwner(1, "content");
+            session.persist(owner);
+            session.persist(new EnhancedInverse(10, owner, List.of("inverse")));
+        });
+    }
+
+    @AfterEach
+    void tearDownDatabase() {
+        sessionFactory.close();
+    }
+
+    /**
+     * Ensure that the entities are enhanced at all. Otherwise, the other tests would test nothing.
+     */
+    @Test
+    void enhanced() {
+        assertThat(PersistentAttributeInterceptable.class).isAssignableFrom(EnhancedOwner.class);
+
+        var dbOwner = sessionFactory.fromTransaction(session -> session.find(EnhancedOwner.class, 1));
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "content")).isFalse();
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "inverse")).isFalse();
+    }
+
+    @Test
+    void lazyBasic() {
+        var dbOwner = findDeepHydratedOwner(Function.identity());
+
+        // At this step, transaction and session are closed.
+        assertThat(dbOwner.getContent()).isEqualTo("content");
+    }
+
+    @Test
+    void lazyBasic_withExclude() {
+        var dbOwner = findDeepHydratedOwner(hydrator ->
+                hydrator.withExclude(EnhancedOwner.class, "content"));
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "content")).isFalse();
+        assertThat(dbOwner.getInverse().getTags()).containsExactly("inverse");
+    }
+
+    @Test
+    void inverseOneToOne() {
+        var dbOwner = findDeepHydratedOwner(Function.identity());
+
+        // At this step, transaction and session are closed.
+        assertThat(dbOwner.getInverse().getId()).isEqualTo(10);
+        assertThat(dbOwner.getInverse().getOwner()).isSameAs(dbOwner);
+        assertThat(dbOwner.getInverse().getTags()).containsExactly("inverse");
+    }
+
+    @Test
+    void inverseOneToOne_withExclude() {
+        var dbOwner = findDeepHydratedOwner(hydrator ->
+                hydrator.withExclude(EnhancedOwner.class, "inverse"));
+
+        // At this step, transaction and session are closed.
+        assertThat(Hibernate.isPropertyInitialized(dbOwner, "inverse")).isFalse();
+        assertThat(dbOwner.getContent()).isEqualTo("content");
+    }
+
+    private EnhancedOwner findDeepHydratedOwner(Function<Hydrator, Hydrator> excludes) {
+        var hydrator = excludes.apply(hydrator(sessionFactory));
+        return sessionFactory.fromTransaction(session ->
+                hydrator.deepHydrate(session.find(EnhancedOwner.class, 1)));
+    }
+}

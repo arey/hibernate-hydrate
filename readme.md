@@ -11,6 +11,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 * Follows associations to entities, collections, maps, arrays, embeddables, `@Any` and `@ManyToAny`
   associations and associations inside composite identifiers (`@IdClass` and `@EmbeddedId`)
 * Handles deep object graphs without overflowing the stack
+* Supports bytecode enhanced entities including their lazy basic attributes
 * Attributes can be excluded from the hydration
 * Supports JPA with Hibernate as provider
 * Supports Hibernate 3.x to 7.x (with different artefactId)
@@ -119,12 +120,17 @@ public class MyEntityService {
 }
 ```
 
-`withExclude` excludes associations, collections and embedded attributes from the hydration.
+`withExclude` excludes associations, collections, embedded attributes and
+lazy basic attributes (`@Basic(fetch = LAZY)`) from the hydration.
 Attributes inside of embedded attributes and embedded identifiers are addressed by a path,
 e.g. `"address.country"` or `"id.owner"`.
 Attributes inside of collections of embeddables cannot be excluded.
-Basic attributes are never hydrated, so excluding them, like excluding unknown attributes,
+Other basic attributes are never hydrated, so excluding them, like excluding unknown attributes,
 throws an `IllegalArgumentException`.
+
+Lazy basic attributes are lazy for bytecode enhanced entities only.
+Hibernate loads all attributes of a lazy group (`@LazyGroup`) at once.
+So to keep an excluded lazy attribute unloaded, all attributes of its lazy group have to be excluded.
 
 ## Contributing to Hibernate Hydrate ##
 

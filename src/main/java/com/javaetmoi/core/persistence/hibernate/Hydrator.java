@@ -36,7 +36,8 @@ public interface Hydrator {
 
     /**
      * Exclude the attribute of the entity from hydration.
-     * Supports attributes that are associations to entities, collections or embedded.
+     * Supports attributes that are associations to entities, collections or embedded
+     * and lazy basic attributes ({@code @Basic(fetch = LAZY)}).
      * Attributes inside of embedded attributes and embedded identifiers are addressed by a path,
      * e.g. {@code "address.country"} or {@code "id.owner"}.
      * Attributes inside of collections of {@link jakarta.persistence.Embeddable}s are not supported.
@@ -47,7 +48,7 @@ public interface Hydrator {
      *            Attribute name or path to an attribute inside of an embedded attribute.
      * @throws IllegalArgumentException
      *            if the entity class is not a JPA entity, the attribute does not exist
-     *            or the attribute is a basic value, which is never hydrated.
+     *            or the attribute is a basic value that is not lazy, which is never hydrated.
      * @return new instance with the exclusion.
      */
     public Hydrator withExclude(Class<?> entityClass, String attribute);
