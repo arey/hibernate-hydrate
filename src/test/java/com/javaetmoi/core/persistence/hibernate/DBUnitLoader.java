@@ -94,8 +94,12 @@ public class DBUnitLoader {
                 .toArray(IDataSet[]::new);
 
         var connection = connection();
-        executeAll(connection, DELETE_ALL, dataSets);
-        executeAll(connection, INSERT, dataSets);
+        try {
+            executeAll(connection, DELETE_ALL, dataSets);
+            executeAll(connection, INSERT, dataSets);
+        } finally {
+            close(connection);
+        }
     }
 
     private IDataSet buildDataSet(Class<?> testClass, String dataSetLocation) {
@@ -129,15 +133,26 @@ public class DBUnitLoader {
         }
     }
 
+    private void close(IDatabaseConnection connection) {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while closing the JDBC connection", e);
+        }
+    }
+
     public void executeAll(IDatabaseConnection connection, DatabaseOperation operation, IDataSet... dataSets) {
         try (var jdbcConnection = dataSource.getConnection(); var statement = jdbcConnection.createStatement()) {
             // language=H2
             statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            for (var dataSet : dataSets) {
-                operation.execute(connection, dataSet);
+            try {
+                for (var dataSet : dataSets) {
+                    operation.execute(connection, dataSet);
+                }
+            } finally {
+                // language=H2
+                statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
             }
-            // language=H2
-            statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
         } catch (NoSuchTableException e) {
             // Ignore missing tables.
             // Delete all: A not existing table needs not be dropped.

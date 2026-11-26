@@ -7,6 +7,7 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.stat.Statistics;
 import org.hibernate.testing.transaction.TransactionUtil;
 import org.hibernate.testing.transaction.TransactionUtil.JPATransactionFunction;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
@@ -33,6 +34,11 @@ public class AbstractTest {
 
         // Reset Hibernate statistics.
         statistics().clear();
+    }
+
+    @AfterEach
+    void tearDownDatabase() {
+        entityManagerFactory.close();
     }
 
     //
