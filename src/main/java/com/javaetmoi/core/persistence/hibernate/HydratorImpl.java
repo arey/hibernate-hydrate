@@ -63,7 +63,7 @@ class HydratorImpl implements Hydrator {
             throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
                     attribute, entityDescriptor.getEntityName()));
         }
-        if (!isHydratable(attributeMapping)) {
+        if (inflater(attributeMapping) == null) {
             throw new IllegalArgumentException("The attribute %s of the entity %s is not hydrated, so it cannot be excluded.".formatted(
                     attribute, entityDescriptor.getEntityName()));
         }
@@ -295,48 +295,56 @@ class HydratorImpl implements Hydrator {
      * The hydration is not done by recursion, because deep object graphs would overflow the stack.
      */
     private void deepInflatePropertyQueued(Object propertyValue, ModelPart part, Hydration hydration) {
-        if (propertyValue == null || !isHydratable(part)) {
+        var inflater = inflater(part);
+        if (propertyValue == null || inflater == null) {
             return;
         }
 
-        hydration.defer(() -> deepInflateProperty(propertyValue, part, hydration));
+        hydration.defer(() -> inflater.inflate(propertyValue, hydration));
     }
 
     /**
-     * Is the part hydrated at all? Basic values are not.
-     * Has to match the parts handled by {@link #deepInflateProperty(Object, ModelPart, Hydration)}.
+     * Deep inflates a value of a part.
      */
-    private boolean isHydratable(ModelPart part) {
-        return part instanceof EntityValuedModelPart ||
-                part instanceof DiscriminatedAssociationModelPart ||
-                part instanceof EmbeddableValuedModelPart ||
-                part instanceof PluralAttributeMapping;
+    @FunctionalInterface
+    private interface Inflater {
+        void inflate(Object value, Hydration hydration);
     }
 
     /**
-     * Deep inflate a property value.
+     * The inflater for the part.
+     * This is the only place that decides which parts are hydrated.
+     *
+     * @return {@code null} if the part is not hydrated at all. Basic values are not.
      */
-    private void deepInflateProperty(
-            Object propertyValue, ModelPart part, Hydration hydration) {
+    private Inflater inflater(ModelPart part) {
         if (part instanceof EntityValuedModelPart entityValuedModelPart) {
-            deepInflateEntity(propertyValue, entityValuedModelPart, hydration);
+            return (value, hydration) -> deepInflateEntity(value, entityValuedModelPart, hydration);
         } else if (part instanceof DiscriminatedAssociationModelPart discriminatedAssociationModelPart) {
-            deepInflateAny(propertyValue, discriminatedAssociationModelPart, hydration);
+            return (value, hydration) -> deepInflateAny(value, discriminatedAssociationModelPart, hydration);
         } else if (part instanceof EmbeddableValuedModelPart embeddableValuedModelPart) {
-            deepInflateEmbedded(propertyValue, embeddableValuedModelPart, hydration);
+            return (value, hydration) -> deepInflateEmbedded(value, embeddableValuedModelPart, hydration);
         } else if (part instanceof PluralAttributeMapping pluralAttributeMapping) {
-            if (propertyValue instanceof Map<?, ?> mapValue) {
-                deepInflateMap(mapValue, pluralAttributeMapping, hydration);
-            } else if (propertyValue instanceof Collection<?> collectionValue) {
-                deepInflateCollection(collectionValue, pluralAttributeMapping, hydration);
-            } else if (propertyValue instanceof Object[] arrayValue) {
-                deepInflateArray(arrayValue, pluralAttributeMapping, hydration);
-            } else if (propertyValue.getClass().isArray()) {
-                // Arrays of primitives are never lazy and contain nothing to hydrate.
-            } else {
-                throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
-                        propertyValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
-            }
+            return (value, hydration) -> deepInflatePlural(value, pluralAttributeMapping, hydration);
+        }
+        return null;
+    }
+
+    /**
+     * Deep inflate a value of a plural attribute.
+     */
+    private void deepInflatePlural(Object pluralValue, PluralAttributeMapping part, Hydration hydration) {
+        if (pluralValue instanceof Map<?, ?> mapValue) {
+            deepInflateMap(mapValue, part, hydration);
+        } else if (pluralValue instanceof Collection<?> collectionValue) {
+            deepInflateCollection(collectionValue, part, hydration);
+        } else if (pluralValue instanceof Object[] arrayValue) {
+            deepInflateArray(arrayValue, part, hydration);
+        } else if (pluralValue.getClass().isArray()) {
+            // Arrays of primitives are never lazy and contain nothing to hydrate.
+        } else {
+            throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
+                    pluralValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
         }
     }
 
