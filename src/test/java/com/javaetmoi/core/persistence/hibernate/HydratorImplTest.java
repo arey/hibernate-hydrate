@@ -22,6 +22,7 @@ import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -197,6 +198,11 @@ class HydratorImplTest extends AbstractTest {
     //
 
     @Test
+    void deepHydrateCollection_nullCollection() {
+        assertThat(hydrator.deepHydrateCollection((Collection<Object>) null)).isNull();
+    }
+
+    @Test
     void deepHydrateCollection_emptyCollection() {
         assertThat(hydrator.deepHydrateCollection(List.of())).isEmpty();
     }
@@ -279,6 +285,25 @@ class HydratorImplTest extends AbstractTest {
         var dbJames = findDeepHydratedEntity(Employee.class, 1);
 
         assertThat(dbJames).isEqualTo(james);
+    }
+
+    /**
+     * An entity that is reached via an excluded attribute first has to be hydrated nevertheless,
+     * if it is reachable via another path that is not excluded.
+     */
+    @Test
+    void withExclude_entityReachableViaOtherPath() {
+        var dbTom = doInJPA(entityManager -> {
+            var lyon = entityManager.find(Address.class, 200);
+            var tom = entityManager.find(Employee.class, 2);
+            // Lyon first, so Tom is reached via the excluded attribute before he is reached directly.
+            hydrator.withExclude(Address.class, "employee")
+                    .deepHydrateCollection(List.of(lyon, tom));
+            return tom;
+        });
+
+        assertThat(dbTom.getProjects()).containsExactly(android);
+        assertThat(dbTom.getAddresses()).containsOnlyKeys("work");
     }
 
     @Test

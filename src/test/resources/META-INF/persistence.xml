@@ -15,9 +15,13 @@
     <class>com.javaetmoi.core.persistence.hibernate.domain.Passport</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Person</class>
     <class>com.javaetmoi.core.persistence.hibernate.domain.Project</class>
+    <class>com.javaetmoi.core.persistence.hibernate.inheritance.Animal</class>
+    <class>com.javaetmoi.core.persistence.hibernate.inheritance.AnimalHolder</class>
+    <class>com.javaetmoi.core.persistence.hibernate.inheritance.Dog</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.InheritanceHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.JoinedBase</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.JoinedSub</class>
+    <class>com.javaetmoi.core.persistence.hibernate.inheritance.Mammal</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.MappedBase</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.MappedSub</class>
     <class>com.javaetmoi.core.persistence.hibernate.inheritance.TablePerClassBase</class>
@@ -34,6 +38,7 @@
     <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.Holder</class>
     <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.SubSystem</class>
     <class>com.javaetmoi.core.persistence.hibernate.manyToOneList.System</class>
+    <class>com.javaetmoi.core.persistence.hibernate.mapping.ChainNode</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.CollectionHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.EmbeddedHolder</class>
     <class>com.javaetmoi.core.persistence.hibernate.mapping.MapHolder</class>

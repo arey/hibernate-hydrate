@@ -49,7 +49,7 @@ public interface Hydrator {
     public Hydrator withExclude(Class<?> entityClass, String attribute);
 
     /**
-     * Populate a lazy-initialized object graph by recursion.
+     * Populate a lazy-initialized object graph.
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
@@ -59,6 +59,7 @@ public interface Hydrator {
      * @param entities
      *            A {@link Collection} of attached Hibernate entities to load.
      *            Elements that are no entities are ignored.
+     *            If it is {@code null}, {@code null} is returned.
      * @return the {@link Collection} of Hibernate entities fully loaded.
      *         Similar to the entities input parameter.
      *         Useful when calling this method in a return statement.
@@ -66,7 +67,7 @@ public interface Hydrator {
     public <C extends Collection<E>, E> C deepHydrateCollection(C entities);
 
     /**
-     * Populate a lazy-initialized object graph by recursion.
+     * Populate a lazy-initialized object graph.
      * <p>
      * This method deeply navigates into a graph of entities in order to resolve uninitialized Hibernate proxies.<br>
      * The goal is to avoid any {@link LazyInitializationException} once entities are detached.<br>
@@ -75,7 +76,7 @@ public interface Hydrator {
      *
      * @param entity
      *            An attached Hibernate entity to load.
-     *            If it is no entity, it is returned unchanged.
+     *            If it is no entity or {@code null}, it is returned unchanged.
      * @return the Hibernate entity fully loaded.
      *         Similar to the entity input parameter.
      *         Useful when calling this method in a return statement.
