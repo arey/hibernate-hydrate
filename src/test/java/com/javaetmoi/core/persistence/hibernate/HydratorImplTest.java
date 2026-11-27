@@ -307,8 +307,47 @@ class HydratorImplTest extends AbstractTest {
     }
 
     @Test
+    void withExclude_nullEntityClass() {
+        assertInvalidExclude(null, "name");
+    }
+
+    @Test
+    void withExclude_nullAttribute() {
+        assertInvalidExclude(Employee.class, null);
+    }
+
+    @Test
+    void withExclude_nonEntity() {
+        assertInvalidExclude(String.class, "value")
+                .hasMessageContaining(String.class.getName());
+    }
+
+    @Test
     void withExclude_unknownAttribute() {
         assertInvalidExclude(Employee.class, "unknown")
                 .hasMessageContaining("unknown");
+    }
+
+    @Test
+    void withExclude_emptyAttribute() {
+        assertInvalidExclude(Employee.class, "");
+    }
+
+    /**
+     * Basic attributes are never hydrated.
+     */
+    @Test
+    void withExclude_basicAttribute() {
+        assertInvalidExclude(Employee.class, "name")
+                .hasMessageContaining("name");
+    }
+
+    /**
+     * Paths are just supported for embeddables.
+     */
+    @Test
+    void withExclude_pathIntoCollection() {
+        assertInvalidExclude(Employee.class, "projects.members")
+                .hasMessageContaining("projects.members");
     }
 }

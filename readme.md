@@ -11,6 +11,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 * Follows associations to entities, collections, maps, arrays, embeddables, `@Any` and `@ManyToAny`
   associations and associations inside composite identifiers (`@IdClass` and `@EmbeddedId`)
 * Handles deep object graphs without overflowing the stack
+* Attributes can be excluded from the hydration
 * Supports JPA with Hibernate as provider
 * Supports Hibernate 3.x to 7.x (with different artefactId)
 
@@ -117,6 +118,13 @@ public class MyEntityService {
   }
 }
 ```
+
+`withExclude` excludes associations, collections and embedded attributes from the hydration.
+Attributes inside of embedded attributes and embedded identifiers are addressed by a path,
+e.g. `"address.country"` or `"id.owner"`.
+Attributes inside of collections of embeddables cannot be excluded.
+Basic attributes are never hydrated, so excluding them, like excluding unknown attributes,
+throws an `IllegalArgumentException`.
 
 ## Contributing to Hibernate Hydrate ##
 

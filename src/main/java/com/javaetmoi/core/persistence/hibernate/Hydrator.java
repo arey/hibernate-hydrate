@@ -36,14 +36,18 @@ public interface Hydrator {
 
     /**
      * Exclude the attribute of the entity from hydration.
-     * Just supports attributes that are JPA entities or collections.
-     * {@link jakarta.persistence.Embeddable}s are not supported.
+     * Supports attributes that are associations to entities, collections or embedded.
+     * Attributes inside of embedded attributes and embedded identifiers are addressed by a path,
+     * e.g. {@code "address.country"} or {@code "id.owner"}.
+     * Attributes inside of collections of {@link jakarta.persistence.Embeddable}s are not supported.
      *
      * @param entityClass
      *            Entity class.
      * @param attribute
-     *            Attribute name.
-     * @throws IllegalArgumentException if then entity class is not a JPA entity or the attribute does not exist.
+     *            Attribute name or path to an attribute inside of an embedded attribute.
+     * @throws IllegalArgumentException
+     *            if the entity class is not a JPA entity, the attribute does not exist
+     *            or the attribute is a basic value, which is never hydrated.
      * @return new instance with the exclusion.
      */
     public Hydrator withExclude(Class<?> entityClass, String attribute);

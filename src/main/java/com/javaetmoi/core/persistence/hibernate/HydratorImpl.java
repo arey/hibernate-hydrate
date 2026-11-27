@@ -53,10 +53,25 @@ class HydratorImpl implements Hydrator {
 
     @Override
     public Hydrator withExclude(Class<?> entityClass, String attribute) {
-        var entityDescriptor = mappingMetamodel.getEntityDescriptor(entityClass);
-        var attributeMapping = findEntityAttributeMapping(entityDescriptor, attribute);
+        if (entityClass == null) {
+            throw new IllegalArgumentException("The entity class is mandatory.");
+        }
+        if (attribute == null) {
+            throw new IllegalArgumentException("The attribute is mandatory.");
+        }
+
+        var entityDescriptor = mappingMetamodel.findEntityDescriptor(entityClass);
+        if (entityDescriptor == null) {
+            throw new IllegalArgumentException("The class %s is no entity.".formatted(
+                    entityClass.getName()));
+        }
+        var attributeMapping = findAttributeMapping(entityDescriptor, attribute);
         if (attributeMapping == null) {
             throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
+                    attribute, entityDescriptor.getEntityName()));
+        }
+        if (inflater(attributeMapping) == null) {
+            throw new IllegalArgumentException("The attribute %s of the entity %s is not hydrated, so it cannot be excluded.".formatted(
                     attribute, entityDescriptor.getEntityName()));
         }
 
@@ -64,6 +79,28 @@ class HydratorImpl implements Hydrator {
         newExcludes.add(attributeMapping.getNavigableRole());
 
         return new HydratorImpl(mappingMetamodel, newExcludes);
+    }
+
+    /**
+     * Find the attribute of the entity.
+     *
+     * @param entityDescriptor
+     *            Entity.
+     * @param attributePath
+     *            Attribute name or a path to an attribute inside of embeddables, e.g. {@code embedded.attribute}.
+     * @return the attribute or {@code null} if it does not exist.
+     */
+    private ModelPart findAttributeMapping(EntityMappingType entityDescriptor, String attributePath) {
+        var attributes = attributePath.split("\\.", -1);
+        var part = findEntityAttributeMapping(entityDescriptor, attributes[0]);
+        for (int i = 1; i < attributes.length; i++) {
+            if (!(part instanceof EmbeddableValuedModelPart embeddableValuedModelPart)) {
+                // Just embeddables have attributes that can be addressed by a path.
+                return null;
+            }
+            part = embeddableValuedModelPart.getEmbeddableTypeDescriptor().findAttributeMapping(attributes[i]);
+        }
+        return part;
     }
 
     /**

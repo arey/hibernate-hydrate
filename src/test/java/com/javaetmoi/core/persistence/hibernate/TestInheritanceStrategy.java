@@ -2,6 +2,7 @@ package com.javaetmoi.core.persistence.hibernate;
 
 import com.javaetmoi.core.persistence.hibernate.inheritance.InheritanceHolder;
 import com.javaetmoi.core.persistence.hibernate.inheritance.JoinedSub;
+import com.javaetmoi.core.persistence.hibernate.inheritance.MappedBase;
 import com.javaetmoi.core.persistence.hibernate.inheritance.MappedSub;
 import com.javaetmoi.core.persistence.hibernate.inheritance.TablePerClassSub;
 import com.javaetmoi.core.persistence.hibernate.mapping.Target;
@@ -91,6 +92,15 @@ class TestInheritanceStrategy extends AbstractTest {
                 hydrator.withExclude(MappedSub.class, "target"), MappedSub.class, 1);
 
         assertThat(Hibernate.isInitialized(dbSub.getTarget())).isFalse();
+    }
+
+    /**
+     * A mapped superclass is no entity, so its attributes cannot be excluded via it.
+     */
+    @Test
+    void mappedSuperclass_withExcludeOfSuperclass() {
+        assertInvalidExclude(MappedBase.class, "target")
+                .hasMessageContaining(MappedBase.class.getName());
     }
 
     private JoinedSub findDeepHydratedJoinedSub(Hydrator hydrator) {

@@ -70,6 +70,14 @@ class TestCompositeId extends AbstractTest {
         assertThat(dbLink.getId().getTarget().getTags()).containsExactly("tag20");
     }
 
+    @Test
+    void embeddedId_withExclude() {
+        var dbLink = findDeepHydratedEmbeddedIdLink(
+                hydrator.withExclude(EmbeddedIdLink.class, "id.target"));
+
+        assertThat(Hibernate.isInitialized(dbLink.getId().getTarget())).isFalse();
+    }
+
     /**
      * Excluding the {@link EmbeddedId} identifier excludes all of its attributes.
      */
