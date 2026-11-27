@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javaetmoi.core</groupId>
   <!-- Versioning X.Y.Z: X=Hibernate major, Y=min required Hibernate minor or API change, Z=patch & compatible Hibernate minor bumps -->
-  <version>7.0.2-SNAPSHOT</version>
+  <version>7.1.0-SNAPSHOT</version>
   <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
   <name>JavaEtMoi Core :: ${project.artifactId}</name>
   <packaging>jar</packaging>
@@ -203,6 +203,12 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${version.plugin.maven-surefire-plugin}</version>
+        <configuration>
+          <systemPropertyVariables>
+            <!-- For tests with bytecode enhanced entities (@BytecodeEnhanced). -->
+            <hibernate.testing.bytecode.enhancement.extension.engine.enabled>true</hibernate.testing.bytecode.enhancement.extension.engine.enabled>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -343,16 +349,16 @@
       <id>hibernate-7.1</id>
       <properties>
         <version.hibernate>7.1.36.Final</version.hibernate>
-        <!-- hibernate-testing requires junit 5.11. -->
-        <version.junit>5.11.4</version.junit>
+        <!-- The bytecode enhancement of hibernate-testing requires the junit 5.13 it is built with. -->
+        <version.junit>5.13.4</version.junit>
       </properties>
     </profile>
     <profile>
       <id>hibernate-7.0</id>
       <properties>
         <version.hibernate>7.0.10.Final</version.hibernate>
-        <!-- hibernate-testing requires junit 5.11. -->
-        <version.junit>5.11.4</version.junit>
+        <!-- The bytecode enhancement of hibernate-testing requires the junit 5.13 it is built with. -->
+        <version.junit>5.13.4</version.junit>
       </properties>
     </profile>
   </profiles>

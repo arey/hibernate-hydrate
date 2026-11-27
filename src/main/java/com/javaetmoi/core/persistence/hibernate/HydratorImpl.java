@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.metamodel.mapping.AttributeMapping;
 import org.hibernate.metamodel.mapping.CompositeIdentifierMapping;
 import org.hibernate.metamodel.mapping.DiscriminatedAssociationModelPart;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
@@ -17,10 +18,12 @@ import org.hibernate.metamodel.mapping.PluralAttributeMapping;
 import org.hibernate.metamodel.mapping.VirtualModelPart;
 import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
+import org.hibernate.sql.results.graph.Fetchable;
 
 import jakarta.persistence.EntityManagerFactory;
 
 import static java.lang.Math.max;
+import static org.hibernate.engine.FetchTiming.DELAYED;
 
 /**
  * Default implementation of {@link Hydrator}.
@@ -70,7 +73,7 @@ class HydratorImpl implements Hydrator {
             throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
                     attribute, entityDescriptor.getEntityName()));
         }
-        if (inflater(attributeMapping) == null) {
+        if (inflater(attributeMapping) == null && !isLazy(attributeMapping)) {
             throw new IllegalArgumentException("The attribute %s of the entity %s is not hydrated, so it cannot be excluded.".formatted(
                     attribute, entityDescriptor.getEntityName()));
         }
@@ -190,10 +193,8 @@ class HydratorImpl implements Hydrator {
         // Start with the identifier. It is not part of the attribute mappings.
         deepInflateIdentifier(target, descriptor, hydration);
         // Continue with the attributes, including the inherited ones.
-        descriptor.getAttributeMappings().forEach(attributeMapping -> {
-            var propertyValue = attributeMapping.getValue(target);
-            deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
-        });
+        descriptor.getAttributeMappings().forEach(attributeMapping ->
+                deepInflateAttribute(target, attributeMapping, hydration));
     }
 
     /**
@@ -245,6 +246,30 @@ class HydratorImpl implements Hydrator {
             var propertyValue = attributeMapping.getValue(container);
             deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
         });
+    }
+
+    /**
+     * Deep inflate an attribute of an entity, unless it is excluded.
+     * <p>
+     * Lazy attributes of bytecode enhanced entities are loaded first,
+     * e.g. a lazy basic attribute or the inverse side of a lazy one-to-one association.
+     * Such attributes are not loaded by initializing the entity and
+     * reading their value via the mapping bypasses the interception of the enhancer.
+     * Hibernate loads all attributes of the same lazy group at once.
+     * </p>
+     */
+    private void deepInflateAttribute(Object entity, AttributeMapping attributeMapping, Hydration hydration) {
+        if (excludes.contains(attributeMapping.getNavigableRole())) {
+            // Check the excludes first: An excluded lazy attribute must not be loaded.
+            return;
+        }
+
+        var attribute = attributeMapping.getAttributeName();
+        if (!Hibernate.isPropertyInitialized(entity, attribute)) {
+            Hibernate.initializeProperty(entity, attribute);
+        }
+        var propertyValue = attributeMapping.getValue(entity);
+        deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
     }
 
     /**
@@ -346,7 +371,8 @@ class HydratorImpl implements Hydrator {
      * The inflater for the part.
      * This is the only place that decides which parts are traversed.
      *
-     * @return {@code null} if the part is not traversed. Basic values are not.
+     * @return {@code null} if the part is not traversed. Basic values are not,
+     *         but lazy basic attributes are loaded by {@link #deepInflateAttribute(Object, AttributeMapping, Hydration)}.
      */
     private Inflater inflater(ModelPart part) {
         if (part instanceof EntityValuedModelPart entityValuedModelPart) {
@@ -377,6 +403,14 @@ class HydratorImpl implements Hydrator {
             throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
                     pluralValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
         }
+    }
+
+    /**
+     * Is the part declared as lazy? Applies to basic attributes too.
+     */
+    private boolean isLazy(ModelPart part) {
+        return part instanceof Fetchable fetchable &&
+                fetchable.getMappedFetchOptions().getTiming() == DELAYED;
     }
 
     /**

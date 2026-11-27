@@ -11,6 +11,7 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 * Follows associations to entities, collections, maps, arrays, embeddables, `@Any` and `@ManyToAny`
   associations and associations inside composite identifiers (`@IdClass` and `@EmbeddedId`)
 * Handles deep object graphs without overflowing the stack
+* Supports bytecode enhanced entities including their lazy basic attributes
 * Attributes can be excluded from the hydration
 * Supports JPA with Hibernate as provider
 * Supports Hibernate 3.x to 7.x (with different artefactId)
@@ -35,7 +36,7 @@ Download the jar though Maven:
 <dependency>
   <groupId>com.javaetmoi.core</groupId>
   <artifactId>javaetmoi-hibernate7-hydrate</artifactId>
-  <version>7.0.1</version>
+  <version>7.1.0</version>
 </dependency> 
 
 <!-- or Hibernate 6.1.6 and above support -->
@@ -114,17 +115,35 @@ public class MyEntityService {
   public MyEntity myEntity(long id) {
     var myEntity = entityManager.find(MyEntity.class, id);
     var myHydratedEntity = hydrator.deepHydrate(myEntity);
-    return myHydrateEntity;
+    return myHydratedEntity;
   }
 }
 ```
 
-`withExclude` excludes associations, collections and embedded attributes from the hydration.
+`withExclude` excludes associations, collections, embedded attributes and
+lazy basic attributes (`@Basic(fetch = LAZY)`) from the hydration.
 Attributes inside of embedded attributes and embedded identifiers are addressed by a path,
 e.g. `"address.country"` or `"id.owner"`.
 Attributes inside of collections of embeddables cannot be excluded.
-Basic attributes are never hydrated, so excluding them, like excluding unknown attributes,
+Other basic attributes are never hydrated, so excluding them, like excluding unknown attributes,
 throws an `IllegalArgumentException`.
+
+Lazy basic attributes are lazy for bytecode enhanced entities only.
+Hibernate loads all attributes of a lazy group (`@LazyGroup`) at once.
+So to keep an excluded lazy attribute unloaded, all attributes of its lazy group have to be excluded.
+
+### Performance ###
+
+Hibernate Hydrate loads each uninitialized proxy and each uninitialized collection by a query of its own.
+For big object graphs it is recommended to enable the batch fetching of Hibernate,
+so that Hibernate loads several proxies or collections of the same kind by one query.
+Either globally by the property `hibernate.default_batch_fetch_size`, e.g. in the `persistence.xml`:
+
+```xml
+<property name="hibernate.default_batch_fetch_size" value="100" />
+```
+
+Or by `@BatchSize` at single entities and collections.
 
 ## Contributing to Hibernate Hydrate ##
 
@@ -166,7 +185,7 @@ The [release.yml](https://github.com/arey/hibernate-hydrate/actions/workflows/re
 ### Release checklist ###
 
 1. Ensure all supported Hibernate minor profiles (`hibernate-X.Y`) are declared in [pom.xml](pom.xml) and tested in [build.yml](.github/workflows/build.yml).
-2. Run the [Maven Release](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow (`workflow_dispatch`) by specifying `releaseVersion` (e.g. `7.0.1`) and `developmentVersion` (e.g. `7.0.2-SNAPSHOT`). The artefact is automatically published to Maven Central once validated by [Sonatype Central Portal](https://central.sonatype.com/publishing/deployments) (`autoPublish=true`).
+2. Run the [Maven Release](https://github.com/arey/hibernate-hydrate/actions/workflows/release.yml) GitHub Actions workflow (`workflow_dispatch`) by specifying `releaseVersion` (e.g. `7.1.0`) and `developmentVersion` (e.g. `7.1.1-SNAPSHOT`). The artefact is automatically published to Maven Central once validated by [Sonatype Central Portal](https://central.sonatype.com/publishing/deployments) (`autoPublish=true`).
 3. Update the dependency version in the [Quick Start](#dependency) section of this `readme.md`.
 4. Create a [GitHub Release](https://github.com/arey/hibernate-hydrate/releases/new) from the new `vX.Y.Z` tag using the auto-generated release notes.
 
