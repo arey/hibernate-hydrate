@@ -82,7 +82,7 @@
     <!-- Version of third libraries -->
     <!-- * Hibernate dependencies -->
     <!-- * Last Hibernate supported version  -->
-    <version.hibernate>7.3.0.Final</version.hibernate>
+    <version.hibernate>7.4.17.Final</version.hibernate>
 
     <!-- * For testing purpose -->
     <version.assertj>3.27.7</version.assertj>
@@ -328,15 +328,21 @@
     </profile>
 
     <profile>
+      <id>hibernate-7.3</id>
+      <properties>
+        <version.hibernate>7.3.13.Final</version.hibernate>
+      </properties>
+    </profile>
+    <profile>
       <id>hibernate-7.2</id>
       <properties>
-        <version.hibernate>7.2.10.Final</version.hibernate>
+        <version.hibernate>7.2.26.Final</version.hibernate>
       </properties>
     </profile>
     <profile>
       <id>hibernate-7.1</id>
       <properties>
-        <version.hibernate>7.1.22.Final</version.hibernate>
+        <version.hibernate>7.1.36.Final</version.hibernate>
         <!-- hibernate-testing requires junit 5.11. -->
         <version.junit>5.11.4</version.junit>
       </properties>
