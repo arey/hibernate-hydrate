@@ -22,12 +22,13 @@ class TestEmbedded extends AbstractTest {
         var association = new Target(10);
         var element = new Target(20);
         var nested = new Target(30);
+        var any = new Target(40);
         var value = new Target(50);
-        persist(association, element, nested, value,
+        persist(association, element, nested, any, value,
                 new EmbeddedHolder(1, new Outer(
-                        association, List.of(element), Map.of("key", value), new Part(nested))),
+                        association, any, List.of(element), Map.of("key", value), new Part(nested))),
                 // Holder with an empty embeddable.
-                new EmbeddedHolder(2, new Outer(null, List.of(), Map.of(), null)));
+                new EmbeddedHolder(2, new Outer(null, null, List.of(), Map.of(), null)));
     }
 
     /**
@@ -38,6 +39,7 @@ class TestEmbedded extends AbstractTest {
         var dbOuter = findEntity(EmbeddedHolder.class, 1).getOuter();
 
         assertThat(Hibernate.isInitialized(dbOuter.getTarget())).isFalse();
+        assertThat(Hibernate.isInitialized(dbOuter.getAny())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getTargets())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getMap())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getPart().getTarget())).isFalse();
@@ -48,6 +50,14 @@ class TestEmbedded extends AbstractTest {
         var dbOuter = findDeepHydratedOuter(hydrator);
 
         assertThat(dbOuter.getTarget().getTags()).containsExactly("tag10");
+    }
+
+    @Test
+    void any() {
+        var dbOuter = findDeepHydratedOuter(hydrator);
+
+        var dbTarget = (Target) Hibernate.unproxy(dbOuter.getAny());
+        assertThat(dbTarget.getTags()).containsExactly("tag40");
     }
 
     @Test
@@ -79,6 +89,7 @@ class TestEmbedded extends AbstractTest {
         var dbOuter = findDeepHydratedOuter(hydrator.withExclude(EmbeddedHolder.class, "outer"));
 
         assertThat(Hibernate.isInitialized(dbOuter.getTarget())).isFalse();
+        assertThat(Hibernate.isInitialized(dbOuter.getAny())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getTargets())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getMap())).isFalse();
         assertThat(Hibernate.isInitialized(dbOuter.getPart().getTarget())).isFalse();
@@ -89,6 +100,7 @@ class TestEmbedded extends AbstractTest {
         var dbOuter = findDeepHydratedEntity(EmbeddedHolder.class, 2).getOuter();
 
         assertThat(dbOuter.getTarget()).isNull();
+        assertThat(dbOuter.getAny()).isNull();
         assertThat(dbOuter.getTargets()).isEmpty();
         assertThat(dbOuter.getMap()).isEmpty();
         assertThat(dbOuter.getPart()).isNull();

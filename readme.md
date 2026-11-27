@@ -8,6 +8,8 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 ## Features ##
 
 * Utility class to populate a lazy-initialized object graph
+* Follows associations to entities, collections, maps, arrays, embeddables, `@Any` and `@ManyToAny`
+  associations and associations inside composite identifiers (`@IdClass` and `@EmbeddedId`)
 * Handles deep object graphs without overflowing the stack
 * Supports JPA with Hibernate as provider
 * Supports Hibernate 3.x to 7.x (with different artefactId)

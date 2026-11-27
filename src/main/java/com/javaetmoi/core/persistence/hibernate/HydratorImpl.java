@@ -7,11 +7,14 @@ import java.util.Set;
 
 import org.hibernate.Hibernate;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.metamodel.mapping.CompositeIdentifierMapping;
+import org.hibernate.metamodel.mapping.DiscriminatedAssociationModelPart;
 import org.hibernate.metamodel.mapping.EmbeddableValuedModelPart;
 import org.hibernate.metamodel.mapping.EntityMappingType;
 import org.hibernate.metamodel.mapping.EntityValuedModelPart;
 import org.hibernate.metamodel.mapping.ModelPart;
 import org.hibernate.metamodel.mapping.PluralAttributeMapping;
+import org.hibernate.metamodel.mapping.VirtualModelPart;
 import org.hibernate.metamodel.model.domain.NavigableRole;
 import org.hibernate.metamodel.spi.MappingMetamodelImplementor;
 
@@ -51,7 +54,7 @@ class HydratorImpl implements Hydrator {
     @Override
     public Hydrator withExclude(Class<?> entityClass, String attribute) {
         var entityDescriptor = mappingMetamodel.getEntityDescriptor(entityClass);
-        var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
+        var attributeMapping = findEntityAttributeMapping(entityDescriptor, attribute);
         if (attributeMapping == null) {
             throw new IllegalArgumentException("The attribute %s does not exist at the entity %s.".formatted(
                     attribute, entityDescriptor.getEntityName()));
@@ -61,6 +64,28 @@ class HydratorImpl implements Hydrator {
         newExcludes.add(attributeMapping.getNavigableRole());
 
         return new HydratorImpl(mappingMetamodel, newExcludes);
+    }
+
+    /**
+     * Find the direct attribute of the entity.
+     * Considers the identifier attributes of an entity with a composite identifier too,
+     * because they are attributes of the entity, but are not part of its attribute mappings.
+     */
+    private ModelPart findEntityAttributeMapping(EntityMappingType entityDescriptor, String attribute) {
+        var attributeMapping = entityDescriptor.findAttributeMapping(attribute);
+        if (attributeMapping != null) {
+            return attributeMapping;
+        }
+
+        if (!(entityDescriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping)) {
+            return null;
+        }
+        if (identifierMapping instanceof VirtualModelPart) {
+            // @IdClass: The identifier attributes are attributes of the entity itself.
+            return identifierMapping.getEmbeddableTypeDescriptor().findAttributeMapping(attribute);
+        }
+        // @EmbeddedId: The identifier is an attribute of the entity.
+        return attribute.equals(identifierMapping.getAttributeName()) ? identifierMapping : null;
     }
 
     @Override
@@ -125,7 +150,9 @@ class HydratorImpl implements Hydrator {
         }
 
         var descriptor = concreteDescriptor(target, part);
-        // Inflate the attributes, including the inherited ones.
+        // Start with the identifier. It is not part of the attribute mappings.
+        deepInflateIdentifier(target, descriptor, hydration);
+        // Continue with the attributes, including the inherited ones.
         descriptor.getAttributeMappings().forEach(attributeMapping -> {
             var propertyValue = attributeMapping.getValue(target);
             deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
@@ -157,6 +184,43 @@ class HydratorImpl implements Hydrator {
             }
         }
         return null;
+    }
+
+    /**
+     * Deep inflate the associations that are part of a composite identifier of an entity.
+     */
+    private void deepInflateIdentifier(
+            Object entity, EntityMappingType descriptor, Hydration hydration) {
+        if (!(descriptor.getIdentifierMapping() instanceof CompositeIdentifierMapping identifierMapping)) {
+            // Simple identifiers contain no associations.
+            return;
+        }
+
+        // @IdClass: The identifier attributes are attributes of the entity itself.
+        // @EmbeddedId: The identifier attributes are attributes of the identifier.
+        var container = identifierMapping instanceof VirtualModelPart ?
+                entity : identifierMapping.getIdentifier(entity);
+        if (guard(container, identifierMapping)) {
+            return;
+        }
+
+        identifierMapping.getEmbeddableTypeDescriptor().getAttributeMappings().forEach(attributeMapping -> {
+            var propertyValue = attributeMapping.getValue(container);
+            deepInflatePropertyQueued(propertyValue, attributeMapping, hydration);
+        });
+    }
+
+    /**
+     * Deep inflate the target of an any association ({@code @Any}, element of {@code @ManyToAny}).
+     * The mapping does not know the entity type of the target, so it is derived from the target itself.
+     */
+    private void deepInflateAny(
+            Object entity, DiscriminatedAssociationModelPart part, Hydration hydration) {
+        if (guard(entity, part)) {
+            return;
+        }
+
+        deepInflateInitialEntity(entity, hydration);
     }
 
     /**
@@ -206,6 +270,21 @@ class HydratorImpl implements Hydrator {
     }
 
     /**
+     * Deep inflate the elements of an array.
+     * Arrays themselves are never lazy.
+     */
+    private void deepInflateArray(Object[] array, PluralAttributeMapping part, Hydration hydration) {
+        if (guard(array, part, hydration)) {
+            return;
+        }
+
+        var elementType = part.getElementDescriptor();
+        for (var element : array) {
+            deepInflatePropertyQueued(element, elementType, hydration);
+        }
+    }
+
+    /**
      * Deep inflate a property value later on.
      * The hydration is not done by recursion, because deep object graphs would overflow the stack.
      */
@@ -235,6 +314,8 @@ class HydratorImpl implements Hydrator {
     private Inflater inflater(ModelPart part) {
         if (part instanceof EntityValuedModelPart entityValuedModelPart) {
             return (value, hydration) -> deepInflateEntity(value, entityValuedModelPart, hydration);
+        } else if (part instanceof DiscriminatedAssociationModelPart discriminatedAssociationModelPart) {
+            return (value, hydration) -> deepInflateAny(value, discriminatedAssociationModelPart, hydration);
         } else if (part instanceof EmbeddableValuedModelPart embeddableValuedModelPart) {
             return (value, hydration) -> deepInflateEmbedded(value, embeddableValuedModelPart, hydration);
         } else if (part instanceof PluralAttributeMapping pluralAttributeMapping) {
@@ -251,6 +332,10 @@ class HydratorImpl implements Hydrator {
             deepInflateMap(mapValue, part, hydration);
         } else if (pluralValue instanceof Collection<?> collectionValue) {
             deepInflateCollection(collectionValue, part, hydration);
+        } else if (pluralValue instanceof Object[] arrayValue) {
+            deepInflateArray(arrayValue, part, hydration);
+        } else if (pluralValue.getClass().isArray()) {
+            // Arrays of primitives are never lazy and contain nothing to hydrate.
         } else {
             throw new UnsupportedOperationException("Unsupported collection type %s for %s.".formatted(
                     pluralValue.getClass().getSimpleName(), part.getNavigableRole().getFullPath()));
