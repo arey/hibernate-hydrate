@@ -7,7 +7,8 @@ The primary goal of the [Hibernate Hydrate](https://github.com/arey/hibernate-hy
 
 ## Features ##
 
-* Utility class to populate a lazy-initialized object graph by recursivity
+* Utility class to populate a lazy-initialized object graph
+* Handles deep object graphs without overflowing the stack
 * Supports JPA with Hibernate as provider
 * Supports Hibernate 3.x to 7.x (with different artefactId)
 
